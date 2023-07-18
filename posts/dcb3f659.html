@@ -18,14 +18,14 @@
   
     <meta name="description" content="环境   名称 版本号    Portainer Docker version 24.0.2, build cb74dfc   Aliyun CentOs CentOS 7.8 64位   VMware CentOs CentOS 7.8 64位   FinalShell 3.9.8.2   Redis latest &#x3D; 6.2.6   MySQL 5.7 5.7   MySQL 8 8">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Docker安装容器合集">
+<meta property="og:title" content="Docker 安装容器合集">
 <meta property="og:url" content="http://conquers.github.io/posts/dcb3f659.html">
 <meta property="og:site_name" content="Kioo&#39;s Blog">
 <meta property="og:description" content="环境   名称 版本号    Portainer Docker version 24.0.2, build cb74dfc   Aliyun CentOs CentOS 7.8 64位   VMware CentOs CentOS 7.8 64位   FinalShell 3.9.8.2   Redis latest &#x3D; 6.2.6   MySQL 5.7 5.7   MySQL 8 8">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://conquers.github.io/Resources/banner-docker.png">
 <meta property="article:published_time" content="2022-07-11T13:45:45.000Z">
-<meta property="article:modified_time" content="2023-07-18T02:34:09.127Z">
+<meta property="article:modified_time" content="2023-07-18T03:35:52.941Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="Portainer">
 <meta property="article:tag" content="Elasitc">
@@ -38,7 +38,7 @@
   
   
   
-  <title>Docker安装容器合集 - Kioo&#39;s Blog</title>
+  <title>Docker 安装容器合集 - Kioo&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -208,7 +208,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Docker安装容器合集"></span>
+            <span id="subtitle" data-typed-text="Docker 安装容器合集"></span>
           
         </div>
 
@@ -242,7 +242,7 @@
         
         
         
-          415 分钟
+          414 分钟
         
       </span>
     
@@ -280,7 +280,7 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Docker安装容器合集</h1>
+            <h1 style="display: none">Docker 安装容器合集</h1>
             
             
               <div class="markdown-body">
@@ -325,8 +325,8 @@
 <td><a target="_blank" rel="noopener" href="https://hub.docker.com/">Docker Hub</a></td>
 </tr>
 <tr>
-<td align="left"></td>
-<td></td>
+<td align="left"><code>...</code></td>
+<td><code>...</code></td>
 </tr>
 </tbody></table>
 <blockquote>
@@ -334,7 +334,7 @@
 </blockquote>
 <h2 id="Portainer"><a href="#Portainer" class="headerlink" title="Portainer"></a>Portainer</h2><h3 id="1、搜索镜像"><a href="#1、搜索镜像" class="headerlink" title="1、搜索镜像"></a>1、搜索镜像</h3><h3 id="2、安装指定版本"><a href="#2、安装指定版本" class="headerlink" title="2、安装指定版本"></a>2、安装指定版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull portainer/portainer<br></code></pre></td></tr></table></figure>
 
-<h3 id="3、启动"><a href="#3、启动" class="headerlink" title="3、启动"></a>3、启动</h3><p>如果需要使用 minio，那么可以将端口映射修改为9002</p>
+<h3 id="3、启动"><a href="#3、启动" class="headerlink" title="3、启动"></a>3、启动</h3><p>如果需要使用 <code>minio</code>，那么可以将端口映射修改为9002</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run -d -p 9002:9000 \<br>--restart=always \<br>-v /var/run/docker.sock:/var/run/docker.sock \<br>--name prtainer \<br>docker.io/portainer/portainer<br></code></pre></td></tr></table></figure>
 
 <p>打开网址：<a target="_blank" rel="noopener" href="http://ip:9002/">http://ip:9002/</a></p>
@@ -344,13 +344,16 @@
 <p><img src="/Resources/image-20230519142344326.png" srcset="/img/loading.gif" lazyload alt="image-20230519142344326"></p>
 <p><img src="/Resources/image-20230519142426575.png" srcset="/img/loading.gif" lazyload alt="image-20230519142426575"></p>
 <p><img src="/Resources/image-20230519142741905.png" srcset="/img/loading.gif" lazyload alt="image-20230519142741905"></p>
-<h2 id="elasticsearch"><a href="#elasticsearch" class="headerlink" title="elasticsearch"></a>elasticsearch</h2><h3 id="1、搜索镜像-1"><a href="#1、搜索镜像-1" class="headerlink" title="1、搜索镜像"></a>1、搜索镜像</h3><h3 id="2、安装指定版本-1"><a href="#2、安装指定版本-1" class="headerlink" title="2、安装指定版本"></a>2、安装指定版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull elasticsearch:6.8.23<br></code></pre></td></tr></table></figure>
+<h2 id="Elasticsearch"><a href="#Elasticsearch" class="headerlink" title="Elasticsearch"></a>Elasticsearch</h2><h3 id="1、搜索镜像-1"><a href="#1、搜索镜像-1" class="headerlink" title="1、搜索镜像"></a>1、搜索镜像</h3><h3 id="2、安装指定版本-1"><a href="#2、安装指定版本-1" class="headerlink" title="2、安装指定版本"></a>2、安装指定版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull elasticsearch:6.8.23<br></code></pre></td></tr></table></figure>
 <h3 id="3、查看已安装的镜像"><a href="#3、查看已安装的镜像" class="headerlink" title="3、查看已安装的镜像"></a>3、查看已安装的镜像</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker images<br></code></pre></td></tr></table></figure>
 <h3 id="4、创建实例并启动"><a href="#4、创建实例并启动" class="headerlink" title="4、创建实例并启动"></a>4、创建实例并启动</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run --name elasticsearch -d -e ES_JAVA_OPTS=<span class="hljs-string">&quot;-Xms512m -Xmx512m&quot;</span> -e <span class="hljs-string">&quot;discovery.type=single-node&quot;</span> -p 9200:9200 -p 9300:9300 elasticsearch:6.8.23<br></code></pre></td></tr></table></figure>
 <h3 id="5、查看启动的服务"><a href="#5、查看启动的服务" class="headerlink" title="5、查看启动的服务"></a>5、查看启动的服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker ps<br></code></pre></td></tr></table></figure>
-<h3 id="6、测试ElaticSearch"><a href="#6、测试ElaticSearch" class="headerlink" title="6、测试ElaticSearch"></a>6、测试ElaticSearch</h3><p>浏览器访问：<br>![[&#x2F;Resources&#x2F;Pasted image 20220720195345.png]]<br>使用curl模拟请求</p>
+<h3 id="6、测试ElaticSearch"><a href="#6、测试ElaticSearch" class="headerlink" title="6、测试ElaticSearch"></a>6、测试ElaticSearch</h3><p>浏览器访问：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">http://localhost:9200<br></code></pre></td></tr></table></figure>
+
+<p>使用curl模拟请求</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">curl http://localhost:9200<br></code></pre></td></tr></table></figure>
-<p>![[Develop&#x2F;开发虚拟机&#x2F;Resources&#x2F;Pasted image 20220720200519.png]]</p>
+
 <hr>
 <h3 id="elasticsearch集群"><a href="#elasticsearch集群" class="headerlink" title="elasticsearch集群"></a>elasticsearch集群</h3><p>以下使用Docker安装ElasticSearch集群</p>
 <blockquote>
@@ -358,7 +361,7 @@
 </blockquote>
 <h4 id="在虚拟机中创建配置文件映射Es容器中的配置文件"><a href="#在虚拟机中创建配置文件映射Es容器中的配置文件" class="headerlink" title="在虚拟机中创建配置文件映射Es容器中的配置文件"></a>在虚拟机中创建配置文件映射Es容器中的配置文件</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/data1<br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/data2<br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/data3<br><br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/plugins1<br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/plugins2<br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/plugins3<br><br><br><span class="hljs-built_in">chmod</span> 777 software/elasticsearch/config/data1<br><span class="hljs-built_in">chmod</span> 777 software/elasticsearch/config/data2<br><span class="hljs-built_in">chmod</span> 777 software/elasticsearch/config/data3<br><br>vim software/elasticsearch/config/es1.yml<br>vim software/elasticsearch/config/es2.yml<br>vim software/elasticsearch/config/es3.yml<br><br><br>cluster.name: es                               <span class="hljs-comment">#集群名称(集群名称必须一致)</span><br>node.name: node1                               <span class="hljs-comment">#节点名称(节点名称不能一致)</span><br>network.host: 0.0.0.0                          <span class="hljs-comment">#监听地址(必须开启远程权限,并关闭防火墙)</span><br>http.port: 9201                                <span class="hljs-comment">#监听端口(在一台机器时服务端口不能一致)</span><br>discovery.zen.ping.unicast.hosts: [<span class="hljs-string">&quot;192.168.153.135:9302&quot;</span>, <span class="hljs-string">&quot;192.168.153.135:9303&quot;</span>]                <span class="hljs-comment">#另外两个节点的ip</span><br>gateway.recover_after_nodes: 3                 <span class="hljs-comment">#集群可做master的最小节点数</span><br>transport.tcp.port: 9301                       <span class="hljs-comment">#集群TCP端口(在一台机器搭建必须修改)</span><br><br>cluster.name: es                               <span class="hljs-comment">#集群名称(集群名称必须一致)</span><br>node.name: node2                               <span class="hljs-comment">#节点名称(节点名称不能一致)</span><br>network.host: 0.0.0.0                          <span class="hljs-comment">#监听地址(必须开启远程权限,并关闭防火墙)</span><br>http.port: 9202                                <span class="hljs-comment">#监听端口(在一台机器时服务端口不能一致)</span><br>discovery.zen.ping.unicast.hosts: [<span class="hljs-string">&quot;192.168.153.135:9301&quot;</span>, <span class="hljs-string">&quot;192.168.153.135:9303&quot;</span>]                <span class="hljs-comment">#另外两个节点的ip</span><br>gateway.recover_after_nodes: 3                 <span class="hljs-comment">#集群可做master的最小节点数</span><br>transport.tcp.port: 9302                       <span class="hljs-comment">#集群TCP端口(在一台机器搭建必须修改)</span><br><br>cluster.name: es                               <span class="hljs-comment">#集群名称(集群名称必须一致)</span><br>node.name: node3                               <span class="hljs-comment">#节点名称(节点名称不能一致)</span><br>network.host: 0.0.0.0                          <span class="hljs-comment">#监听地址(必须开启远程权限,并关闭防火墙)</span><br>http.port: 9203                                <span class="hljs-comment">#监听端口(在一台机器时服务端口不能一致)</span><br>discovery.zen.ping.unicast.hosts: [<span class="hljs-string">&quot;192.168.153.135:9301&quot;</span>, <span class="hljs-string">&quot;192.168.153.135:9302&quot;</span>]                <span class="hljs-comment">#另外两个节点的ip</span><br>gateway.recover_after_nodes: 3                 <span class="hljs-comment">#集群可做master的最小节点数</span><br>transport.tcp.port: 9303                       <span class="hljs-comment">#集群TCP端口(在一台机器搭建必须修改)</span><br></code></pre></td></tr></table></figure>
 
-<h4 id="调高JVM线程数限制数量"><a href="#调高JVM线程数限制数量" class="headerlink" title="调高JVM线程数限制数量"></a>调高JVM线程数限制数量</h4><p><a href="Docker%E5%AE%89%E8%A3%85ElasticSearch.md">Docker安装ElasticSearch</a>没有报错是因为指明了单机模式运行，因此不会报错，只要是以集群方法启动，就必须调高JVM线程数限制数量。</p>
+<h4 id="调高JVM线程数限制数量"><a href="#调高JVM线程数限制数量" class="headerlink" title="调高JVM线程数限制数量"></a>调高JVM线程数限制数量</h4><p><a href="https://conquers.github.io/posts/dcb3f659.html#elasticsearch">Docker安装ElasticSearch</a> 没有报错是因为指明了单机模式运行，因此不会报错，只要是以集群方法启动，就必须调高 <code>JVM</code> 线程数限制数量。</p>
 <blockquote>
 <p>必须做这个，不然会报错，显示# ERROR: [1] bootstrap checks failed [1]: max virtual memory areas vm.max_map_count [65530] is too low</p>
 </blockquote>
@@ -373,10 +376,10 @@
 <h3 id="连接集群"><a href="#连接集群" class="headerlink" title="连接集群"></a>连接集群</h3><h4 id="Kibana-连接-ES集群"><a href="#Kibana-连接-ES集群" class="headerlink" title="Kibana 连接 ES集群"></a>Kibana 连接 ES集群</h4><p>如果你之前连接过一台ES集群（为什么说一台也是集群呢？因为ES启动方式就是集群启动，只是集群数量为一台），其实需要修改的地方都差不多</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run --name kibana -e ELASTICSEARCH_HOSTS=http://192.168.153.135:9201 -p 5601:5601 -d kibana:6.8.23<br></code></pre></td></tr></table></figure>
 
-<p>进入kibana配置文件：<br>修改连接ES的地址为集群中的任意一台：<br><a href="../../Develop/%E5%BC%80%E5%8F%91%E8%99%9A%E6%8B%9F%E6%9C%BA/Docker%E5%AE%89%E8%A3%85Kibana.md#6%E3%80%81%E8%A6%86%E7%9B%96%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">kibana 连接 ES集群-编写配置</a></p>
+<p>进入kibana配置文件：<br>修改连接ES的地址为集群中的任意一台：<br><a href="https://conquers.github.io/posts/dcb3f659.html#6%E3%80%81%E8%A6%86%E7%9B%96%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">kibana 连接 ES集群-编写配置</a></p>
 <figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">server.host:</span> <span class="hljs-string">&quot;0&quot;</span><br><span class="hljs-attr">elasticsearch.hosts:</span> [<span class="hljs-string">&quot;http://192.168.153.135:9201&quot;</span>]<br></code></pre></td></tr></table></figure>
 
-<h4 id="SpringBoot-连接ES集群"><a href="#SpringBoot-连接ES集群" class="headerlink" title="SpringBoot 连接ES集群"></a>SpringBoot 连接ES集群</h4><p>如果你之前有用SpringBoot连接ES，这里的配置差不多，只是需要将连接地址改为所有的节点地址（防止其中某一台断掉不可用）<br><a href="SpringData%E6%93%8D%E4%BD%9CElasticSearch.md#%E7%BC%96%E5%86%99yml%E9%85%8D%E7%BD%AE">SpringBoot连接ES-编写配置</a></p>
+<h4 id="SpringBoot-连接ES集群"><a href="#SpringBoot-连接ES集群" class="headerlink" title="SpringBoot 连接ES集群"></a>SpringBoot 连接ES集群</h4><p>如果你之前有用 <code>SpringBoot</code> 连接 <code>ES</code> ，这里的配置差不多，只是需要将连接地址改为所有的节点地址（防止其中某一台断掉不可用）<br><a href="SpringData%E6%93%8D%E4%BD%9CElasticSearch.md#%E7%BC%96%E5%86%99yml%E9%85%8D%E7%BD%AE">SpringBoot连接ES-编写配置</a></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RestClientConfig</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">AbstractElasticsearchConfiguration</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 用来替换 transportClient对象</span><br><span class="hljs-comment">     * <span class="hljs-doctag">@return</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> RestHighLevelClient <span class="hljs-title function_">elasticsearchClient</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">        定义客户端配置对象</span><br><span class="hljs-comment">        端口为9200，前面说过，es开放的rest端口为9200</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-keyword">final</span> <span class="hljs-type">ClientConfiguration</span> <span class="hljs-variable">clientConfiguration</span> <span class="hljs-operator">=</span> ClientConfiguration.builder()<br>                .connectedTo(<span class="hljs-string">&quot;192.168.153.135:9201&quot;</span>, <span class="hljs-string">&quot;192.168.153.135:9202&quot;</span>, <span class="hljs-string">&quot;192.168.153.135:9203&quot;</span>)<br>                .build();<br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">        通过RestClients对象创建</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-keyword">return</span> RestClients.create(clientConfiguration).rest();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <h3 id="Head-集群可视化"><a href="#Head-集群可视化" class="headerlink" title="Head 集群可视化"></a>Head 集群可视化</h3><p>下载镜像</p>
@@ -459,7 +462,7 @@
 <p><img src="/Resources/image-20230602142724660.png" srcset="/img/loading.gif" lazyload alt="image-20230602142724660"></p>
 <h4 id="Redis持久化"><a href="#Redis持久化" class="headerlink" title="Redis持久化"></a>Redis持久化</h4><p>默认持久化方式是快照持久化，修改配置文件，AOF持久化</p>
 <blockquote>
-<p>参考Redis的持久化：<a href="../../%E4%B8%93%E4%B8%9A%E6%8A%80%E8%83%BD/Database/Redis/Redis.md#9%E3%80%81Redis%E7%9A%84%E6%8C%81%E4%B9%85%E5%8C%96%E6%9C%BA%E5%88%B6">Redis的持久化机制</a></p>
+<p>参考Redis的持久化：<a href="https://conquers.github.io/posts//posts/bae4ff13.html#9%E3%80%81Redis%E7%9A%84%E6%8C%81%E4%B9%85%E5%8C%96%E6%9C%BA%E5%88%B6">Redis的持久化机制</a></p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">vi /mydata/redis/conf/redis.conf<br><br><span class="hljs-comment"># 修改的下面内容</span><br>appendonly <span class="hljs-built_in">yes</span><br>保存<br> <br>docker restart redis<br></code></pre></td></tr></table></figure>
 
@@ -770,11 +773,11 @@
 
 <h2 id="Nginx"><a href="#Nginx" class="headerlink" title="Nginx"></a>Nginx</h2><h3 id="1、搜索镜像-5"><a href="#1、搜索镜像-5" class="headerlink" title="1、搜索镜像"></a>1、搜索镜像</h3><h3 id="2、安装指定版本-5"><a href="#2、安装指定版本-5" class="headerlink" title="2、安装指定版本"></a>2、安装指定版本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull nginx:1.19.10<br></code></pre></td></tr></table></figure>
 <blockquote>
-<p><img src="/Resources/Pasted%20image%2020220731180056.png" srcset="/img/loading.gif" lazyload><br>问题：报错<br>原因：没有配置DNS<br>解决：配置DNS解析服务器<a href="%E5%BC%80%E5%8F%91%E8%99%9A%E6%8B%9F%E6%9C%BA/%E5%AE%89%E8%A3%85%E5%BC%80%E5%8F%91%E8%99%9A%E6%8B%9F%E6%9C%BA.md#%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E5%8D%A1">配置虚拟机网卡</a><br>添加DNS1&#x3D;114.114.114.114, DNS2&#x3D;8.8.8.8</p>
+<p><img src="/./Resources/image-20230718113454570.png" srcset="/img/loading.gif" lazyload alt="image-20230718113454570"><br>问题：报错<br>原因：没有配置DNS<br>解决：配置DNS解析服务器<a href="%E5%BC%80%E5%8F%91%E8%99%9A%E6%8B%9F%E6%9C%BA/%E5%AE%89%E8%A3%85%E5%BC%80%E5%8F%91%E8%99%9A%E6%8B%9F%E6%9C%BA.md#%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E5%8D%A1">配置虚拟机网卡</a><br>添加DNS1&#x3D;114.114.114.114, DNS2&#x3D;8.8.8.8</p>
 </blockquote>
 <h3 id="3、查看已安装的镜像-4"><a href="#3、查看已安装的镜像-4" class="headerlink" title="3、查看已安装的镜像"></a>3、查看已安装的镜像</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker images<br></code></pre></td></tr></table></figure>
 <h3 id="3-5、创建挂载的配置文件"><a href="#3-5、创建挂载的配置文件" class="headerlink" title="3.5、创建挂载的配置文件"></a>3.5、创建挂载的配置文件</h3><blockquote>
-<p>映射文件前，首先要<strong>先创建好</strong>才可以映射！<br>如果没有创建就执行的话，docker会默认映射文件夹的类型📂（并且会自动创建相应的文件夹），这里就会自动创建software下的nginx文件夹📂和nginx.conf文件夹📂<br> <img src="/Resources/Pasted%20image%2020220731200319.png" srcset="/img/loading.gif" lazyload></p>
+<p>映射文件前，首先要<strong>先创建好</strong>才可以映射！<br>如果没有创建就执行的话，docker会默认映射文件夹的类型📂（并且会自动创建相应的文件夹），这里就会自动创建software下的nginx文件夹📂和nginx.conf文件夹📂<br> <img src="/./Resources/image-20230718113501876.png" srcset="/img/loading.gif" lazyload alt="image-20230718113501876"></p>
 </blockquote>
 <p>配置<code>nginx.conf</code>有两种方法：<br>第一种：网上找<br><strong>第二种：复制容器内的<code>nginx.conf</code></strong></p>
 <ul>
@@ -786,19 +789,19 @@
 <p>当挂载配置文件时：使用nginx的代理服务器功能，实现反向代理，负载均衡功能<br>当挂载nginx家目录时（家目录的位置在第8部分）：使用nginx的服务器功能<br><strong>也可以都挂载，两个-v</strong></p>
 </blockquote>
 <blockquote>
-<p>这里没有映射整个目录，而仅仅是单个文件，说明该目录还有其他文件不能被覆盖！<br><img src="/Resources/Pasted%20image%2020220731195424.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里没有映射整个目录，而仅仅是单个文件，说明该目录还有其他文件不能被覆盖！<br><img src="/./Resources/image-20230718113520721.png" srcset="/img/loading.gif" lazyload alt="image-20230718113520721"></p>
 </blockquote>
 <h3 id="5、查看启动的服务-1"><a href="#5、查看启动的服务-1" class="headerlink" title="5、查看启动的服务"></a>5、查看启动的服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker ps<br></code></pre></td></tr></table></figure>
-<h3 id="6、测试Nginx"><a href="#6、测试Nginx" class="headerlink" title="6、测试Nginx"></a>6、测试Nginx</h3><p><img src="/Resources/Pasted%20image%2020220731193838.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="6、测试Nginx"><a href="#6、测试Nginx" class="headerlink" title="6、测试Nginx"></a>6、测试Nginx</h3><p><img src="/./Resources/image-20230718113526938.png" srcset="/img/loading.gif" lazyload alt="image-20230718113526938"></p>
 <h3 id="7、进入容器"><a href="#7、进入容器" class="headerlink" title="7、进入容器"></a>7、进入容器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker <span class="hljs-built_in">exec</span> -it nginx bash<br></code></pre></td></tr></table></figure>
 <h3 id="8、修改页面"><a href="#8、修改页面" class="headerlink" title="8、修改页面"></a>8、修改页面</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">find / -name index.html<br></code></pre></td></tr></table></figure>
-<p><img src="/Resources/Pasted%20image%2020220731194649.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/./Resources/image-20230718113533242.png" srcset="/img/loading.gif" lazyload alt="image-20230718113533242"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cd</span> /usr/share/nginx/html<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;i love docker&quot;</span> &gt; index.html<br></code></pre></td></tr></table></figure>
-<p><img src="/Resources/Pasted%20image%2020220731194731.png" srcset="/img/loading.gif" lazyload></p>
-<h3 id="9、挂载配置文件"><a href="#9、挂载配置文件" class="headerlink" title="9、挂载配置文件"></a>9、挂载配置文件</h3><p>首先查找nginx是否有配置文件<br><img src="/Resources/Pasted%20image%2020220731194825.png" srcset="/img/loading.gif" lazyload><br>所以应该在宿主机中创建配置文件以映射到这个文件</p>
+<p><img src="/./Resources/image-20230718113539596.png" srcset="/img/loading.gif" lazyload alt="image-20230718113539596"></p>
+<h3 id="9、挂载配置文件"><a href="#9、挂载配置文件" class="headerlink" title="9、挂载配置文件"></a>9、挂载配置文件</h3><p>首先查找nginx是否有配置文件<br><img src="/./Resources/image-20230718113547625.png" srcset="/img/loading.gif" lazyload alt="image-20230718113547625"><br>所以应该在宿主机中创建配置文件以映射到这个文件</p>
 <p>官网确认：</p>
 <blockquote>
-<p><code>:ro</code> ：只读<br><img src="/Resources/Pasted%20image%2020220731195038.png" srcset="/img/loading.gif" lazyload></p>
+<p><code>:ro</code> ：只读<br><img src="/./Resources/image-20230718113552193.png" srcset="/img/loading.gif" lazyload alt="image-20230718113552193"></p>
 </blockquote>
 <h2 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a>RabbitMQ</h2><h3 id="1、下载-RabbitMQ-镜像"><a href="#1、下载-RabbitMQ-镜像" class="headerlink" title="1、下载 RabbitMQ 镜像"></a>1、下载 RabbitMQ 镜像</h3><p>下载最新版本的镜像：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull rabbitmq:management<br></code></pre></td></tr></table></figure>
@@ -1002,7 +1005,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Docker安装容器合集</div>
+      <div>Docker 安装容器合集</div>
       <div>http://conquers.github.io/posts/dcb3f659.html</div>
     </div>
     <div class="license-meta">
@@ -1056,6 +1059,12 @@
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/posts/bae4ff13.html" title="Redis">
+                        <span class="hidden-mobile">Redis</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>
