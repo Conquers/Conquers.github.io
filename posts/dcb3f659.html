@@ -25,12 +25,12 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://conquers.github.io/Resources/banner-docker.png">
 <meta property="article:published_time" content="2022-07-11T13:45:45.000Z">
-<meta property="article:modified_time" content="2023-07-18T03:35:52.941Z">
+<meta property="article:modified_time" content="2023-07-18T06:45:57.319Z">
 <meta property="article:author" content="wtt">
+<meta property="article:tag" content="Redis">
 <meta property="article:tag" content="Portainer">
 <meta property="article:tag" content="Elasitc">
 <meta property="article:tag" content="Mysql">
-<meta property="article:tag" content="Redis">
 <meta property="article:tag" content="Nginx">
 <meta property="article:tag" content="RabbitMQ">
 <meta name="twitter:card" content="summary_large_image">
@@ -106,7 +106,7 @@
   <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
   <div class="container">
     <a class="navbar-brand" href="/">
-      <strong>Fluid</strong>
+      <strong>wtt</strong>
     </a>
 
     <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
@@ -242,7 +242,7 @@
         
         
         
-          414 分钟
+          415 分钟
         
       </span>
     
@@ -323,6 +323,34 @@
 <tr>
 <td align="left"><code>Docker Hub</code></td>
 <td><a target="_blank" rel="noopener" href="https://hub.docker.com/">Docker Hub</a></td>
+</tr>
+<tr>
+<td align="left"><a href="#Elasticsearch">Elasticsearch</a></td>
+<td><code>6.8.23</code></td>
+</tr>
+<tr>
+<td align="left"><a href="#Kibana">Kibana</a></td>
+<td><code>6.8.23</code></td>
+</tr>
+<tr>
+<td align="left"><a href="#Redis">Redis</a></td>
+<td><code>6.X</code></td>
+</tr>
+<tr>
+<td align="left"><a href="#RabbitMQ">RabbitMQ</a></td>
+<td><code>latest</code></td>
+</tr>
+<tr>
+<td align="left"><a href="#nacos">nacos</a></td>
+<td><code>latest</code></td>
+</tr>
+<tr>
+<td align="left"><a href="#XXL-JOB">XXL-JOB</a></td>
+<td><code>2.3.1</code></td>
+</tr>
+<tr>
+<td align="left"><a href="#Nginx">Nginx</a></td>
+<td><code>1.19.10</code></td>
 </tr>
 <tr>
 <td align="left"><code>...</code></td>
@@ -803,6 +831,17 @@
 <blockquote>
 <p><code>:ro</code> ：只读<br><img src="/./Resources/image-20230718113552193.png" srcset="/img/loading.gif" lazyload alt="image-20230718113552193"></p>
 </blockquote>
+<p><strong>简易版</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull nginx<br><br>docker run --name nginx-test -p 80:80 -d nginx<br><br><span class="hljs-built_in">mkdir</span> -p /mydata/nginx/&#123;conf,html,logs&#125;<br><br>docker <span class="hljs-built_in">cp</span> nginx-test:/etc/nginx/nginx.conf /mydata/nginx/conf/nginx.conf<br>docker <span class="hljs-built_in">cp</span> nginx-test:/etc/nginx/conf.d /mydata/nginx/conf/conf.d<br>docker <span class="hljs-built_in">cp</span> nginx-test:/usr/share/nginx/html/ /mydata/nginx/<br><br>docker stop nginx-test<br>docker <span class="hljs-built_in">rm</span> nginx-test<br><br><br><br>docker run \<br>-p 80:80 \<br>--name nginx \<br>-v /mydata/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \<br>-v /mydata/nginx/conf/conf.d:/etc/nginx/conf.d \<br>-v /mydata/nginx/log:/var/log/nginx \<br>-v /mydata/nginx/html:/usr/share/nginx/html \<br>-d nginx<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
 <h2 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a>RabbitMQ</h2><h3 id="1、下载-RabbitMQ-镜像"><a href="#1、下载-RabbitMQ-镜像" class="headerlink" title="1、下载 RabbitMQ 镜像"></a>1、下载 RabbitMQ 镜像</h3><p>下载最新版本的镜像：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull rabbitmq:management<br></code></pre></td></tr></table></figure>
 <p>更多版本的镜像可以访问 Docker 官网：<code>https://hub.docker.com/_/rabbitmq?tab=tags</code></p>
@@ -911,17 +950,6 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run  -p 18080:8080 -d --name=xxl-job-admin --restart=always -v /mydata/xxl-job/application.properties:/application.properties  -e PARAMS=<span class="hljs-string">&#x27;--spring.config.location=/application.properties&#x27;</span> xuxueli/xxl-job-admin:2.3.1<br></code></pre></td></tr></table></figure>
 
 
-
-<h2 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker pull nginx<br><br>docker run --name nginx-test -p 80:80 -d nginx<br><br><span class="hljs-built_in">mkdir</span> -p /mydata/nginx/&#123;conf,html,logs&#125;<br><br>docker <span class="hljs-built_in">cp</span> nginx-test:/etc/nginx/nginx.conf /mydata/nginx/conf/nginx.conf<br>docker <span class="hljs-built_in">cp</span> nginx-test:/etc/nginx/conf.d /mydata/nginx/conf/conf.d<br>docker <span class="hljs-built_in">cp</span> nginx-test:/usr/share/nginx/html/ /mydata/nginx/<br><br>docker stop nginx-test<br>docker <span class="hljs-built_in">rm</span> nginx-test<br></code></pre></td></tr></table></figure>
-
-
-
-
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><br>docker run \<br>-p 80:80 \<br>--name nginx \<br>-v /mydata/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \<br>-v /mydata/nginx/conf/conf.d:/etc/nginx/conf.d \<br>-v /mydata/nginx/log:/var/log/nginx \<br>-v /mydata/nginx/html:/usr/share/nginx/html \<br>-d nginx<br></code></pre></td></tr></table></figure>
-
-
-
 <h1 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h1><p>0、每次挂起再启动，ssh可以正常连接，mysql这些就连不上</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">service NetworkManager stop<br>systemctl restart network.service<br></code></pre></td></tr></table></figure>
 
@@ -983,13 +1011,13 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
+        <a href="/tags/Redis/">#Redis</a>
+      
         <a href="/tags/Portainer/">#Portainer</a>
       
         <a href="/tags/Elasitc/">#Elasitc</a>
       
         <a href="/tags/Mysql/">#Mysql</a>
-      
-        <a href="/tags/Redis/">#Redis</a>
       
         <a href="/tags/Nginx/">#Nginx</a>
       
@@ -1060,8 +1088,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/posts/bae4ff13.html" title="Redis">
-                        <span class="hidden-mobile">Redis</span>
+                      <a href="/posts/9cde3973.html" title="Shiro实战教程">
+                        <span class="hidden-mobile">Shiro实战教程</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
