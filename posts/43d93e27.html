@@ -1,0 +1,1636 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="wtt">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="第09章 性能分析工具的使用在数据库调优中，我们的目标是响应时间更快, 吞吐量更大 。利用宏观的监控工具和微观的日志分析可以帮我们快速找到调优的思路和方式。 1. 数据库服务器的优化步骤当我们遇到数据库调优问题的时候，该如何思考呢？这里把思考的流程整理成下面这张图。 整个流程划分成了 观察（Show status）和行动（Action） 两个部分。字母 S 的部分代表观察（会使用相应的分析工具），">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第09章 性能分析工具的使用">
+<meta property="og:url" content="http://conquers.github.io/posts/43d93e27.html">
+<meta property="og:site_name" content="Kioo&#39;s Blog">
+<meta property="og:description" content="第09章 性能分析工具的使用在数据库调优中，我们的目标是响应时间更快, 吞吐量更大 。利用宏观的监控工具和微观的日志分析可以帮我们快速找到调优的思路和方式。 1. 数据库服务器的优化步骤当我们遇到数据库调优问题的时候，该如何思考呢？这里把思考的流程整理成下面这张图。 整个流程划分成了 观察（Show status）和行动（Action） 两个部分。字母 S 的部分代表观察（会使用相应的分析工具），">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://conquers.github.io/Resources/default.png">
+<meta property="article:published_time" content="2023-06-29T03:32:52.000Z">
+<meta property="article:modified_time" content="2023-07-18T02:42:52.329Z">
+<meta property="article:author" content="wtt">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://conquers.github.io/Resources/default.png">
+  
+  
+  
+  <title>第09章 性能分析工具的使用 - Kioo&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/mac.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="第09章 性能分析工具的使用"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-06-29 11:32" pubdate>
+          2023年6月29日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          39k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          328 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">第09章 性能分析工具的使用</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="第09章-性能分析工具的使用"><a href="#第09章-性能分析工具的使用" class="headerlink" title="第09章 性能分析工具的使用"></a>第09章 性能分析工具的使用</h1><p>在数据库调优中，我们的目标是响应时间<strong>更快</strong>, 吞吐量<strong>更大</strong> 。利用宏观的监控工具和微观的日志分析可以帮我们快速找到调优的思路和方式。</p>
+<h2 id="1-数据库服务器的优化步骤"><a href="#1-数据库服务器的优化步骤" class="headerlink" title="1. 数据库服务器的优化步骤"></a>1. 数据库服务器的优化步骤</h2><p>当我们遇到数据库调优问题的时候，该如何思考呢？这里把思考的流程整理成下面这张图。</p>
+<p>整个流程划分成了 观察（<code>Show status</code>）和行动（<code>Action</code>） 两个部分。字母 S 的部分代表观察（会使用相应的分析工具），字母 A 代表的部分是行动（对应分析可以采取的行动）。</p>
+<p><img src="/Resources/image-20230629142121981.png" srcset="/img/loading.gif" lazyload alt="image-20230629142121981"></p>
+<p>我们可以通过观察了解数据库整体的运行状态，通过性能分析工具可以让我们了解执行慢的 <code>SQL</code> 都有哪些，查看具体的 <code>SQL</code> 执行计划，甚至是 <code>SQL</code> 执行中的每一步的成本代价，这样才能定位问题所在，找到了问题，再采取相应的行动。</p>
+<p><strong>小结</strong></p>
+<p><img src="/Resources/image-20230629142837524.png" srcset="/img/loading.gif" lazyload alt="image-20230629142837524"></p>
+<h2 id="2-查看系统性能参数"><a href="#2-查看系统性能参数" class="headerlink" title="2. 查看系统性能参数"></a>2. 查看系统性能参数</h2><p>在 <code>MySQL</code> 中，可以使用 <code>SHOW STATUS</code> 语句查询一些 <code>MySQL</code> 数据库服务器的性能参数、执行频率。</p>
+<p><code>SHOW STATUS</code> 语句语法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; SHOW [GLOBAL|SESSION] STATUS LIKE &#x27;参数&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p>一些常用的性能参数如下：</p>
+<ul>
+<li><code>Connections</code>：连接MySQL服务器的次数。 </li>
+<li><code>Uptime</code>：MySQL服务器的上线时间。 </li>
+<li><code>Slow_queries</code>：慢查询的次数。 </li>
+<li><code>Innodb_rows_read</code>：Select查询返回的行数 </li>
+<li><code>Innodb_rows_inserted</code>：执行INSERT操作插入的行数 </li>
+<li><code>Innodb_rows_updated</code>：执行UPDATE操作更新的 行数 </li>
+<li><code>Innodb_rows_deleted</code>：执行DELETE操作删除的行数 </li>
+<li><code>Com_select</code>：查询操作的次数。 </li>
+<li><code>Com_insert</code>：插入操作的次数。对于批量插入的 INSERT 操作，只累加一次。 </li>
+<li><code>Com_update</code>：更新操作的次数。 </li>
+<li><code>Com_delete</code>：删除操作的次数。</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; SHOW STATUS LIKE &#x27;Innodb_rows_%&#x27;;<br><br>+--------------------+-----+<br>|Variable_name       |Value|<br>+--------------------+-----+<br>|Innodb_rows_deleted |8    |<br>|Innodb_rows_inserted|2    |<br>|Innodb_rows_read    |34   |<br>|Innodb_rows_updated |0    |<br>+--------------------+-----+<br></code></pre></td></tr></table></figure>
+
+<h2 id="3-统计SQL的查询成本-last-query-cost"><a href="#3-统计SQL的查询成本-last-query-cost" class="headerlink" title="3. 统计SQL的查询成本: last_query_cost"></a>3. 统计SQL的查询成本: last_query_cost</h2><p>一条 <code>SQL</code> 查询语句在执行前需要查询执行计划，如果存在多种执行计划的话，<code>MySQL</code> 会计算每个执行计划所需要的成本，从中选择<strong>成本最小</strong>的一个作为最终执行的执行计划。</p>
+<p>如果我们想要查看某条 <code>SQL</code> 语句的查询成本，可以在执行完这条 <code>SQL</code> 语句之后，通过查看当前会话中的<code>last_query_cost</code>变量值来得到当前查询的成本。它通常也是我们评价一个<strong>查询的执行效率</strong>的一个常用指标。这个查询成本对应的是<code>SQL</code> 语句所需要读取的读页的数量&#96;</p>
+<p>以第 8 章的 <code>student_info</code> 表为例：<a href="%E7%AC%AC08%E7%AB%A0%20%E7%B4%A2%E5%BC%95%E7%9A%84%E5%88%9B%E5%BB%BA%E4%B8%8E%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99.md#3.1%20%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87">数据准备</a></p>
+<p>统计查询 <code>id=900001</code> 的查询成本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; SELECT student_id, class_id, NAME, create_time FROM student_info WHERE id = 900001;<br><br># 统计SQL的查询成本<br>SHOW STATUS LIKE &#x27;last_query_cost&#x27;;<br><br>+---------------+--------+<br>|Variable_name  |Value   |<br>+---------------+--------+<br>|Last_query_cost|0.000000|<br>+---------------+--------+<br></code></pre></td></tr></table></figure>
+
+<p>统计查询 <code>id BETWEEN 900001 AND 900100</code> 的查询成本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; SELECT student_id, class_id, NAME, create_time FROM student_info WHERE id BETWEEN 900001 AND 900100;<br><br># 统计SQL的查询成本<br>SHOW STATUS LIKE &#x27;last_query_cost&#x27;;<br>+---------------+--------+<br>|Variable_name  |Value   |<br>+---------------+--------+<br>|Last_query_cost|0.000000|<br>+---------------+--------+<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>每一次的结果都是 0 的原因：使用了可视化软件 <code>DataGrip</code>，使用命令行即可</p>
+<p><img src="/Resources/image-20230629151128823.png" srcset="/img/loading.gif" lazyload alt="image-20230629151128823"></p>
+</blockquote>
+<p>可以看到页的数量是刚才的 200 倍，但是查询的效率并没有明显的变化，实际上这两个 <code>SQL</code> 查询的时间基本上一样，就是因为采用了顺序读取的方式将页面一次性加载到缓冲池中，然后再进行查找。虽然页数量（<code>last_query_cost</code>）增加了不少 ，但是通过缓冲池的机制，并没有增加多少查询时间 。 </p>
+<p><strong>使用场景：</strong>它对于比较开销是非常有用的，特别是我们有好几种查询方式可选的时候。</p>
+<p><code>SQL</code> 查询时一个动态的过程，从页加载的角度来看，我们可以得到以下两点结论：</p>
+<ol>
+<li><strong>位置决定效率</strong>。如果页就在<strong>数据库缓冲池</strong>中，那么效率是最高的，否则还需要从内存或者磁盘中进行读取，当然针对单个页的读取来说，如果页存在于内存中，会比在磁盘中读取效率高很多。</li>
+<li><strong>批量决定效率</strong>。如果我们从磁盘中对单一页进行随机读，那么效率是很低的(差不多 10ms)，而采用顺序读取的方式，批量对页进行读取，平均一页的读取效率就会提升很多，甚至要快于单个页面在内存中的随机读取。</li>
+</ol>
+<p>所以说，遇到 <code>I/O</code> 并不用担心，方法找对了，效率还是很高的。我们首先要考虑数据存放的位置，如果是进程使用的数据就要尽量放到<strong>缓冲池</strong>中，其次我们可以充分利用磁盘的吞吐能力，一次性批量读取数据，这样单个页的读取效率也就得到了提升。</p>
+<h2 id="4-定位执行慢的-SQL：慢查询日志"><a href="#4-定位执行慢的-SQL：慢查询日志" class="headerlink" title="4. 定位执行慢的 SQL：慢查询日志"></a>4. 定位执行慢的 SQL：慢查询日志</h2><p><code>MySQL</code> 的慢查询日志，用来记录在 <code>MySQL</code> 中响应时间超过<strong>阀值</strong>的语句，该值通过 <code>long_query_time</code> 控制，默认值为10。</p>
+<p>它的主要作用是，帮助我们发现那些执行时间特别长的 <code>SQL</code> 查询，并且有针对性地进行优化，从而提高系统的整体效率。当我们的数据库服务器发生阻塞、运行变慢的时候，检查一下慢查询日志，找到那些慢查询，对解决问题很有帮助。</p>
+<p>默认情况下，<code>MySQL</code> 数据库没有开启慢查询日志，需要我们手动来设置这个参数。如果不是调优需要的话，一般不建议启动该参数，因为开启慢查询日志会或多或少带来一定的性能影响，此外，慢查询日志支持将日志记录写入文件。</p>
+<h3 id="4-1-开启慢查询日志参数"><a href="#4-1-开启慢查询日志参数" class="headerlink" title="4.1 开启慢查询日志参数"></a>4.1 开启慢查询日志参数</h3><p><strong>1. 开启 slow_query_log</strong></p>
+<p>以 <code>MySQL 5.7</code> 为例，查询是否开启慢查询</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; show variables like &#x27;%slow_query_log&#x27;;<br><br>+--------------+-----+<br>|Variable_name |Value|<br>+--------------+-----+<br>|slow_query_log|OFF  |<br>+--------------+-----+<br><br># 开启慢查询<br>mysql &gt; set global slow_query_log=&#x27;ON&#x27;;<br><br># 查询慢查询日志记录位置<br>show variables like &#x27;%slow_query_log%&#x27;;<br>+-------------------+------------------------------------+<br>|Variable_name      |Value                               |<br>+-------------------+------------------------------------+<br>|slow_query_log     |ON                                  |<br>|slow_query_log_file|/var/lib/mysql/c2879930f2c0-slow.log|<br>+-------------------+------------------------------------+<br></code></pre></td></tr></table></figure>
+
+<p><strong>2. 修改 long_query_time 阈值</strong></p>
+<p>查询慢查询的时间阈值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql &gt; show variables like &#x27;%long_query_time%&#x27;;<br><br>+---------------+---------+<br>|Variable_name  |Value    |<br>+---------------+---------+<br>|long_query_time|10.000000|<br>+---------------+---------+<br></code></pre></td></tr></table></figure>
+
+<p>修改慢查询的时间阈值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#测试发现：设置global的方式对当前session的long_query_time失效。对新连接的客户端有效。所以可以一并<br>执行下述语句<br>mysql &gt; set global long_query_time = 1;<br>mysql&gt; show global variables like &#x27;%long_query_time%&#x27;;<br><br>mysql&gt; set long_query_time = 1;<br>mysql&gt; show variables like &#x27;%long_query_time%&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><strong>补充：修改配置文件(可选)</strong></p>
+<p>如下的方式相较于前面的命令行方式，可以看做是永久设置的方式。</p>
+<p>修改 <code>my.cnf</code> 文件，<code>[mysqld]</code> 下增加或修改参数 <code>long_query_time、slow_query_log</code> 和 <code>slow_query_log_file</code> 后，然后重启 <code>MySQL</code> 服务器。</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-attr">[mysqld]</span><br><span class="hljs-attr">slow_query_log</span>= <span class="hljs-string">ON  # 开启慢查询日志开关</span><br><span class="hljs-attr">slow_query_log_file</span>=<span class="hljs-string">/var/lib/mysql/atguigu-low.log  # 慢查询日志的目录和文件名信息</span><br><span class="hljs-comment"># 如果不指定存储路径，慢查询日志默认存储到MySQL数据库的数据文件夹下。如果不指定文件名，默认文件名为hostname_slow.log。</span><br><span class="hljs-attr">long_query_time</span>=<span class="hljs-string">3  # 设置慢查询的阈值为3秒，超出此设定值的SQL即被记录到慢查询日志</span><br><span class="hljs-attr">log_output</span>=<span class="hljs-string">FILE</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="4-2-查看慢查询数目"><a href="#4-2-查看慢查询数目" class="headerlink" title="4.2 查看慢查询数目"></a>4.2 查看慢查询数目</h3><p>查询当前系统中有多少条慢查询记录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 记录一条慢查询，不然下面查询出来为0<br>mysql&gt; select * from atguigudb1.student_info where id &gt; 100000;<br><br>mysql&gt; show status like &#x27;Slow_queries&#x27;;<br>+-------------+-----+<br>|Variable_name|Value|<br>+-------------+-----+<br>|Slow_queries |1    |<br>+-------------+-----+<br></code></pre></td></tr></table></figure>
+
+<p><strong>补充说明</strong></p>
+<p>除了<code>long_query_time的</code> 之外，还有一个系统变量:  <code>min_examined_row_limit</code>，这两个参数共同控制慢查询日志。</p>
+<p><code>min_examined_row_limit</code> 指的是查询扫描过的<strong>最少记录数</strong>。如果查询扫描过的记录数大于等于<code>min_examined_row_limit</code> ，并且查询执行时间超过 <code>long_query_time的</code> 值，那么，这个查询就被记录到慢查询日志中；反之，则不被记录到慢查询日志中。</p>
+<p>默认值为 0，表示哪怕一个记录都没扫到，但是只要时间超过 <code>long_query_time的</code> ，就会被记录到慢查询日志中。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; show variables like &#x27;min%&#x27;;<br><br>+----------------------+-----+<br>|Variable_name         |Value|<br>+----------------------+-----+<br>|min_examined_row_limit|0    |<br>+----------------------+-----+<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-3-慢查询日志分析工具：mysqldumpslow"><a href="#4-3-慢查询日志分析工具：mysqldumpslow" class="headerlink" title="4.3 慢查询日志分析工具：mysqldumpslow"></a>4.3 慢查询日志分析工具：mysqldumpslow</h3><p>在生产环境中，如果要手工分析日志，查找、分析 <code>SQL</code>，显然是个体力活，<code>MySQL</code> 提供了日志分析工具 <code>mysqldumpslow</code> 。</p>
+<p>查看 <code>mysqldumpslow</code> 的帮助信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs bash">root@c2879930f2c0:/<span class="hljs-comment"># mysqldumpslow --help</span><br>Usage: mysqldumpslow [ OPTS... ] [ LOGS... ]<br><br>Parse and summarize the MySQL slow query <span class="hljs-built_in">log</span>. Options are<br><br>  --verbose    verbose<br>  --debug      debug<br>  --<span class="hljs-built_in">help</span>       write this text to standard output<br><br>  -v           verbose<br>  -d           debug<br>  -s ORDER     what to <span class="hljs-built_in">sort</span> by (al, at, ar, c, l, r, t), <span class="hljs-string">&#x27;at&#x27;</span> is default 是表示按照何种方式排序<br>                al: average lock time 平均锁定时间 <br>                ar: average rows sent 平均返回记录数 <br>                at: average query time 平均查询时间 （默认方式） <br>                 c: count 访问次数 <br>                 l: lock time   锁定时间<br>                 r: rows sent   返回记录 <br>                 t: query time  查询时间 <br>  -r           reverse the <span class="hljs-built_in">sort</span> order (largest last instead of first)<br>  -t NUM       just show the top n queries 即为返回前面多少条的数据<br>  -a           don<span class="hljs-string">&#x27;t abstract all numbers to N and strings to &#x27;</span>S<span class="hljs-string">&#x27; 不将数字抽象成N，字符串抽象成S</span><br><span class="hljs-string">  -n NUM       abstract numbers with at least n digits within names</span><br><span class="hljs-string">  -g PATTERN   grep: only consider stmts that include this string 后边搭配一个正则匹配模式，大小写不敏感的</span><br><span class="hljs-string">  -h HOSTNAME  hostname of db server for *-slow.log filename (can be wildcard),</span><br><span class="hljs-string">               default is &#x27;</span>*<span class="hljs-string">&#x27;, i.e. match all</span><br><span class="hljs-string">  -i NAME      name of server instance (if using mysql.server startup script)</span><br><span class="hljs-string">  -l           don&#x27;</span>t subtract lock time from total time<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>举例</strong>：按照查询时间排序，查看前五条 SQL 语句</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">mysqldumpslow -s t -t 5 /var/lib/mysql/c2879930f2c0-slow.log<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20230629155723967.png" srcset="/img/loading.gif" lazyload alt="image-20230629155723967"></p>
+<p><strong>工作常用参考：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment">#得到返回记录集最多的10个SQL</span><br>mysqldumpslow -s r -t 10 /var/lib/mysql/c2879930f2c0-slow.log<br><br><span class="hljs-comment">#得到访问次数最多的10个SQL</span><br>mysqldumpslow -s c -t 10 /var/lib/mysql/c2879930f2c0-slow.log<br><br><span class="hljs-comment">#得到按照时间排序的前10条里面含有左连接的查询语句</span><br>mysqldumpslow -s t -t 10 -g <span class="hljs-string">&quot;left join&quot;</span> /var/lib/mysql/c2879930f2c0-slow.log<br><br><span class="hljs-comment">#另外建议在使用这些命令时结合 | 和more 使用 ，否则有可能出现爆屏情况</span><br>mysqldumpslow -s r -t 10 /var/lib/mysql/c2879930f2c0-slow.log | more<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-4-关闭慢查询日志"><a href="#4-4-关闭慢查询日志" class="headerlink" title="4.4 关闭慢查询日志"></a>4.4 关闭慢查询日志</h3><p><code>MySQL</code> 服务器停止慢查询日志功能有两种方法：</p>
+<ol>
+<li>修改 <code>my.cnf</code> 配置文件</li>
+</ol>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-attr">[mysqld]</span><br><span class="hljs-attr">slow_query_log</span>=<span class="hljs-string">OFF</span><br></code></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>使用SET语句</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SET GLOBAL slow_query_log=off;<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-5-删除慢查询日志"><a href="#4-5-删除慢查询日志" class="headerlink" title="4.5 删除慢查询日志"></a>4.5 删除慢查询日志</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 查询慢日志存放路径<br>mysql&gt; SHOW VARIABLES LIKE &#x27;slow_query_log%&#x27;;<br><br># 手动去文件路径中删除<br><br># 重新生成慢日志文件<br>mysqladmin -uroot -p flush-logs slow<br><br># 使用时一定要注意，一旦执行了这个命令，慢查询日志都只存在新的日志文件中，如果需要旧的查询日志，就必须事先备份。<br></code></pre></td></tr></table></figure>
+
+<h2 id="5-查看-SQL-执行成本：SHOW-PROFILE"><a href="#5-查看-SQL-执行成本：SHOW-PROFILE" class="headerlink" title="5. 查看 SQL 执行成本：SHOW PROFILE"></a>5. 查看 SQL 执行成本：SHOW PROFILE</h2><p><a href="%E7%AC%AC04%E7%AB%A0%20%E9%80%BB%E8%BE%91%E6%9E%B6%E6%9E%84.md#2.3%20MySQL5.7%E4%B8%ADSQL%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86">2.3 MySQL5.7中SQL执行原理</a><br><a href="%E7%AC%AC04%E7%AB%A0%20%E9%80%BB%E8%BE%91%E6%9E%B6%E6%9E%84.md#2.2%20MySQL8%E4%B8%ADSQL%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86">2.2 MySQL8中SQL执行原理</a></p>
+<p><code>show profile</code> 在《逻辑架构》章节中讲过，这里作为复习，以下以 <code>MySQL 5.7</code> 为例，且<strong>最好用命令行</strong>，<code>Datagrip</code> 有一些问题。</p>
+<p><code>show profile</code> 是 <code>MySQL</code> 提供的可以用来分析当前会话中 <code>SQL</code> 都做了什么、执行的资源消耗工具的情况，可用于 <code>SQL</code> 调优的测量。<strong>默认情况下处于关闭状态</strong>，并保存最近15次的运行结果。</p>
+<p>我们可以在会话级别开启这个功能。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 查询状态<br>mysql&gt; show variables like &#x27;profiling&#x27;;<br><br>+-------------+-----+<br>|Variable_name|Value|<br>+-------------+-----+<br>|profiling    |OFF  |<br>+-------------+-----+<br><br>#  开启<br>mysql&gt; set profiling = &#x27;ON&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p>查看当前会话的所有查询的开销</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs mysql"> # 先查询一次，不然没有记录<br> mysql&gt; select * from atguigudb1.student_info where id &gt; 999000;<br><br>mysql&gt; show profiles;<br>+----------+------------+---------------------------------------------------------+<br>| Query_ID | Duration   | Query                                                   |<br>+----------+------------+---------------------------------------------------------+<br>|        1 | 0.00098050 | select * from atguigudb1.student_info where id &gt; 999000 |<br>+----------+------------+---------------------------------------------------------+<br></code></pre></td></tr></table></figure>
+
+<p>查看当前会话的最近一次查询的开销</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; show profile;<br><br>+----------------------+----------+<br>| Status               | Duration |<br>+----------------------+----------+<br>| starting             | 0.000061 |<br>| checking permissions | 0.000009 |<br>| Opening tables       | 0.000019 |<br>| init                 | 0.000029 |<br>| System lock          | 0.000009 |<br>| optimizing           | 0.000010 |<br>| statistics           | 0.000054 |<br>| preparing            | 0.000012 |<br>| executing            | 0.000005 |<br>| Sending data         | 0.000725 |<br>| end                  | 0.000006 |<br>| query end            | 0.000011 |<br>| closing tables       | 0.000007 |<br>| freeing items        | 0.000014 |<br>| cleaning up          | 0.000012 |<br>+----------------------+----------+<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; show profile cpu,block io for query 1;<br><br>+----------------------+----------+----------+------------+--------------+---------------+<br>| Status               | Duration | CPU_user | CPU_system | Block_ops_in | Block_ops_out |<br>+----------------------+----------+----------+------------+--------------+---------------+<br>| starting             | 0.000061 | 0.000023 |   0.000034 |            0 |             0 |<br>| checking permissions | 0.000009 | 0.000003 |   0.000005 |            0 |             0 |<br>| Opening tables       | 0.000019 | 0.000008 |   0.000011 |            0 |             0 |<br>| init                 | 0.000029 | 0.000012 |   0.000018 |            0 |             0 |<br>| System lock          | 0.000009 | 0.000003 |   0.000005 |            0 |             0 |<br>| optimizing           | 0.000010 | 0.000004 |   0.000005 |            0 |             0 |<br>| statistics           | 0.000054 | 0.000022 |   0.000033 |            0 |             0 |<br>| preparing            | 0.000012 | 0.000004 |   0.000006 |            0 |             0 |<br>| executing            | 0.000005 | 0.000002 |   0.000003 |            0 |             0 |<br>| Sending data         | 0.000725 | 0.000000 |   0.000725 |            0 |             0 |<br>| end                  | 0.000006 | 0.000000 |   0.000006 |            0 |             0 |<br>| query end            | 0.000011 | 0.000000 |   0.000010 |            0 |             0 |<br>| closing tables       | 0.000007 | 0.000000 |   0.000008 |            0 |             0 |<br>| freeing items        | 0.000014 | 0.000000 |   0.000013 |            0 |             0 |<br>| cleaning up          | 0.000012 | 0.000000 |   0.000012 |            0 |             0 |<br>+----------------------+----------+----------+------------+--------------+---------------+<br></code></pre></td></tr></table></figure>
+
+<p>**show profile的常用查询参数： **</p>
+<ul>
+<li>ALL：显示所有的开销信息。 </li>
+<li>BLOCK IO：显示块IO开销。 </li>
+<li>CONTEXT SWITCHES：上下文切换开销。 </li>
+<li>CPU：显示CPU开销信息。 </li>
+<li>IPC：显示发送和接收开销信息。</li>
+<li>MEMORY：显示内存开销信息。 </li>
+<li>PAGE FAULTS：显示页面错误开销信息。 </li>
+<li>SOURCE：显示和Source_function，Source_file， Source_line相关的开销信息。 </li>
+<li>SWAPS：显示交换次数开销信息。</li>
+</ul>
+<p><strong>日常开发需注意的结论：</strong></p>
+<p>① <code>converting HEAP to MyISAM</code>: 查询结果太大，内存不够，数据往磁盘上搬了。 </p>
+<p>② <code>Creating tmp table</code>：创建临时表。先拷贝数据到临时表，用完后再删除临时表。 </p>
+<p>③ <code>Copying to tmp table on disk</code>：把内存中临时表复制到磁盘上，警惕！ </p>
+<p>④ <code>locked</code>。 </p>
+<p>如果在 <code>show profile</code> 诊断结果中出现了以上4条结果中的任何一条，则 <code>SQL</code> 语句需要优化。</p>
+<p><strong>注意：</strong></p>
+<p>不过 <strong><code>SHOW PROFILE</code> 命令将被启用</strong>，我们可以从 <code>information_schema</code> 中的 <code>profiling</code> 数据表进行查看。</p>
+<h2 id="6-分析查询语句：EXPLAIN"><a href="#6-分析查询语句：EXPLAIN" class="headerlink" title="6. 分析查询语句：EXPLAIN"></a>6. 分析查询语句：EXPLAIN</h2><h3 id="6-1-概述"><a href="#6-1-概述" class="headerlink" title="6.1 概述"></a>6.1 概述</h3><p>通过慢查询定位执行慢的<code>SQL</code> 之后，我们就可以使用 <code>EXPLAIN</code> 或 <code>DESCRIBE</code> 工具做针对性的分析。</p>
+<p>通过 <code>EXPLAIN</code> ，可以获取到执行计划的相关信息。</p>
+<blockquote>
+<p><strong>执行计划</strong> 是指一条 <code>SQL</code> 语句在经过 <strong>MySQL 查询优化器</strong> 的优化会后，具体的执行方式。</p>
+<p>执行计划通常用于 SQL 性能分析、优化等场景。通过 <code>EXPLAIN</code> 的结果，可以了解到如数据表的查询顺序、数据查询操作的操作类型、哪些索引可以被命中、哪些索引实际会命中、每个数据表有多少行记录被查询等信息。</p>
+</blockquote>
+<p>不同版本的  <code>EXPLAIN</code></p>
+<ul>
+<li><code>MySQL 5.6.3 前</code> 只支持 <code>SELECT</code>；</li>
+<li><code>MYSQL 5.6.3 后</code> 支持 <code>SELECT</code>、<code>DELETE</code>、<code>INSERT</code>、<code>REPLACE</code> 以及 <code>UPDATE</code> 语句</li>
+<li>此外，在 <code>5.7</code> 以前的版本中，如果在结果中需要显示 <code>partitions</code> 或 <code>filtered</code>，那么需要使用 <code>explain extended </code> 或 <code>explain partitions</code>，在 <code>5.7</code> 之后的版本中，默认直接显示<code>partitions</code> 和 <code>filtered</code>。</li>
+</ul>
+<h3 id="6-2-基本语法"><a href="#6-2-基本语法" class="headerlink" title="6.2 基本语法"></a>6.2 基本语法</h3><p><code>EXPLAIN</code> 或 <code>DESCRIBE</code> 语句的语法形式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT select_options<br>或者<br>mysql&gt; DESCRIBE SELECT select_options<br></code></pre></td></tr></table></figure>
+
+<p><strong>举例</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">explain select * from student_info where id = 12345;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student_info</td>
+<td align="left">null</td>
+<td align="left">const</td>
+<td align="left">PRIMARY</td>
+<td align="left">PRIMARY</td>
+<td align="left">4</td>
+<td align="left">const</td>
+<td align="left">1</td>
+<td align="left">100</td>
+<td align="left">null</td>
+</tr>
+</tbody></table>
+<p>上述信息就是所谓的<strong>执行计划</strong>。在这个执行计划的辅助下，我们需要知道应该怎样改进自己的查询语句以使查询执行起来更高效。注意：执行 <code>EXPLAIN</code> 时<strong>并没有真正的执行该后面的语句</strong>，因此可以安全的查看执行计划。</p>
+<p><code>EXPLAIN</code> 语句输出的各个列的作用如下</p>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>id</code></td>
+<td>在一个大的查询语句中每个 <code>SELECT</code> 关键字都对应一个唯一的id</td>
+</tr>
+<tr>
+<td><code>select_type</code></td>
+<td><code>SELECT</code> 关键字对应的那个查询的类型</td>
+</tr>
+<tr>
+<td><code>table</code></td>
+<td>表名</td>
+</tr>
+<tr>
+<td><code>partitions</code></td>
+<td>匹配的分区信息</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>针对单表的访问方法</td>
+</tr>
+<tr>
+<td><code>possible_keys</code></td>
+<td>可能用到的索引</td>
+</tr>
+<tr>
+<td><code>key</code></td>
+<td>实际上使用的索引</td>
+</tr>
+<tr>
+<td><code>key_len</code></td>
+<td>实际使用到的索引长度</td>
+</tr>
+<tr>
+<td><code>ref</code></td>
+<td>当使用索引列等值查询时，与索引列进行等值匹配的对象信息</td>
+</tr>
+<tr>
+<td><code>rows</code></td>
+<td>预估的需要读取的记录条数</td>
+</tr>
+<tr>
+<td><code>filtered</code></td>
+<td>某个表经过搜索条件过滤后剩余记录条数的百分比</td>
+</tr>
+<tr>
+<td><code>Extra</code></td>
+<td>一些额外的信息</td>
+</tr>
+</tbody></table>
+<h3 id="6-3-数据准备"><a href="#6-3-数据准备" class="headerlink" title="6.3 数据准备"></a>6.3 数据准备</h3><p>以下使用 <code>MySQL 5.7</code> 为例</p>
+<p><strong>1. 建表</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE s1 (<br>    id INT AUTO_INCREMENT,<br>    key1 VARCHAR(100),<br>    key2 INT,<br>    key3 VARCHAR(100),<br>    key_part1 VARCHAR(100),<br>    key_part2 VARCHAR(100),<br>    key_part3 VARCHAR(100),<br>    common_field VARCHAR(100),<br>    PRIMARY KEY (id),<br>    INDEX idx_key1 (key1),<br>    UNIQUE INDEX idx_key2 (key2),<br>    INDEX idx_key3 (key3),<br>    INDEX idx_key_part(key_part1, key_part2, key_part3)<br>) ENGINE=INNODB CHARSET=utf8;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE s2 (<br>    id INT AUTO_INCREMENT,<br>    key1 VARCHAR(100),<br>    key2 INT,<br>    key3 VARCHAR(100),<br>    key_part1 VARCHAR(100),<br>    key_part2 VARCHAR(100),<br>    key_part3 VARCHAR(100),<br>    common_field VARCHAR(100),<br>    PRIMARY KEY (id),<br>    INDEX idx_key1 (key1),<br>    UNIQUE INDEX idx_key2 (key2),<br>    INDEX idx_key3 (key3),<br>    INDEX idx_key_part(key_part1, key_part2, key_part3)<br>) ENGINE=INNODB CHARSET=utf8;<br></code></pre></td></tr></table></figure>
+
+<p><strong>2. 设置参数 log_bin_trust_function_creators</strong></p>
+<p>创建函数，假如报错，需开启如下命令：允许创建函数设置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">set global log_bin_trust_function_creators=1; # 不加global只是当前窗口有效。<br></code></pre></td></tr></table></figure>
+
+<p><strong>3. 创建函数</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs mysql">DELIMITER //<br>CREATE FUNCTION rand_string1(n INT)<br>	RETURNS VARCHAR(255) #该函数会返回一个字符串<br>BEGIN<br>	DECLARE chars_str VARCHAR(100) DEFAULT<br>&#x27;abcdefghijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ&#x27;;<br>    DECLARE return_str VARCHAR(255) DEFAULT &#x27;&#x27;;<br>    DECLARE i INT DEFAULT 0;<br>    WHILE i &lt; n DO<br>        SET return_str =CONCAT(return_str,SUBSTRING(chars_str,FLOOR(1+RAND()*52),1));<br>        SET i = i + 1;<br>    END WHILE;<br>    RETURN return_str;<br>END //<br>DELIMITER ;<br></code></pre></td></tr></table></figure>
+
+<p><strong>4. 创建存储过程</strong></p>
+<p>创建往s1表中插入数据的存储过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs mysql">DELIMITER //<br>CREATE PROCEDURE insert_s1 (IN min_num INT (10),IN max_num INT (10))<br>BEGIN<br>    DECLARE i INT DEFAULT 0;<br>    SET autocommit = 0;<br>    REPEAT<br>    SET i = i + 1;<br>    INSERT INTO s1 VALUES(<br>        (min_num + i),<br>        rand_string1(6),<br>        (min_num + 30 * i + 5),<br>        rand_string1(6),<br>        rand_string1(10),<br>        rand_string1(5),<br>        rand_string1(10),<br>        rand_string1(10));<br>    UNTIL i = max_num<br>    END REPEAT;<br>    COMMIT;<br>END //<br>DELIMITER ;<br></code></pre></td></tr></table></figure>
+
+<p>创建往s2表中插入数据的存储过程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs mysql">DELIMITER //<br>CREATE PROCEDURE insert_s2 (IN min_num INT (10),IN max_num INT (10))<br>BEGIN<br>    DECLARE i INT DEFAULT 0;<br>    SET autocommit = 0;<br>    REPEAT<br>    SET i = i + 1;<br>    INSERT INTO s2 VALUES(<br>        (min_num + i),<br>        rand_string1(6),<br>        (min_num + 30 * i + 5),<br>        rand_string1(6),<br>        rand_string1(10),<br>        rand_string1(5),<br>        rand_string1(10),<br>        rand_string1(10));<br>    UNTIL i = max_num<br>    END REPEAT;<br>    COMMIT;<br>END //<br>DELIMITER ;<br></code></pre></td></tr></table></figure>
+
+<p><strong>5. 调用存储过程</strong></p>
+<p>s1表数据的添加：加入1万条记录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CALL insert_s1(10001,10000);<br></code></pre></td></tr></table></figure>
+
+<p>s2表数据的添加：加入1万条记录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CALL insert_s2(10001,10000);<br></code></pre></td></tr></table></figure>
+
+<h3 id="6-4-EXPLAIN各列作用-暂时跳过"><a href="#6-4-EXPLAIN各列作用-暂时跳过" class="headerlink" title="6.4 EXPLAIN各列作用(暂时跳过)"></a>6.4 EXPLAIN各列作用(暂时跳过)</h3><p>为了让大家有比较好的体验，我们调整了下 <code>EXPLAIN</code> 输出列的顺序。</p>
+<h4 id="1-table"><a href="#1-table" class="headerlink" title="1. table"></a>1. table</h4><p>不论我们的查询语句有多复杂，里面包含了多少个表，到最后也是需要对每个表进行单表访问的，所以 <code>MySQL</code> 规定 <code>EXPLAIN</code> 语句输出的每条记录都对应着某个单表的访问方法，该条记录的 <code>table</code> 列代表着该表的表名（有时不是真实的表名字，可能是简称）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">s1</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">9895</td>
+<td align="left">100</td>
+<td align="left">null</td>
+</tr>
+</tbody></table>
+<p>这个查询语句只涉及对 <code>s1</code> 表的单表查询，所以 <code>EXPLAIN</code> 输出中只有一条记录，其中的 <code>table</code> 列的值为 <code>s1</code>，表明这条记录是用来说明对 <code>s1</code> 表的单表访问方法的。</p>
+<p>下边我们看一个连接查询的执行计划</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 INNER JOIN s2;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">s1</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">9895</td>
+<td align="left">100</td>
+<td align="left">null</td>
+</tr>
+<tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">s2</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">9895</td>
+<td align="left">100</td>
+<td align="left">Using join buffer (Block Nested Loop)</td>
+</tr>
+</tbody></table>
+<p>可以看出这个连接查询的执行计划中有两条记录，这两条记录的 <code>table</code> 列分别是 <code>s1</code> 和 <code>s2</code>，这两条记录用来分别说明对 <code>s1</code> 表和 <code>s2</code> 表的访问方法。</p>
+<h4 id="2-id"><a href="#2-id" class="headerlink" title="2. id"></a>2. id</h4><p>我们写的查询语句一般都以 <code>SELECT</code> 关键字开头，比较简单的查询语句里只有一个 <code>SELECT</code> 关键字， 如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT * FROM s1 WHERE key1 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p>稍微复杂一点的连接查询中也只有一个 <code>SELECT</code> 关键字，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT * FROM s1 INNER JOIN s2<br>ON s1.key1 = s2.key1<br>WHERE s1.common_field = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p>但是有些情况下，会出现多个 <code>SELECT</code> 关键字，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; SELECT * FROM s1 WHERE key1 IN (SELECT key3 FROM s2)<br></code></pre></td></tr></table></figure>
+
+<p>每出现一个 <code>SELECT</code> 关键字，<code>MySQL</code> 就会为它分配一个唯一的 <code>id</code> 值。这个 <code>id</code> 值就是 <code>EXPLALIN</code> 语句的第一个列。</p>
+<blockquote>
+<p>当查询语句中是<strong>子查询</strong>或者 <strong>UNION</strong>的时候，<code>id</code> 是<strong>不同</strong>的。</p>
+</blockquote>
+<ul>
+<li><p><strong>子查询</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key3 FROM s2);<br></code></pre></td></tr></table></figure>
+
+<p>多出来的记录是是临时表</p>
+<p><img src="/Resources/image-20230630150115285.png" srcset="/img/loading.gif" lazyload alt="image-20230630150115285"></p>
+</li>
+<li><p><strong>UNION</strong></p>
+</li>
+</ul>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 UNION SELECT * FROM s2;<br></code></pre></td></tr></table></figure>
+
+<p>  对于第三条记录，该条记录是临时表用于去重，见 6.4 Extra 中的 <code>Using temporary</code>。</p>
+<p>  对于第三条记录的 <code>id</code> 和 <code>table</code> ，在后面 <code>注意部分</code> 进行说明</p>
+<p>  对于第三条记录的 <code>select_type</code>，见 6.4 <code>select_type</code>。</p>
+<p>  <img src="/Resources/image-20230630150012732.png" srcset="/img/loading.gif" lazyload alt="image-20230630150012732"></p>
+<blockquote>
+<p>当查询语句中是<strong>连接查询</strong>的时候，<code>id</code> 是<strong>相同</strong>的。</p>
+</blockquote>
+<p><img src="/Resources/image-20230630145646493.png" srcset="/img/loading.gif" lazyload alt="image-20230630145646493"></p>
+<p>可以看到，上述连接查询中参与连接的 <code>s1</code> 和 <code>s2</code> 表分别对应一条记录，但是这两条记录对应的 <code>id</code> 都是1。这里需要大家记住的是，<u>在<strong>连接查询的执行计划</strong>中，每个表都会对应一条记录，这些记录的**<code>id</code>列的值是相同的**</u>，出现在前边的表表示 <strong>驱动表</strong>，出现在后面的表表示 <strong>被驱动表</strong>。所以从上边的 <code>EXPLAIN</code> 输出中我们可以看到，第一个查询计划中，查询优化器准备让 <code>s1</code> 表作为驱动表，让 <code>s2</code> 表作为被驱动表来执行查询，而在第二个查询计划中，查询优化器准备让 <code>s2</code> 表作为驱动表，让 <code>s1</code> 表作为被驱动表来执行查询。</p>
+<p>但是，不是在前面一定就是驱动表，在后面一定就是被驱动表，这是优化器决定的，不是顺序决定的。</p>
+<blockquote>
+<p>查询优化器将子查询转换为连接查询的时候，<code>id</code> 是<strong>相同</strong>的。</p>
+</blockquote>
+<p>查询优化器可能对涉及子查询的查询语句进行重写，从而转换为连接查询。比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 查询优化器可能对涉及子查询的查询语句进行重写，转变为多表查询的操作。  <br>mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key2 FROM s2 WHERE common_field = &#x27;a&#x27;);<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20230630151209991.png" srcset="/img/loading.gif" lazyload alt="image-20230630151209991"></p>
+<p>可以看到，虽然我们的查询语句是一个子查询，但是执行计划中 <code>s1</code> 和 <code>s2</code> 表对应的记录的<code>id</code>值全部是 <code>1</code>，这就表明<strong>查询优化器将子查询转换为了连接查询</strong>，验证方法使用 <code>show warnings</code>，使用说明见：<a href="%E7%AC%AC09%E7%AB%A0%20%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7%E7%9A%84%E4%BD%BF%E7%94%A8.md#7.2%20SHOW%20WARNINGS%E7%9A%84%E4%BD%BF%E7%94%A8">SHOW WARNINGS的使用</a><br><img src="/Resources/Pasted%20image%2020230703112109.png" srcset="/img/loading.gif" lazyload></p>
+<blockquote>
+<p>注意</p>
+</blockquote>
+<p>对于包含 <code>UNION</code> 子句的查询语句来说，每个 <code>SELECT</code> 关键字对应一个 <code>id</code> 值也是没错的，不过还是有点儿特别的东西，比方说下边的查询：</p>
+<p><img src="/Resources/image-20230630151505613.png" srcset="/img/loading.gif" lazyload alt="image-20230630151505613"></p>
+<p>第三条记录的 <code>id</code> 为 <code>NULL</code> 以及 <code>table</code> 为 <code>&lt;union1,2&gt;</code> 的说明：</p>
+<p>它会把多个查询的结果集合并起来并对结果集中的记录进行去重，由于 <code>MySQL</code> 使用的是内部的临时表。正如上边的查询计划中所示，<code>UNION</code> 子句是为了把 <code>id</code> 为 <code>1</code> 的查询和 <code>id</code> 为 <code>2</code> 的查询的结果集合并起来并去重，所以在内部创建了一个名为 <code>&lt;union1，2&gt;</code> 的临时表（就是执行计划第三条记录的 <code>table</code> 列的名称)，<code>id</code> 为 <code>NULL</code> 表明这个临时表是为了合并两个查询的结果集而创建的。</p>
+<p>跟 <code>UNION</code> 对比起来，<code>UNION ALL</code> 就不需要为最终的结果集进行去重，它只是单纯的把多个查询的结果集中的记录合并成一个并返回给用户，所以也就不需要使用临时表。所以在包含 <code>UNION ALL</code> 子句的查询的执行计划中，就没有那个 <code>id</code> 为 <code>NULL</code> 的记录，如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 UNION ALL SELECT * FROM s2;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20230630151720317.png" srcset="/img/loading.gif" lazyload alt="image-20230630151720317"></p>
+<blockquote>
+<p><strong>小结:</strong></p>
+</blockquote>
+<ul>
+<li><code>id</code> 如果相同，可以认为是一组，从上往下顺序执行 </li>
+<li>在所有组中，<code>id</code> 值越大，优先级越高，越先执行 </li>
+<li><strong>关注点</strong>：<code>id</code> 号每个号码，表示一趟独立的查询, 一个 <code>sql</code> 的查询趟数越少越好</li>
+</ul>
+<h4 id="3-select-type"><a href="#3-select-type" class="headerlink" title="3. select_type"></a>3. select_type</h4><p>一条大的查询语句里边可以包含若干个 <code>SELECT</code> 关键字，每个 <code>SELECT</code> 关键字代表着一个小的查询语句，而每个 <code>SELECT</code> 关键字的 <code>FROM</code> 子句中都可以包含若干张表（这些表用来做连接查询)，每一张表都对应着执行计划输出中的一条记录，对于在同一个 <code>SELECT</code> 关键字中的表来说，它们的 <code>id</code> 值是相同的。</p>
+<p><code>MySQL</code> 为每一个 <code>SELECT</code> 关键字代表的小查询都定义了一个称之为 <code>select_type</code> 的属性，意思是我们只要知道了某个小查询的 <code>select_type</code> 属性，就知道了这个小查询在整个大查询中扮演了一个什么角色。</p>
+<p><img src="/Resources/image-20230630154006538.png" srcset="/img/loading.gif" lazyload alt="image-20230630154006538"></p>
+<p>参数说明如下：</p>
+<ul>
+<li><p>SIMPLE</p>
+<p>查询语句中不包含 <code>UNION</code> 或者子查询的查询都算作是 <code>SIMPLE</code> 类型，比方说下边这个单表查询 <code>select_type</code> 的值就是<code>SIMPLE</code>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220629171840300.png" srcset="/img/loading.gif" lazyload alt="image-20220629171840300"></p>
+<p>当然，，连接查询也算是 SIMPLE 类型，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 INNER JOIN s2;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220629171904912.png" srcset="/img/loading.gif" lazyload alt="image-20220629171904912"></p>
+</li>
+<li><p>PRIMARY</p>
+<p>对于包含<code>UNION、UNION ALL</code>或者子查询的大查询来说，它是由几个小查询组成的，其中最左边的那个查询的<code>select_type</code>的值就是<code>PRIMARY</code>，比方说：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 UNION SELECT * FROM s2;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220629171929924.png" srcset="/img/loading.gif" lazyload alt="image-20220629171929924"></p>
+<p>从结果中可以看到，最左边的小查询<code>SELECT * FROM s1</code>对应的是执行计划中的第一条记录，它的<code>select_type</code>的值就是<code>PRIMARY</code>。</p>
+</li>
+<li><p>UNION</p>
+<p>对于包含<code>UNION</code>或者<code>UNION ALL</code>的大查询来说，它是由几个小查询组成的，其中除了最左边的那个小查询意外，其余的小查询的<code>select_type</code>值就是UNION，可以对比上一个例子的效果。</p>
+</li>
+<li><p>UNION RESULT</p>
+<p>MySQL 选择使用临时表来完成<code>UNION</code>查询的去重工作，针对该临时表的查询的<code>select_type</code>就是<code>UNION RESULT</code>, 例子上边有。</p>
+</li>
+<li><p>SUBQUERY</p>
+<p>如果包含子查询的查询语句不能够转为对应的<code>semi-join</code>的形式，并且该子查询是不相关子查询，并且查询优化器决定采用将该子查询物化的方案来执行该子查询时，该子查询的第一个<code>SELECT</code>关键字代表的那个查询的<code>select_type</code>就是<code>SUBQUERY</code>，比如下边这个查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key1 FROM s2) OR key3 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220629172449267.png" srcset="/img/loading.gif" lazyload alt="image-20220629172449267"></p>
+</li>
+<li><p>DEPENDENT SUBQUERY</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key1 FROM s2 WHERE s1.key2 = s2.key2) OR key3 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220629172525236.png" srcset="/img/loading.gif" lazyload alt="image-20220629172525236"></p>
+</li>
+<li><p>DEPENDENT UNION</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key1 FROM s2 WHERE key1 = &#x27;a&#x27; UNION SELECT key1 FROM s1 WHERE key1 = &#x27;b&#x27;);<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220629172555603.png" srcset="/img/loading.gif" lazyload alt="image-20220629172555603"></p>
+</li>
+<li><p>DERIVED</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM (SELECT key1, count(*) as c FROM s1 GROUP BY key1) AS derived_s1 where c &gt; 1;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220629172622893.png" srcset="/img/loading.gif" lazyload alt="image-20220629172622893"></p>
+<p>从执行计划中可以看出，id为2的记录就代表子查询的执行方式，它的select_type是DERIVED, 说明该子查询是以物化的方式执行的。id为1的记录代表外层查询，大家注意看它的table列显示的是derived2，表示该查询时针对将派生表物化之后的表进行查询的。</p>
+</li>
+<li><p>MATERIALIZED</p>
+<p>当查询优化器在执行包含子查询的语句时，选择将子查询物化之后的外层查询进行连接查询时，该子查询对应的<code>select_type</code>属性就是MATERIALIZED，比如下边这个查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 IN (SELECT key1 FROM s2);<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220629172646367.png" srcset="/img/loading.gif" lazyload alt="image-20220629172646367"></p>
+</li>
+<li><p>UNCACHEABLE SUBQUERY</p>
+<p>不常用，就不多说了。</p>
+</li>
+<li><p>UNCACHEABLE UNION</p>
+<p>不常用，就不多说了。</p>
+</li>
+</ul>
+<h4 id="4-partitions-可略"><a href="#4-partitions-可略" class="headerlink" title="4. partitions (可略)"></a>4. partitions (可略)</h4><ul>
+<li>代表分区表中的命中情况，非分区表，该项为<code>NULL</code>。一般情况下我们的额查询语句的执行计划的<code>partitions</code>列的值为<code>NULL</code>。</li>
+<li><a><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/alter-table-partition-operations.html">https://dev.mysql.com/doc/refman/5.7/en/alter-table-partition-operations.html</a></a></li>
+<li>如果想详细了解，可以如下方式测试。创建分区表：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs mysql">-- 创建分区表，<br>-- 按照id分区，id&lt;100 p0分区，其他p1分区<br>CREATE TABLE user_partitions (id INT auto_increment,<br>NAME VARCHAR(12),PRIMARY KEY(id))<br>PARTITION BY RANGE(id)(<br>PARTITION p0 VALUES less than(100),<br>PARTITION p1 VALUES less than MAXVALUE<br>);<br></code></pre></td></tr></table></figure>
+
+<img src="Resources/image-20220629190304966.png" srcset="/img/loading.gif" lazyload alt="image-20220629190304966" style="float:left;" />
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">DESC SELECT * FROM user_partitions WHERE id&gt;200;<br></code></pre></td></tr></table></figure>
+
+<p>查询id大于200（200&gt;100，p1分区）的记录，查看执行计划，partitions是p1，符合我们的分区规则</p>
+<img src="Resources/image-20220629190335371.png" srcset="/img/loading.gif" lazyload alt="image-20220629190335371" style="float:left;" />
+
+<h4 id="5-type⭐"><a href="#5-type⭐" class="headerlink" title="5. type⭐"></a>5. type⭐</h4><p>执行计划的一条记录就代表着 <code>MySQL</code> 对某个表的执行查询时的<strong>访问方法</strong> , 又称 “<strong>访问类型</strong>“，其中的 <code>type</code> 列就表明了这条记录的访问类型。</p>
+<p>比如，看到<code>type</code>列的值是 <code>ref</code>，表明 <code>MySQL</code> 即将使用 <code>ref</code> 访问方法来执行对 <code>s1</code> 表的查询。</p>
+<p>完整的访问方法如下： <code>system ， const ， eq_ref ， ref ， fulltext ， ref_or_null ， index_merge ， unique_subquery ， index_subquery ， range ， index ， ALL</code> 。</p>
+<p>我们详细解释一下：</p>
+<ul>
+<li><p><code>system</code></p>
+<p>当<strong>表中只有一条记录</strong>并且该表使用的存储引擎的<strong>统计数据是精确的</strong>，比如 <code>MyISAM</code>（统计数据精确：MyISAM会维护行记录数，而InnoDB还要先读数据页到缓冲区再全表扫描再计算记录数）、<code>Memory</code>，那么对该表的访问方法就是 <code>system</code>。比方说我们新建一个 <code>MyISAM</code> 表，并为其插入一条记录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; CREATE TABLE t(i int) Engine=MyISAM;<br>Query OK, 0 rows affected (0.05 sec)<br><br>mysql&gt; INSERT INTO t VALUES(1);<br>Query OK, 1 row affected (0.01 sec)<br></code></pre></td></tr></table></figure>
+
+<p>然后我们看一下查询这个表的执行计划：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM t;<br></code></pre></td></tr></table></figure>
+
+<img src="Resources/image-20220630164434315.png" srcset="/img/loading.gif" lazyload alt="image-20220630164434315" style="float:left;" />
+
+<p>可以看到 <code>type</code> 列的值就是<code>system</code>了，</p>
+<blockquote>
+<p>注意：</p>
+<ol>
+<li>当再插入一条数据时，<code>type</code> 就变成了 <code>ALL</code>。</li>
+<li>使用 <code>InnoDB</code> 存储引擎，测试上述条件后，执行计划的 <code>type</code> 列是 <code>ALL</code>。</li>
+</ol>
+</blockquote>
+</li>
+<li><p><code>const</code></p>
+<p>当我们根据<strong>主键</strong>或者<strong>唯一的二级索引列与常数进行等值匹配</strong>时，对单表的访问方法就是<code>const</code>, 比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE id = 10005;<br></code></pre></td></tr></table></figure>
+
+<img src="Resources/image-20220630164724548.png" srcset="/img/loading.gif" lazyload alt="image-20220630164724548" style="float:left;" />
+</li>
+<li><p><code>eq_ref</code></p>
+<p>在连接查询时，如果被驱动表是通过主键或者唯一二级索引列等值匹配的方式进行访问的（如果该主键或者唯一二级索引是联合索引的话，所有的索引列都必须进行等值比较）。则对该被驱动表的访问方法就是<code>eq_ref</code>，比方说：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 INNER JOIN s2 ON s1.id = s2.id;<br></code></pre></td></tr></table></figure>
+
+<img src="Resources/image-20220630164802559.png" srcset="/img/loading.gif" lazyload alt="image-20220630164802559" style="float:left;" />
+
+<p>从执行计划的结果中可以看出，<code>MySQL</code> 打算将 <code>s2</code> 作为驱动表，<code>s1</code> 作为被驱动表，重点关注 <code>s1</code>的访问方法是 <code>eq_ref</code> ，表明在访问 <code>s1</code> 表的时候可以<strong>通过主键的等值匹配</strong>来进行访问。</p>
+</li>
+<li><p><code>ref</code></p>
+<p>当通过普通的二级索引列与常量进行等值匹配时来查询某个表，那么对该表的访问方法就可能是<code>ref</code>，比方说下边这个查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<img src="Resources/image-20220630164930020.png" srcset="/img/loading.gif" lazyload alt="image-20220630164930020" style="float:left;" />
+</li>
+<li><p><code>fulltext</code></p>
+<p>全文索引</p>
+</li>
+<li><p><code>ref_or_null</code></p>
+<p>当对普通二级索引进行等值匹配查询，该索引列的值也可以是<code>NULL</code>值时，那么对该表的访问方法就可能是<code>ref_or_null</code>，比如说：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 = &#x27;a&#x27; OR key1 IS NULL;<br></code></pre></td></tr></table></figure>
+
+<img src="Resources/image-20220630175133920.png" srcset="/img/loading.gif" lazyload alt="image-20220630175133920" style="float:left;" />
+</li>
+<li><p><code>index_merge</code></p>
+<p>一般情况下对于某个表的查询只能使用到一个索引，但单表访问方法时在某些场景下可以使用<code>Interseation、union、Sort-Union</code>这三种索引合并的方式来执行查询。我们看一下执行计划中是怎么体现MySQL使用索引合并的方式来对某个表执行查询的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 = &#x27;a&#x27; OR key3 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<img src="Resources/image-20220630175511644.png" srcset="/img/loading.gif" lazyload alt="image-20220630175511644" style="float:left;" />
+
+<p>从执行计划的 <code>type</code> 列的值是 <code>index_merge</code> 就可以看出，MySQL 打算使用索引合并的方式来执行对 s1 表的查询。</p>
+</li>
+<li><p><code>unique_subquery</code></p>
+<p>类似于两表连接中被驱动表的<code>eq_ref</code>访问方法，<code>unique_subquery</code>是针对在一些包含<code>IN</code>子查询的查询语句中，如果查询优化器决定将<code>IN</code>子查询转换为<code>EXISTS</code>子查询，而且子查询可以使用到主键进行等值匹配的话，那么该子查询执行计划的<code>type</code>列的值就是<code>unique_subquery</code>，比如下边的这个查询语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key2 IN (SELECT id FROM s2 where s1.key1 = s2.key1) OR key3 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<img src="Resources/image-20220630180123913.png" srcset="/img/loading.gif" lazyload alt="image-20220630180123913" style="float:left;" /></li>
+</ul>
+<ul>
+<li><p><code>index_subquery</code></p>
+<p><code>index_subquery</code> 与 <code>unique_subquery</code> 类似，只不过访问子查询中的表时使用的是普通的索引，比如这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE common_field IN (SELECT key3 FROM s2 where s1.key1 = s2.key1) OR key3 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<p><img src="/Resources/image-20220703214407225.png" srcset="/img/loading.gif" lazyload alt="image-20220703214407225"></p>
+<ul>
+<li><p><code>range</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 IN (&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;);<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220703214633338.png" srcset="/img/loading.gif" lazyload alt="image-20220703214633338"></p>
+<p>或者：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 &gt; &#x27;a&#x27; AND key1 &lt; &#x27;b&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220703214657251.png" srcset="/img/loading.gif" lazyload alt="image-20220703214657251"></p>
+</li>
+<li><p><code>index</code></p>
+<p>当我们可以使用索引覆盖，但需要扫描全部的索引记录时，该表的访问方法就是<code>index</code>，比如这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT key_part2 FROM s1 WHERE key_part3 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220703214844885.png" srcset="/img/loading.gif" lazyload alt="image-20220703214844885"></p>
+<p>上述查询中的所有列表中只有key_part2 一个列，而且搜索条件中也只有 key_part3 一个列，这两个列又恰好包含在idx_key_part这个索引中，可是搜索条件key_part3不能直接使用该索引进行<code>ref</code>和<code>range</code>方式的访问，只能扫描整个<code>idx_key_part</code>索引的记录，所以查询计划的<code>type</code>列的值就是<code>index</code>。</p>
+<blockquote>
+<p>再一次强调，对于使用InnoDB存储引擎的表来说，二级索引的记录只包含索引列和主键列的值，而聚簇索引中包含用户定义的全部列以及一些隐藏列，所以扫描二级索引的代价比直接全表扫描，也就是扫描聚簇索引的代价更低一些。</p>
+</blockquote>
+</li>
+<li><p><code>ALL</code></p>
+<p>最熟悉的全表扫描，就不多说了，直接看例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220703215958374.png" srcset="/img/loading.gif" lazyload alt="image-20220703215958374"></p>
+</li>
+</ul>
+<p>**小结: **</p>
+<p>**结果值从最好到最坏依次是： **</p>
+<p><strong>system &gt; const &gt; eq_ref &gt; ref</strong> &gt; fulltext &gt; ref_or_null &gt; index_merge &gt; unique_subquery &gt; index_subquery &gt; range &gt; index &gt; ALL </p>
+<p><strong>其中比较重要的几个提取出来（见上图中的粗体）。SQL 性能优化的目标：至少要达到 range 级别，要求是 ref 级别，最好是 consts级别。（阿里巴巴 开发手册要求）</strong></p>
+<h4 id="7-key-len⭐"><a href="#7-key-len⭐" class="headerlink" title="7. key_len⭐"></a>7. key_len⭐</h4><p>实际使用到的索引长度 (即：字节数)</p>
+<p>帮你检查<code>是否充分的利用了索引</code>，<code>值越大越好</code>，主要针对于联合索引，有一定的参考意义。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE id = 10005;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704130030692.png" srcset="/img/loading.gif" lazyload alt="image-20220704130030692"></p>
+<blockquote>
+<p>int 占用 4 个字节</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key2 = 10126;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704130138204.png" srcset="/img/loading.gif" lazyload alt="image-20220704130138204"></p>
+<blockquote>
+<p>key2上有一个唯一性约束，是否为NULL占用一个字节，那么就是5个字节</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704130214482.png" srcset="/img/loading.gif" lazyload alt="image-20220704130214482"></p>
+<blockquote>
+<p>key1 VARCHAR(100) 一个字符占3个字节，100*3，是否为NULL占用一个字节，varchar的长度信息占两个字节。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key_part1 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704130442095.png" srcset="/img/loading.gif" lazyload alt="image-20220704130442095"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key_part1 = &#x27;a&#x27; AND key_part2 = &#x27;b&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704130515031.png" srcset="/img/loading.gif" lazyload alt="image-20220704130515031"></p>
+<blockquote>
+<p>联合索引中可以比较，key_len&#x3D;606的好于key_len&#x3D;303</p>
+</blockquote>
+<p>**练习： **</p>
+<p>key_len的长度计算公式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs mysql">varchar(10)变长字段且允许NULL = 10 * ( character set：utf8=3,gbk=2,latin1=1)+1(NULL)+2(变长字段)<br><br>varchar(10)变长字段且不允许NULL = 10 * ( character set：utf8=3,gbk=2,latin1=1)+2(变长字段)<br><br>char(10)固定字段且允许NULL = 10 * ( character set：utf8=3,gbk=2,latin1=1)+1(NULL)<br><br>char(10)固定字段且不允许NULL = 10 * ( character set：utf8=3,gbk=2,latin1=1)<br></code></pre></td></tr></table></figure>
+
+<h4 id="8-ref"><a href="#8-ref" class="headerlink" title="8. ref"></a>8. ref</h4><img src="Resources/image-20220704131759630.png" srcset="/img/loading.gif" lazyload alt="image-20220704131759630" style="float:left;" />
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704130837498.png" srcset="/img/loading.gif" lazyload alt="image-20220704130837498"></p>
+<p>可以看到<code>ref</code>列的值是<code>const</code>，表明在使用<code>idx_key1</code>索引执行查询时，与<code>key1</code>列作等值匹配的对象是一个常数，当然有时候更复杂一点:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 INNER JOIN s2 ON s1.id = s2.id;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704130925426.png" srcset="/img/loading.gif" lazyload alt="image-20220704130925426"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 INNER JOIN s2 ON s2.key1 = UPPER(s1.key1);<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704130957359.png" srcset="/img/loading.gif" lazyload alt="image-20220704130957359"></p>
+<h4 id="9-rows⭐"><a href="#9-rows⭐" class="headerlink" title="9. rows⭐"></a>9. rows⭐</h4><p>预估的需要读取的记录条数，<code>值越小越好</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 &gt; &#x27;z&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704131050496.png" srcset="/img/loading.gif" lazyload alt="image-20220704131050496"></p>
+<h4 id="10-filtered"><a href="#10-filtered" class="headerlink" title="10. filtered"></a>10. filtered</h4><p>某个表经过搜索条件过滤后剩余记录条数的百分比</p>
+<p>如果使用的是索引执行的单表扫描，那么计算时需要估计出满足除使用到对应索引的搜索条件外的其他搜索条件的记录有多少条。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 &gt; &#x27;z&#x27; AND common_field = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704131323242.png" srcset="/img/loading.gif" lazyload alt="image-20220704131323242"></p>
+<p>对于单表查询来说，这个filtered的值没有什么意义，我们<code>更关注在连接查询中驱动表对应的执行计划记录的filtered值</code>，它决定了被驱动表要执行的次数 (即: rows * filtered)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 INNER JOIN s2 ON s1.key1 = s2.key1 WHERE s1.common_field = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704131644615.png" srcset="/img/loading.gif" lazyload alt="image-20220704131644615"></p>
+<p>从执行计划中可以看出来，查询优化器打算把<code>s1</code>作为驱动表，<code>s2</code>当做被驱动表。我们可以看到驱动表<code>s1</code>表的执行计划的<code>rows</code>列为<code>9688</code>，filtered列为<code>10.00</code>，这意味着驱动表<code>s1</code>的扇出值就是<code>9688 x 10.00% = 968.8</code>，这说明还要对被驱动表执行大约<code>968</code>次查询。</p>
+<h4 id="11-Extra⭐"><a href="#11-Extra⭐" class="headerlink" title="11. Extra⭐"></a>11. Extra⭐</h4><p>顾名思义，<code>Extra</code>列是用来说明一些额外信息的，包含不适合在其他列中显示但十分重要的额外信息。我们可以通过这些额外信息来更准确的理解 <code>MySQL</code> 到底将如何<strong>执行给定的查询语句</strong>。MySQL提供的额外信息有好几十个，我们就不一个一个介绍了，所以我们只挑选比较重要的额外信息介绍给大家。</p>
+<ul>
+<li><p><code>No tables used</code></p>
+<p>当查询语句<strong>没有 <code>FROM</code> 子句</strong>时将会提示该额外信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT 1;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704132345383.png" srcset="/img/loading.gif" lazyload alt="image-20220704132345383"></p>
+</li>
+<li><p><code>Impossible WHERE</code></p>
+<p>当查询语句的 **<code>WHERE</code> 子句永远为 <code>FALSE</code> **时将会提示该额外信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE 1 != 1;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704132458978.png" srcset="/img/loading.gif" lazyload alt="image-20220704132458978"></p>
+</li>
+<li><p><code>Using where</code></p>
+<p>当我们使用全表扫描来执行对某个表的查询，并且该语句的 <code>WHERE</code> 子句中有针对该表的搜索条件时会提示该额外信息</p>
+<p><del>不用读取表中所有信息，<strong>仅通过索引就可以获取所需数据</strong>，这发生在对表的全部的请求列都是同一个索引的部分的时候，表示 <code>MySQL</code> 服务器将在存储引擎检索行后再进行过滤。表明使用了 <code>WHERE</code> 过滤。<br>当我们使用全表扫描来执行对某个表的查询，并且该语句的 <code>WHERE</code> 子句中有针对该表的搜索条件时，在 <code>Extra</code> 列中会提示上述额外信息。比如下边这个查询:</del></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE common_field = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704132655342.png" srcset="/img/loading.gif" lazyload alt="image-20220704132655342"></p>
+<p>当使用索引访问来执行对某个表的查询，并且该语句的 <code>WHERE</code> 子句中有除了该索引包含的列之外的其他搜索条件时，在 <code>Extra</code> 列中也会提示上述额外信息。比如下边这个查询虽然使用 <code>idx_key1</code> 索引执行查询，但是搜索条件中还包含 <code>common_field = &#39;a&#39;</code> 的搜索条件(<code>common_field</code> 没有索引)，所以依然会提示该额外信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 = &#x27;a&#x27; AND common_field = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704133130515.png" srcset="/img/loading.gif" lazyload alt="image-20220704133130515"></p>
+</li>
+<li><p><code>No matching min/max row</code></p>
+<p>当查询列表处有<code>MIN</code>或者<code>MAX</code>聚合函数，但是并没有符合<code>WHERE</code>子句中的搜索条件的记录时</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT MIN(key1) FROM s1 WHERE key1 = &#x27;abcdefg&#x27;;<br><br># 即如下语句结果不存在<br>SELECT * FROM s1 WHERE key1 = &#x27;abcdefg&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704134324354.png" srcset="/img/loading.gif" lazyload alt="image-20220704134324354"></p>
+<p>换一个符合<code>WHERE</code>子句中的搜索条件的记录时</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT MIN(key1) FROM s1 WHERE key1 = &#x27;DbxiyU&#x27;;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">Select tables optimized away</td>
+</tr>
+</tbody></table>
+<p><code>table</code> 为 <code>null</code> 的原因：该表中只有这一条记录</p>
+</li>
+<li><p><code>Using index</code></p>
+<p>当我们的查询列表以及搜索条件中只包含属于某个索引的列，也就是在可以<strong>使用覆盖索引</strong>的情况下，在 <code>Extra</code> 列将会提示该额外信息。比方说下边这个查询中只需要用到 <code>idx_key1</code> 而<strong>不需要回表操作</strong>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT key1 FROM s1 WHERE key1 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704134931220.png" srcset="/img/loading.gif" lazyload alt="image-20220704134931220"></p>
+</li>
+<li><p><code>Using index condition</code></p>
+<p>当查询语句的执行过程中将要使用<strong>索引条件下推</strong>这个特性时，如下 <code>SQL</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; SELECT * FROM s1 WHERE key1 &gt; &#x27;z&#x27; AND key1 LIKE &#x27;%a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p>在上述 <code>SQL</code> 中第一个条件使用到了索引，第二个条件没有使用到索引，执行步骤如下</p>
+<p>不能使用到索引的原因见：<a href=",10%EF%BF%BD%20%22%15%18%16%0E%EF%BF%BD%EF%BF%BD%18%16.md#2.9%20like%EF%BF%BD%1AM&%25%004%22%151H">like以通配符%开头索引失效</a>。</p>
+<p><code>MySQL 5.6 前</code>：</p>
+<ul>
+<li>先根据 <code>key1 &gt; &#39;z&#39;</code> 这个条件，从二级索引 <code>idx_key1</code> 中获取到对应的二级索引记录。</li>
+<li>根据上一步骤得到的二级索引记录中的主键值进行回表，找到完整的用户记录再检测该记录是否符合 <code>key1 LIKE &#39;%a&#39; </code>这个条件，将符合条件的记录加入到最后的结果集。</li>
+</ul>
+<p><code>MySQL 5.6 及之后</code>：</p>
+<ul>
+<li><p>先根据 <code>key1 &gt; &#39;z&#39;</code> 这个条件，定位到二级索引 <code>idx_key1</code> 中对应的二级索引记录。</p>
+</li>
+<li><p>对于指定的二级索引记录，先不着急回表，而是先检测一下该记录是否满足 <code>key1 LIKE &#39;%a&#39; </code>这个条件，如果这个条件不满足，则该二级索引记录压根儿就没必要回表。</p>
+</li>
+<li><p>对于满足 <code>key1 LIKE &#39;%a&#39;</code> 这个条件的二级索引记录执行回表操作。</p>
+</li>
+</ul>
+<p>回表操作其实是一个 <strong>随机IO</strong>，比较耗时，所以上述修改虽然只改进了一点点，但是可以省去好多回表操作的成本。<code>MySQL</code> 把他们的这个改进称之为<strong>索引条件下推</strong> ( <code>Index Condition Pushdown</code> )。</p>
+</li>
+<li><p><code>Using join buffer (Block Nested Loop)</code></p>
+<p>在连接查询执行过程中，当被驱动表不能有效的利用索引加快访问速度，<code>MySQL</code> 一般会为其分配一块名叫<code>join buffer</code>的内存块来加快查询速度，也就是我们所讲的 <strong>基于块的嵌套循环算法</strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 INNER JOIN s2 ON s1.common_field = s2.common_field;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704140815955.png" srcset="/img/loading.gif" lazyload alt="image-20220704140815955"></p>
+</li>
+<li><p><code>Not exists</code></p>
+<p>当我们使用左(外)连接时，如果<code>WHERE</code>子句中包含要求被驱动表的某个列等于<code>NULL</code>值的搜索条件，而且那个列是不允许存储 <code>NULL</code> 值的，那么在该表的执行计划的 <code>Extra</code> 列就会提示这个信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 LEFT JOIN s2 ON s1.key1 = s2.key1 WHERE s2.id IS NULL;<br></code></pre></td></tr></table></figure>
+
+<p>执行计划结果中的 <code>s1</code> 为驱动表，<code>s2</code> 为被驱动表</p>
+<p><img src="/Resources/image-20220704142059555.png" srcset="/img/loading.gif" lazyload alt="image-20220704142059555"></p>
+</li>
+<li><p><code>Using intersect(...)</code> 、 <code>Using union(...)</code> 和 <code>Using sort_union(...)</code></p>
+<p>如果出现 <code>Using intersect(...)</code>提示，说明准备使用<code>Intersect</code>索引合并的方式执行查询，括号中的<code>...</code>表示需要进行索引合并的索引名称；</p>
+<p>如果出现 <code>Using union(...)</code>提示，说明准备使用<code>Union</code>索引合并的方式执行查询;</p>
+<p>如果出现 <code>Using sort_union(...)</code>提示，说明准备使用<code>Sort-Union</code>索引合并的方式执行查询。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 WHERE key1 = &#x27;a&#x27; OR key3 = &#x27;a&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704142552890.png" srcset="/img/loading.gif" lazyload alt="image-20220704142552890"></p>
+</li>
+<li><p><code>Zero limit</code></p>
+<p>当我们的 <code>LIMIT</code> 子句的参数为<code>0</code>时，表示压根儿不打算从表中读取任何记录，将会提示该额外信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 LIMIT 0;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704142754394.png" srcset="/img/loading.gif" lazyload alt="image-20220704142754394"></p>
+</li>
+<li><p><code>Using filesort</code></p>
+<p>有一些情况下对结果集中的记录进行排序是可以使用到索引的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 ORDER BY key1 LIMIT 10;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704142901857.png" srcset="/img/loading.gif" lazyload alt="image-20220704142901857"></p>
+<p>这个查询语句可以利用 <code>idx_key1</code> 索引直接取出 <code>key1</code> 列的10条记录，然后再进行回表操作就好了。但是很多情况下排序操作无法使用到索引，只能在内存中（记录较少的时候）或者磁盘中（记录较多的时候）进行排序，<code>MySQL</code> 把这种在内存中或者磁盘上进行排序的方式统称为文件排序( <code>filesort</code> )。如果某个查询需要使用文件排序的方式执行查询，就会在执行计划的 <code>Extra</code> 列中显示 <code>Using filesort</code> 提示，比如这样:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT * FROM s1 ORDER BY common_field LIMIT 10;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704143518857.png" srcset="/img/loading.gif" lazyload alt="image-20220704143518857"></p>
+<p>需要注意的是，如果查询中需要使用<code>filesort</code>的方式进行排序的记录非常多，那么这个过程是很耗费性能的，我们最好想办法将使用文件排序的执行方式改为索引进行排序。</p>
+</li>
+<li><p><code>Using temporary</code></p>
+<p>在许多查询的执行过程中，<code>MySQL</code> 可能会借助临时表来完成一些功能，比如<strong>去重</strong>、<strong>排序</strong>之类的，比如我们在执行许多包含 <code>DISTINCT</code>、<code>GROUP BY</code>、<code>UNION</code> 等子句的查询过程中，如果不能有效利用索引来完成查询，<code>MySQL</code> 很有可能寻求通过建立内部的临时表来执行查询。如果查询中使用到了内部的临时表，在执行计划的 <code>Extra</code> 列将会显示 <code>Using temporary</code> 提示，比方说这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT DISTINCT common_field FROM s1;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704150030005.png" srcset="/img/loading.gif" lazyload alt="image-20220704150030005"></p>
+<p>再比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT common_field, COUNT(*) AS amount FROM s1 GROUP BY common_field;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704150156416.png" srcset="/img/loading.gif" lazyload alt="image-20220704150156416"></p>
+<p>执行计划中出现 <code>Using temporary</code> 并不是一个好的征兆，因为建立与维护临时表要付出很大的成本的，所以我们最好能使用索引来替代掉使用临时表，比方说下边这个包含<code>GROUP BY</code>子句的查询就不需要使用临时表：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT key1, COUNT(*) AS amount FROM s1 GROUP BY key1;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704150308189.png" srcset="/img/loading.gif" lazyload alt="image-20220704150308189"></p>
+<p>从 <code>Extra</code> 的 <code>Using index</code> 的提示里我们可以看出，上述查询只需要扫描 <code>idx_key1</code> 索引就可以搞定了，不再需要临时表了。</p>
+</li>
+<li><p>其他</p>
+<p>其它特殊情况这里省略。</p>
+</li>
+</ul>
+<h4 id="12-小结"><a href="#12-小结" class="headerlink" title="12. 小结"></a>12. 小结</h4><ul>
+<li><code>EXPLAIN</code> 不考虑各种 <code>Cache </code> ，即不管这条记录从磁盘还是从缓存中取</li>
+<li><code>EXPLAIN</code> 不能显示 <code>MySQL</code> 在执行查询时所作的优化工作 </li>
+<li><code>EXPLAIN</code> 不会告诉你关于触发器、存储过程的信息或用户自定义函数对查询的影响情况 </li>
+<li>部分统计信息是估算的，并非精确值</li>
+</ul>
+<h2 id="7-EXPLAIN的进一步使用"><a href="#7-EXPLAIN的进一步使用" class="headerlink" title="7. EXPLAIN的进一步使用"></a>7. EXPLAIN的进一步使用</h2><h3 id="7-1-EXPLAIN四种输出格式"><a href="#7-1-EXPLAIN四种输出格式" class="headerlink" title="7.1 EXPLAIN四种输出格式"></a>7.1 EXPLAIN四种输出格式</h3><p>这里谈谈EXPLAIN的输出格式。EXPLAIN可以输出四种格式： <strong>传统格式</strong> ，<strong>JSON格式</strong> ， <strong>TREE格式</strong> 以及 <strong>可视化输出</strong> 。用户可以根据需要选择适用于自己的格式。</p>
+<h4 id="1-传统格式"><a href="#1-传统格式" class="headerlink" title="1. 传统格式"></a>1. 传统格式</h4><p>传统格式简单明了，输出是一个表格形式，概要说明查询计划。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT s1.key1, s2.key1 FROM s1 LEFT JOIN s2 ON s1.key1 = s2.key1 WHERE s2.common_field IS NOT NULL;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704161702384.png" srcset="/img/loading.gif" lazyload alt="image-20220704161702384"></p>
+<h4 id="2-JSON格式"><a href="#2-JSON格式" class="headerlink" title="2. JSON格式"></a>2. JSON格式</h4><p>第1种格式中介绍的 <code>EXPLAIN</code> 语句输出中缺少了一个衡量执行好坏的重要属性 —— <strong>成本</strong>。而 <code>JSON</code> 格式是四种格式里面输出信息<strong>最详尽</strong>的格式，里面包含了执行的成本信息。语法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN FORMAT=JSON SELECT ....<br></code></pre></td></tr></table></figure>
+
+<p><code>EXPLAIN</code> 的 <code>Column</code> 与 <code>JSON</code> 的对应关系：(来源于 <code>MySQL 5.7</code> 文档)</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>JSON Name</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>id</strong></td>
+<td>select_id</td>
+<td>The SELECT identifier</td>
+</tr>
+<tr>
+<td>select_type</td>
+<td>None</td>
+<td>The SELECT type</td>
+</tr>
+<tr>
+<td>table</td>
+<td>table_name</td>
+<td>The table for the output row</td>
+</tr>
+<tr>
+<td>partitions</td>
+<td>partitions</td>
+<td>The matching partitions</td>
+</tr>
+<tr>
+<td><strong>type</strong></td>
+<td>access_type</td>
+<td>The join type</td>
+</tr>
+<tr>
+<td>possible_keys</td>
+<td>possible_keys</td>
+<td>The possible indexes to choose</td>
+</tr>
+<tr>
+<td>key</td>
+<td>key</td>
+<td>The index actually chosen</td>
+</tr>
+<tr>
+<td><strong>key_len</strong></td>
+<td>key_length</td>
+<td>The length of the chosen key</td>
+</tr>
+<tr>
+<td><strong>ref</strong></td>
+<td>ref</td>
+<td>The columns compared to the index</td>
+</tr>
+<tr>
+<td>rows</td>
+<td>rows</td>
+<td>Estimate of rows to be examined</td>
+</tr>
+<tr>
+<td>filtered</td>
+<td>filtered</td>
+<td>Percentage of rows filtered by table condition</td>
+</tr>
+<tr>
+<td><strong>Extra</strong></td>
+<td>None</td>
+<td>Additional information</td>
+</tr>
+</tbody></table>
+<p>这样我们就可以得到一个 <code>Json</code> 格式的执行计划，里面包含该计划花费的成本。比如这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN FORMAT=JSON SELECT * FROM s1 INNER JOIN s2 ON s1.key1 = s2.key2 WHERE s1.common_field = &#x27;a&#x27;\G;<br>*************************** 1. row ***************************<br>EXPLAIN: &#123;<br>  &quot;query_block&quot;: &#123;<br>    &quot;select_id&quot;: 1, <br>    &quot;cost_info&quot;: &#123;<br>      &quot;query_cost&quot;: &quot;3263.40&quot; #整个查询的执行成本预计为3197.16<br>    &#125;,<br>    &quot;nested_loop&quot;: [<br>      &#123;<br>        #以下是参与嵌套循环连接算法的各个表的信息<br>        &quot;table&quot;: &#123;<br>          &quot;table_name&quot;: &quot;s1&quot;,   # 驱动表:s1表<br>          &quot;access_type&quot;: &quot;ALL&quot;, # 访问方法为ALL<br>          &quot;possible_keys&quot;: [		    # 可能使用的索引<br>            &quot;idx_key1&quot;<br>          ],<br>          &quot;rows_examined_per_scan&quot;: 9895,  # 查询一次s1表大致需要扫描9688条记录<br>          &quot;rows_produced_per_join&quot;: 989,   # rows_examined_per_scan * (filtered / 100)<br>          &quot;filtered&quot;: &quot;10.00&quot;, # 百分之10<br>          &quot;cost_info&quot;: &#123;<br>            &quot;read_cost&quot;: &quot;1878.10&quot;,<br>            &quot;eval_cost&quot;: &quot;197.90&quot;,<br>            &quot;prefix_cost&quot;: &quot;2076.00&quot;,  # 单次查询s1表总共的成本 = read_cost + eval_cost<br>            &quot;data_read_per_join&quot;: &quot;1M&quot; # 读取的数据量<br>          &#125;,<br>          &quot;used_columns&quot;: [            # 执行查询中涉及到的列<br>            &quot;id&quot;,<br>            &quot;key1&quot;,<br>            &quot;key2&quot;,<br>            &quot;key3&quot;,<br>            &quot;key_part1&quot;,<br>            &quot;key_part2&quot;,<br>            &quot;key_part3&quot;,<br>            &quot;common_field&quot;<br>          ],<br>          # 对s1表访问时针对单表查询的条件<br>          &quot;attached_condition&quot;: &quot;((`atguigudb1`.`s1`.`common_field` = &#x27;a&#x27;) and (`atguigudb1`.`s1`.`key1` is not null))&quot;<br>        &#125;<br>      &#125;,<br>      &#123;<br>        &quot;table&quot;: &#123;<br>          &quot;table_name&quot;: &quot;s2&quot;,    # 被驱动表:s2表<br>          &quot;access_type&quot;: &quot;ref&quot;,  # 访问方法为ref<br>          &quot;possible_keys&quot;: [     # 可能使用到的索引<br>            &quot;idx_key2&quot;<br>          ],<br>          &quot;key&quot;: &quot;idx_key2&quot;,<br>          &quot;used_key_parts&quot;: [    #  使用到的索引<br>            &quot;key2&quot;<br>          ],<br>          &quot;key_length&quot;: &quot;5&quot;,<br>          &quot;ref&quot;: [<br>            &quot;atguigudb1.s1.key1&quot;<br>          ],<br>          &quot;rows_examined_per_scan&quot;: 1,<br>          &quot;rows_produced_per_join&quot;: 989,<br>          &quot;filtered&quot;: &quot;100.00&quot;,<br>          &quot;index_condition&quot;: &quot;(`atguigudb1`.`s1`.`key1` = `atguigudb1`.`s2`.`key2`)&quot;,<br>          &quot;cost_info&quot;: &#123;<br>            &quot;read_cost&quot;: &quot;989.50&quot;,<br>            &quot;eval_cost&quot;: &quot;197.90&quot;,<br>            &quot;prefix_cost&quot;: &quot;3263.40&quot;, # 前面的prefix_cost + 这次的read_cost + 这次的eval_cost<br>            &quot;data_read_per_join&quot;: &quot;1M&quot;<br>          &#125;,<br>          &quot;used_columns&quot;: [<br>            &quot;id&quot;,<br>            &quot;key1&quot;,<br>            &quot;key2&quot;,<br>            &quot;key3&quot;,<br>            &quot;key_part1&quot;,<br>            &quot;key_part2&quot;,<br>            &quot;key_part3&quot;,<br>            &quot;common_field&quot;<br>          ]<br>        &#125;<br>      &#125;<br>    ]<br>  &#125;<br>&#125;<br>1 row in set, 2 warnings (0.00 sec)<br></code></pre></td></tr></table></figure>
+
+<p>我们使用 <code>#</code> 后边跟随注释的形式为大家解释了 <code>EXPLAIN FORMAT=JSON</code> 语句的部分输出内容，但是大家可能有疑问 “<code>cost_info</code>“ 里边的成本看着怪怪的，它们是怎么计算出来的？先看 <code>s1</code> 表的 “<code>cost_info</code>“ 部 分：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-attr">&quot;rows_examined_per_scan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9895</span><span class="hljs-punctuation">,</span><br><span class="hljs-attr">&quot;rows_produced_per_join&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">989</span><span class="hljs-punctuation">,</span><br><span class="hljs-attr">&quot;filtered&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;10.00&quot;</span><span class="hljs-punctuation">,</span><br><br><span class="hljs-attr">&quot;cost_info&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;read_cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1878.10&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;eval_cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;197.90&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;prefix_cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2076.00&quot;</span><span class="hljs-punctuation">,</span>  # 单次查询s1表总共的成本<br>  <span class="hljs-attr">&quot;data_read_per_join&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1M&quot;</span> # 读取的数据量<br><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><code>read_cost</code> 是由下边这两部分组成的：<ul>
+<li><code>IO</code> 成本</li>
+<li>检测 <code>rows × (1 - filter)</code> 条记录的 CPU 成本<ul>
+<li><code>rows</code> 即 &#96;rows_examined_per_scan&#96;&#96;</li>
+<li>&#96;&#96;filtered<code> 即</code>filtered %&#96; 。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p><code>eval_cost</code> 是这样计算的：</p>
+<ul>
+<li>检测 <code>rows × filter</code> 条记录的成本。</li>
+</ul>
+</li>
+<li><p><code>prefix_cost</code> 就是单独查询 <code>s1</code> 表的成本，也就是：</p>
+<ul>
+<li><code>read_cost</code> + <code>eval_cost</code> 即前面两个之和</li>
+</ul>
+</li>
+<li><p><code>data_read_per_join</code> 表示在此次查询中需要读取的数据量。</p>
+</li>
+</ul>
+<p>对于 <code>s2</code> 表的 “<code>cost_info</code>“ 部分是这样的：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-attr">&quot;cost_info&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;read_cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;989.50&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;eval_cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;197.90&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;prefix_cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;3263.40&quot;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;data_read_per_join&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1M&quot;</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>由于 <code>s2</code> 表是被驱动表，所以可能被读取多次，这里的<code>read_cost</code> 和 <code>eval_cost</code> 是访问多次 <code>s2</code> 表后累加起来的值，大家主要关注里边儿的 <code>prefix_cost</code> 的值代表的是整个连接查询预计的成本，也就是单次查询 <code>s1</code> 表和多次查询 <code>s2</code> 表后的成本的和，也就是：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">989</span>.<span class="hljs-number">50</span> + <span class="hljs-number">197</span>.<span class="hljs-number">90</span> + <span class="hljs-number">2076</span>.<span class="hljs-number">00</span> = <span class="hljs-number">3263</span>.<span class="hljs-number">40</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="3-TREE格式"><a href="#3-TREE格式" class="headerlink" title="3. TREE格式"></a>3. TREE格式</h4><p>TREE格式是 <code>MySQL 8.0.16</code> 版本之后引入的新格式，主要根据查询的各个部分之间的关系和各部分的执行顺序来描述如何查询。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN FORMAT=TREE SELECT * FROM s1 INNER JOIN s2 ON s1.key1 = s2.key2 WHERE<br>s1.common_field = &#x27;a&#x27;\G<br>*************************** 1. row ***************************<br>EXPLAIN: -&gt; Nested loop inner join (cost=1360.08 rows=990)<br>-&gt; Filter: ((s1.common_field = &#x27;a&#x27;) and (s1.key1 is not null)) (cost=1013.75<br>rows=990)<br>-&gt; Table scan on s1 (cost=1013.75 rows=9895)<br>-&gt; Single-row index lookup on s2 using idx_key2 (key2=s1.key1), with index<br>condition: (cast(s1.key1 as double) = cast(s2.key2 as double)) (cost=0.25 rows=1)<br>1 row in set, 1 warning (0.00 sec)<br></code></pre></td></tr></table></figure>
+
+<h4 id="4-可视化输出"><a href="#4-可视化输出" class="headerlink" title="4. 可视化输出"></a>4. 可视化输出</h4><blockquote>
+<p><code>DataGrip</code>：<a target="_blank" rel="noopener" href="https://www.jetbrains.com.cn/datagrip/">https://www.jetbrains.com.cn/datagrip/</a></p>
+</blockquote>
+<p><img src="/Resources/image-20230630165139973.png" srcset="/img/loading.gif" lazyload alt="image-20230630165139973"></p>
+<p>结果图如下：</p>
+<p><img src="/Resources/image-20230630165149233.png" srcset="/img/loading.gif" lazyload alt="image-20230630165149233"></p>
+<p>上图按从左到右的连接顺序显示表。<code>Full Scan</code> 表示全表扫描，而 <code>Unique index Scan</code> 表示使用索引查找。对于每个表， 显示使用的索引。还要注意的是，每个表格的框下方是每个表访问所发现的行数的估计值。</p>
+<blockquote>
+<p><code>MySQL Workbench</code>：<a target="_blank" rel="noopener" href="https://dev.mysql.com/downloads/workbench/">https://dev.mysql.com/downloads/workbench/</a></p>
+</blockquote>
+<p>可视化输出，可以通过 <code>MySQL Workbench</code> 可视化查看 <code>MySQL</code> 的执行计划。通过点击 <code>Workbench</code> 的放大镜图标，即可生成可视化的查询计划。 </p>
+<p><img src="/Resources/image-20230703110525488.png" srcset="/img/loading.gif" lazyload alt="image-20230703110525488"></p>
+<p>上图按从左到右的连接顺序显示表。<code>Full Scan</code> 表示全表扫描，而 <code>Unique index Scan</code> 表示使用索引查找。对于每个表， 显示使用的索引。还要注意的是，每个表格的框上方是每个表访问所发现的行数的估计值以及访问该表的成本。</p>
+<h3 id="7-2-SHOW-WARNINGS的使用"><a href="#7-2-SHOW-WARNINGS的使用" class="headerlink" title="7.2 SHOW WARNINGS的使用"></a>7.2 SHOW WARNINGS的使用</h3><p>在我们使用<code>EXPLAIN</code>语句查看了某个查询的执行计划后，紧接着还可以使用<code>SHOW WARNINGS</code>语句查看与这个查询的执行计划有关的一些扩展信息，比如这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; EXPLAIN SELECT s1.key1, s2.key1 FROM s1 LEFT JOIN s2 ON s1.key1 = s2.key1 WHERE s2.common_field IS NOT NULL;<br><br># 尽管S1在前面，S2在后面，但结果表示S2是驱动表，S1是被驱动表，这是优化器优化后的结果<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220704174543663.png" srcset="/img/loading.gif" lazyload alt="image-20220704174543663"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; SHOW WARNINGS\G<br>*************************** 1. row ***************************<br>  Level: Note<br>   Code: 1003<br>Message: /* select#1 */ select `atguigudb1`.`s1`.`key1` AS `key1`,`atguigudb1`.`s2`.`key1` AS `key1` from `atguigudb1`.`s1` join `atguigudb1`.`s2` where ((`atguigudb1`.`s1`.`key1` = `atguigudb1`.`s2`.`key1`) and (`atguigudb1`.`s2`.`common_field` is not null))<br>1 row in set (0.00 sec)<br></code></pre></td></tr></table></figure>
+
+<p>部分参数说明：</p>
+<ul>
+<li><code>Level</code><ul>
+<li><code>error</code></li>
+<li><code>waring</code></li>
+<li><code>note</code></li>
+</ul>
+</li>
+<li><code>Code</code><ul>
+<li><code>1003</code></li>
+<li><code>...</code></li>
+</ul>
+</li>
+<li><code>Message</code><ul>
+<li>当 <code>Code</code> 值为 <code>1003</code> 时，<code>Message</code>字段展示的信息为优化后的语句，如本来是 <code>LEFT JOIN</code> 转换为了<code>JOIN</code>。</li>
+</ul>
+</li>
+</ul>
+<h2 id="8-分析优化器执行计划：trace"><a href="#8-分析优化器执行计划：trace" class="headerlink" title="8. 分析优化器执行计划：trace"></a>8. 分析优化器执行计划：trace</h2><p><code>OPTIMIZER_TRACE</code> 是 <code>MySQL 5.6</code> 引入的一项跟踪功能，它可以跟踪优化器做出的各种决策（比如访问表的方法、各种开销计算、各种转换等），并将跟踪结果记录到 <code>INFORMATION_SCHEMA.OPTIMIZER_TRACE</code> 表中。</p>
+<p>此功能默认为关闭状态，开启 <code>trace</code> 命令如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 开启 trace，设置格式为 JSON<br>mysql&gt; SET optimizer_trace=&quot;enabled=on&quot;,end_markers_in_json=on;<br># 设置 trace 最大能够使用的内存大小，避免解析过程中因为默认内存过小而不能够完整展示。<br>mysql&gt; SET optimizer_trace_max_mem_size=1000000;<br></code></pre></td></tr></table></figure>
+
+<p>开启后，可分析如下语句： </p>
+<ul>
+<li>SELECT </li>
+<li>INSERT </li>
+<li>REPLACE</li>
+<li>UPDATE </li>
+<li>DELETE </li>
+<li>EXPLAIN </li>
+<li>SET </li>
+<li>DECLARE </li>
+<li>CASE </li>
+<li>IF </li>
+<li>RETURN </li>
+<li>CALL</li>
+</ul>
+<p>测试：执行如下SQL语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">select * from student where id &lt; 10;<br></code></pre></td></tr></table></figure>
+
+<p>最后， 查询 <code>information_schema.optimizer_trace</code> 就可以知道 <code>MySQL</code> 是如何执行 <code>SQL</code> 的 ：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">select * from information_schema.optimizer_trace\G;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br></pre></td><td class="code"><pre><code class="hljs json">*************************** <span class="hljs-number">1.</span> row ***************************<br><span class="hljs-comment">//第1部分：查询语句</span><br>QUERY<span class="hljs-punctuation">:</span> select * from s1 where id &lt; <span class="hljs-number">10032</span><br><span class="hljs-comment">//第2部分：QUERY字段对应语句的跟踪信息</span><br>TRACE<span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br><span class="hljs-attr">&quot;steps&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br><span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;join_preparation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//预备工作</span><br>        <span class="hljs-attr">&quot;select#&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;steps&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>            <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;expanded_query&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/* select#1 */ select `student`.`id` AS</span><br><span class="hljs-string">            `id`,`student`.`stuno` AS `stuno`,`student`.`name` AS `name`,`student`.`age` AS</span><br><span class="hljs-string">            `age`,`student`.`classId` AS `classId` from `student` where (`student`.`id` &lt; 10)&quot;</span><br>            <span class="hljs-punctuation">&#125;</span><br>        <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* steps */</span><br>    <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* join_preparation */</span><br><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br><span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;join_optimization&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//进行优化</span><br>    <span class="hljs-attr">&quot;select#&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;steps&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>        <span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;condition_processing&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//条件处理</span><br>        <span class="hljs-attr">&quot;condition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;WHERE&quot;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;original_condition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(`student`.`id` &lt; 10)&quot;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;steps&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>        <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;transformation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;equality_propagation&quot;</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;resulting_condition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(`student`.`id` &lt; 10)&quot;</span><br>        <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;transformation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;constant_propagation&quot;</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;resulting_condition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(`student`.`id` &lt; 10)&quot;</span><br>        <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;transformation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;trivial_condition_removal&quot;</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;resulting_condition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(`student`.`id` &lt; 10)&quot;</span><br>        <span class="hljs-punctuation">&#125;</span><br>        <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* steps */</span><br>    <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* condition_processing */</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;substitute_generated_columns&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//替换生成的列</span><br>        <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* substitute_generated_columns */</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;table_dependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">//表的依赖关系</span><br>        <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;table&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;`student`&quot;</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;row_may_be_null&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;map_bit&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;depends_on_map_bits&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>            <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* depends_on_map_bits */</span><br>        <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* table_dependencies */</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;ref_optimizer_key_uses&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">//使用键</span><br>        <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* ref_optimizer_key_uses */</span><br>        <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;rows_estimation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">//行判断</span><br>        <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;table&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;`student`&quot;</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;range_analysis&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;table_scan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>                    <span class="hljs-attr">&quot;rows&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3973767</span><span class="hljs-punctuation">,</span><br>                    <span class="hljs-attr">&quot;cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">408558</span><br>            <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* table_scan */</span><span class="hljs-punctuation">,</span> <span class="hljs-comment">//扫描表</span><br>            <span class="hljs-attr">&quot;potential_range_indexes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">//潜在的范围索引</span><br>                <span class="hljs-punctuation">&#123;</span><br>                    <span class="hljs-attr">&quot;index&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;PRIMARY&quot;</span><span class="hljs-punctuation">,</span><br>                    <span class="hljs-attr">&quot;usable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>                    <span class="hljs-attr">&quot;key_parts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>                    <span class="hljs-string">&quot;id&quot;</span><br>                    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* key_parts */</span><br>                <span class="hljs-punctuation">&#125;</span><br>            <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* potential_range_indexes */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;setup_range_conditions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">//设置范围条件</span><br>        <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* setup_range_conditions */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;group_index_range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;cause&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;not_group_by_or_distinct&quot;</span><br>        <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* group_index_range */</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;skip_scan_range&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;potential_skip_scan_indexes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>                    <span class="hljs-punctuation">&#123;</span><br>                        <span class="hljs-attr">&quot;index&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;PRIMARY&quot;</span><span class="hljs-punctuation">,</span><br>                        <span class="hljs-attr">&quot;usable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span><br>                        <span class="hljs-attr">&quot;cause&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;query_references_nonkey_column&quot;</span><br>                    <span class="hljs-punctuation">&#125;</span><br>                <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* potential_skip_scan_indexes */</span><br>            <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* skip_scan_range */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;analyzing_range_alternatives&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//分析范围选项</span><br>            <span class="hljs-attr">&quot;range_scan_alternatives&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>                <span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;index&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;PRIMARY&quot;</span><span class="hljs-punctuation">,</span><br>                    <span class="hljs-attr">&quot;ranges&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>                        <span class="hljs-string">&quot;id &lt; 10&quot;</span><br>                    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* ranges */</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;index_dives_for_eq_ranges&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;rowid_ordered&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;using_mrr&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;index_only&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;rows&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1.91986</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><br>                <span class="hljs-punctuation">&#125;</span><br>            <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* range_scan_alternatives */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;analyzing_roworder_intersect&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;usable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;cause&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;too_few_roworder_scans&quot;</span><br>        	<span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* analyzing_roworder_intersect */</span><br>        <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* analyzing_range_alternatives */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;chosen_range_access_summary&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//选择范围访问摘要</span><br>            <span class="hljs-attr">&quot;range_access_plan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>                <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;range_scan&quot;</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;index&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;PRIMARY&quot;</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;rows&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;ranges&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>                <span class="hljs-string">&quot;id &lt; 10&quot;</span><br>                <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* ranges */</span><br>                <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* range_access_plan */</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;rows_for_plan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;cost_for_plan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1.91986</span><span class="hljs-punctuation">,</span><br>                <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><br>                <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* chosen_range_access_summary */</span><br>                <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* range_analysis */</span><br>            <span class="hljs-punctuation">&#125;</span><br>        <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* rows_estimation */</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;considered_execution_plans&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">//考虑执行计划</span><br>    <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;plan_prefix&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* plan_prefix */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;table&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;`student`&quot;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;best_access_path&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//最佳访问路径</span><br>        <span class="hljs-attr">&quot;considered_access_paths&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>        <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;rows_to_scan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;access_type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;range&quot;</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;range_details&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;used_index&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;PRIMARY&quot;</span><br>        <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* range_details */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;resulting_rows&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;cost&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2.81986</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><br>    <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* considered_access_paths */</span><br>    <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* best_access_path */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;condition_filtering_pct&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">100</span><span class="hljs-punctuation">,</span> <span class="hljs-comment">//行过滤百分比</span><br>        <span class="hljs-attr">&quot;rows_for_plan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">9</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;cost_for_plan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2.81986</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;chosen&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><br>    <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* considered_execution_plans */</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;attaching_conditions_to_tables&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//将条件附加到表上</span><br>        <span class="hljs-attr">&quot;original_condition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(`student`.`id` &lt; 10)&quot;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;attached_conditions_computation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>        <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* attached_conditions_computation */</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;attached_conditions_summary&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">//附加条件概要</span><br>    <span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;table&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;`student`&quot;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;attached&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(`student`.`id` &lt; 10)&quot;</span><br>    <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* attached_conditions_summary */</span><br>    <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* attaching_conditions_to_tables */</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;finalizing_table_conditions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>    <span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;table&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;`student`&quot;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;original_table_condition&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(`student`.`id` &lt; 10)&quot;</span><span class="hljs-punctuation">,</span><br>        <span class="hljs-attr">&quot;final_table_condition &quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;(`student`.`id` &lt; 10)&quot;</span><br>    <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* finalizing_table_conditions */</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;refine_plan&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-comment">//精简计划</span><br>    <span class="hljs-punctuation">&#123;</span><br>    	<span class="hljs-attr">&quot;table&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;`student`&quot;</span><br>    <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* refine_plan */</span><br>    <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* steps */</span><br>    <span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* join_optimization */</span><br><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>	<span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;join_execution&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-comment">//执行</span><br>            <span class="hljs-attr">&quot;select#&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span><br>            <span class="hljs-attr">&quot;steps&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><br>            <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* steps */</span><br>        	<span class="hljs-punctuation">&#125;</span> <span class="hljs-comment">/* join_execution */</span><br>        <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">]</span> <span class="hljs-comment">/* steps */</span><br><span class="hljs-punctuation">&#125;</span><br><span class="hljs-comment">//第3部分：跟踪信息过长时，被截断的跟踪信息的字节数。</span><br>MISSING_BYTES_BEYOND_MAX_MEM_SIZE<span class="hljs-punctuation">:</span> <span class="hljs-number">0</span> <span class="hljs-comment">//丢失的超出最大容量的字节</span><br><span class="hljs-comment">//第4部分：执行跟踪语句的用户是否有查看对象的权限。当不具有权限时，该列信息为1且TRACE字段为空，一般在</span><br>调用带有SQL SECURITY DEFINER的视图或者是存储过程的情况下，会出现此问题。<br>INSUFFICIENT_PRIVILEGES<span class="hljs-punctuation">:</span> <span class="hljs-number">0</span> <span class="hljs-comment">//缺失权限</span><br><span class="hljs-number">1</span> row in set (<span class="hljs-number">0.00</span> sec)<br></code></pre></td></tr></table></figure>
+
+<h2 id="9-MySQL监控分析视图-sys-schema"><a href="#9-MySQL监控分析视图-sys-schema" class="headerlink" title="9. MySQL监控分析视图-sys schema"></a>9. MySQL监控分析视图-sys schema</h2><p>关于 <code>MySQL</code> 的性能监控和问题诊断，我们一般都从 <code>performance_schema</code> 中去获取想要的数据，在 <code>MySQL5.7.7</code> 版本中新增 <code>sys schema</code>，它将 <code>performance_schema</code> 和 <code>information_schema</code> 中的数据以更容易理解的方式总结归纳为”视图”，其目的就是为了降低查询 <code>performance_schema</code> 的复杂度，让 <code>DBA</code> 能能够快速的定位问题。</p>
+<h2 id="10-小结"><a href="#10-小结" class="headerlink" title="10. 小结"></a>10. 小结</h2><p>查询是数据库中最频繁的操作，提高查询速度可以有效地提高 <code>MySQL</code> 数据库的性能。通过对查询语句的分析可以了解查询语句的执行情况，找出查询语句执行的瓶颈，从而优化查询语句。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Database/" class="category-chain-item">Database</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Database/MySQL/" class="category-chain-item">MySQL</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/MySQL/">#MySQL</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>第09章 性能分析工具的使用</div>
+      <div>http://conquers.github.io/posts/43d93e27.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>wtt</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年6月29日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

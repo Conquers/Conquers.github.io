@@ -1,0 +1,880 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="wtt">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="第05章 存储引擎为了管理方便，人们把连接管理、查询缓存、语法解析、查询优化这些并不涉及真实数据存储的功能划分为 MySQL server 的功能，把真实存取数据的功能划分为存储引擎的功能。所以在 MySQL server 完成了查询优化后，只需按照生成的执行计划调用底层存储引擎提供的 API，获取到数据后返回给客户端就好了。 MySQL 中提到了存储引擎的概念。简而言之，存储引擎就是指表的类型。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第05章 存储引擎">
+<meta property="og:url" content="http://conquers.github.io/posts/8d469f79.html">
+<meta property="og:site_name" content="Kioo&#39;s Blog">
+<meta property="og:description" content="第05章 存储引擎为了管理方便，人们把连接管理、查询缓存、语法解析、查询优化这些并不涉及真实数据存储的功能划分为 MySQL server 的功能，把真实存取数据的功能划分为存储引擎的功能。所以在 MySQL server 完成了查询优化后，只需按照生成的执行计划调用底层存储引擎提供的 API，获取到数据后返回给客户端就好了。 MySQL 中提到了存储引擎的概念。简而言之，存储引擎就是指表的类型。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://conquers.github.io/Resources/default.png">
+<meta property="article:published_time" content="2023-07-05T02:03:03.000Z">
+<meta property="article:modified_time" content="2023-07-18T02:42:52.325Z">
+<meta property="article:author" content="wtt">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://conquers.github.io/Resources/default.png">
+  
+  
+  
+  <title>第05章 存储引擎 - Kioo&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/mac.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="第05章 存储引擎"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-07-05 10:03" pubdate>
+          2023年7月5日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">第05章 存储引擎</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="第05章-存储引擎"><a href="#第05章-存储引擎" class="headerlink" title="第05章 存储引擎"></a>第05章 存储引擎</h1><p>为了管理方便，人们把<strong>连接管理</strong>、<strong>查询缓存</strong>、<strong>语法解析</strong>、<strong>查询优化</strong>这些并不涉及真实数据存储的功能划分为 <code>MySQL server</code> 的功能，把真实存取数据的功能划分为<strong>存储引擎</strong>的功能。所以在 <code>MySQL server</code> 完成了查询优化后，只需按照生成的执行计划调用底层存储引擎提供的 <code>API</code>，获取到数据后返回给客户端就好了。</p>
+<p><code>MySQL</code> 中提到了存储引擎的概念。简而言之，<strong>存储引擎就是指表的类型</strong>。其实存储引擎以前叫做<strong>表处理器</strong>，后来改名为<strong>存储引擎</strong>，它的功能就是接收上层传下来的指令，然后对表中的数据进行提取或写入操作。</p>
+<h2 id="1-查看存储引擎"><a href="#1-查看存储引擎" class="headerlink" title="1. 查看存储引擎"></a>1. 查看存储引擎</h2><p>查看 <code>MySQL</code> 提供的存储引擎</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; show engines;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Engine</th>
+<th align="left">Support</th>
+<th align="left">Comment</th>
+<th align="left">Transactions</th>
+<th align="left">XA</th>
+<th align="left">Savepoints</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">InnoDB</td>
+<td align="left">DEFAULT</td>
+<td align="left">Supports transactions, row-level locking, and foreign keys</td>
+<td align="left">YES</td>
+<td align="left">YES</td>
+<td align="left">YES</td>
+</tr>
+<tr>
+<td align="left">MRG_MYISAM</td>
+<td align="left">YES</td>
+<td align="left">Collection of identical MyISAM tables</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+</tr>
+<tr>
+<td align="left">MEMORY</td>
+<td align="left">YES</td>
+<td align="left">Hash based, stored in memory, useful for temporary tables</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+</tr>
+<tr>
+<td align="left">BLACKHOLE</td>
+<td align="left">YES</td>
+<td align="left">&#x2F;dev&#x2F;null storage engine (anything you write to it disappears)</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+</tr>
+<tr>
+<td align="left">MyISAM</td>
+<td align="left">YES</td>
+<td align="left">MyISAM storage engine</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+</tr>
+<tr>
+<td align="left">CSV</td>
+<td align="left">YES</td>
+<td align="left">CSV storage engine</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+</tr>
+<tr>
+<td align="left">ARCHIVE</td>
+<td align="left">YES</td>
+<td align="left">Archive storage engine</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+</tr>
+<tr>
+<td align="left">PERFORMANCE_SCHEMA</td>
+<td align="left">YES</td>
+<td align="left">Performance Schema</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+<td align="left">NO</td>
+</tr>
+<tr>
+<td align="left">FEDERATED</td>
+<td align="left">NO</td>
+<td align="left">Federated MySQL storage engine</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+</tr>
+</tbody></table>
+<h2 id="2-设置系统默认的存储引擎"><a href="#2-设置系统默认的存储引擎" class="headerlink" title="2. 设置系统默认的存储引擎"></a>2. 设置系统默认的存储引擎</h2><blockquote>
+<p>查看默认的存储引擎</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; show variables like &#x27;%storage_engine%&#x27;; #  如下表格<br>mysql&gt; SELECT @@default_storage_engine; # InnoDB<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Variable_name</th>
+<th align="left">Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">default_storage_engine</td>
+<td align="left">InnoDB</td>
+</tr>
+<tr>
+<td align="left">default_tmp_storage_engine</td>
+<td align="left">InnoDB</td>
+</tr>
+<tr>
+<td align="left">disabled_storage_engines</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">internal_tmp_disk_storage_engine</td>
+<td align="left">InnoDB</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>修改默认的存储引擎</p>
+</blockquote>
+<p>如果在创建表的语句中没有显式指定表的存储引擎的话，那就会默认使用 <code>InnoDB</code> 作为表的存储引擎。</p>
+<p> 修改默认存储引擎的命令如下：</p>
+<p>方法1：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-attr">SET</span> <span class="hljs-string">DEFAULT_STORAGE_ENGINE=MyISAM;</span><br></code></pre></td></tr></table></figure>
+
+<p>方法2：修改 <code>my.cnf</code> 文件：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-attr">default-storage-engine</span>=<span class="hljs-string">MyISAM  </span><br></code></pre></td></tr></table></figure>
+
+<h2 id="3-设置表的存储引擎"><a href="#3-设置表的存储引擎" class="headerlink" title="3. 设置表的存储引擎"></a>3. 设置表的存储引擎</h2><p>存储引擎是负责对表中的数据进行提取和写入工作的，我们可以为不同的表设置不同的存储引擎 ，也就是说不同的表可以有不同的物理存储结构，不同的提取和写入方式。</p>
+<h3 id="3-1-创建表时指定存储引擎"><a href="#3-1-创建表时指定存储引擎" class="headerlink" title="3.1 创建表时指定存储引擎"></a>3.1 创建表时指定存储引擎</h3><p>我们之前创建表的语句都没有指定表的存储引擎，那就会使用默认的存储引擎 <code>InnoDB</code>。如果我们想显式的指定一下表的存储引擎，那可以这么写：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE 表名(  <br>建表语句;  <br>) ENGINE = 存储引擎名称;<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-2-修改表的存储引擎"><a href="#3-2-修改表的存储引擎" class="headerlink" title="3.2 修改表的存储引擎"></a>3.2 修改表的存储引擎</h3><p>如果表已经建好了，我们也可以使用下边这个语句来修改表的存储引擎</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; ALTER TABLE 表名 ENGINE = 存储引擎名称;<br></code></pre></td></tr></table></figure>
+
+<p>比如我们修改一下 <code>engine_demo_table</code> 表的存储引擎：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; ALTER TABLE engine_demo_table ENGINE = InnoDB;<br></code></pre></td></tr></table></figure>
+
+<p>这时我们再查看一下 <code>engine_demo_table</code> 的表结构：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; SHOW CREATE TABLE engine_demo_table\G  <br>*************************** 1. row ***************************  <br>Table: engine_demo_table  <br>Create Table: CREATE TABLE `engine_demo_table` (  <br>`i` int(11) DEFAULT NULL  <br>) ENGINE=InnoDB DEFAULT CHARSET=utf8  <br></code></pre></td></tr></table></figure>
+
+<h2 id="4-引擎介绍"><a href="#4-引擎介绍" class="headerlink" title="4. 引擎介绍"></a>4. 引擎介绍</h2><h3 id="4-1-InnoDB-引擎：具备外键支持功能的事务存储引擎"><a href="#4-1-InnoDB-引擎：具备外键支持功能的事务存储引擎" class="headerlink" title="4.1 InnoDB 引擎：具备外键支持功能的事务存储引擎"></a>4.1 InnoDB 引擎：具备外键支持功能的事务存储引擎</h3><ul>
+<li><p><code>MySQL</code> 从 <code>3.23.34a</code> 开始就包含 <code>InnoDB</code> 存储引擎。 <code>5.5及之后</code>，默认采用 <code>InnoDB</code> 引擎。</p>
+</li>
+<li><p><code>InnoDB</code> 是 <code>MySQL</code> 的默认事务型引擎 ，它被设计用来处理大量的短期(<code>short-lived</code>)事务。可以确保事务的完整提交(<code>Commit</code>)和回滚(<code>Rollback</code>)。</p>
+</li>
+<li><p>除了增加和查询外，还需要更新、删除操作，那么，应优先选择 <code>InnoDB</code> 存储引擎。 </p>
+</li>
+<li><p>除非有非常特别的原因需要使用其他的存储引擎，否则应该优先考虑 <code>InnoDB</code> 引擎。</p>
+</li>
+<li><p>数据文件结构：具体地可以参考：<a href="%E7%AC%AC02%E7%AB%A0%20MySQL%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95.md">第02章 MySQL的数据目录</a></p>
+<ul>
+<li><p><code>表名.frm</code>：存储表结构（<code>MySQL8.0</code>时，合并在 <code>表名.ibd</code> 中）</p>
+</li>
+<li><p><code>表名.ibd</code>：存储数据和索引</p>
+</li>
+</ul>
+</li>
+<li><p><code>InnoDB</code> 是<strong>为处理巨大数据量的最大性能设计</strong>。</p>
+<ul>
+<li>在以前的版本中，字典数据以元数据文件、非事务表等来存储。现在这些元数据文件被删除了。比如：<code>.frm</code>，<code>.par</code>，<code>.trn</code>，<code>.isl</code>，<code>.db.opt</code> 等都在 <code>MySQL8.0</code> 中不存在了。</li>
+</ul>
+</li>
+<li><p>对比 <code>MyISAM</code> 的存储引擎， <code>InnoDB</code> <strong>写的处理效率差一些</strong>，并且会占用更多的磁盘空间以保存数据和索引。</p>
+</li>
+<li><p><code>MyISAM</code> 只缓存索引，不缓存真实数据；<code>InnoDB</code> 不仅缓存索引还要缓存真实数据，因此加载的内容比 <code>MyISAM</code> 更多，<strong>对内存要求也就较高</strong>，且内存大小对性能有决定性的影响。</p>
+</li>
+<li><p>对比 <code>MyISAM</code>， <code>InnoDB</code> 中没有针对数据统计有额外的常数存储，这是因为 <code>InnoDB</code> 引擎实现了多版本并发控制（<code>MVCC</code>）的原因：对同一个表，不同事物在同一时刻，看到的数据可能是不一样的。</p>
+</li>
+</ul>
+<h3 id="4-2-MyISAM-引擎：主要的非事务处理存储引擎"><a href="#4-2-MyISAM-引擎：主要的非事务处理存储引擎" class="headerlink" title="4.2 MyISAM 引擎：主要的非事务处理存储引擎"></a>4.2 MyISAM 引擎：主要的非事务处理存储引擎</h3><ul>
+<li><p><code>MyISAM</code> 提供了大量的特性，包括全文索引、压缩、空间函数(<code>GIS</code>)等，但 <code>MyISAM</code> 不支持事务、行级锁、外键 ，有一个毫无疑问的缺陷就是<strong>崩溃后无法安全恢复</strong>。</p>
+</li>
+<li><p><code>5.5</code> 之前默认的存储引擎</p>
+</li>
+<li><p>优势是<strong>访问速度快</strong> ，对事务完整性没有要求或者以 <code>SELECT</code>、<code>INSERT</code>为主的应用</p>
+</li>
+<li><p>针对数据统计有额外的常数存储。故而 <code>count(*</code>) 的查询效率很高 </p>
+</li>
+<li><p>数据文件结构：具体地可以参考：<a href="%E7%AC%AC02%E7%AB%A0%20MySQL%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95.md">第02章 MySQL的数据目录</a></p>
+<ul>
+<li><p><code>表名.frm</code>：存储表结构</p>
+<ul>
+<li><p><code>表名.MYD</code>：存储数据 (<code>MYData</code>)</p>
+</li>
+<li><p><code>表名.MYI</code>：存储索引 (<code>MYIndex</code>)</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>应用场景：只读应用或者以读为主的业务</p>
+</li>
+</ul>
+<h3 id="4-3-Archive-引擎：用于数据存档"><a href="#4-3-Archive-引擎：用于数据存档" class="headerlink" title="4.3 Archive 引擎：用于数据存档"></a>4.3 Archive 引擎：用于数据存档</h3><ul>
+<li>下表展示了ARCHIVE 存储引擎功能</li>
+</ul>
+<p><img src="/./Resources/image-20230705111856891.png" srcset="/img/loading.gif" lazyload alt="image-20230705111856891"></p>
+<h3 id="4-4-Blackhole-引擎：丢弃写操作，读操作会返回空内容"><a href="#4-4-Blackhole-引擎：丢弃写操作，读操作会返回空内容" class="headerlink" title="4.4 Blackhole 引擎：丢弃写操作，读操作会返回空内容"></a>4.4 Blackhole 引擎：丢弃写操作，读操作会返回空内容</h3><h3 id="4-5-CSV-引擎：存储数据时，以逗号分隔各个数据项"><a href="#4-5-CSV-引擎：存储数据时，以逗号分隔各个数据项" class="headerlink" title="4.5 CSV 引擎：存储数据时，以逗号分隔各个数据项"></a>4.5 CSV 引擎：存储数据时，以逗号分隔各个数据项</h3><p>使用案例如下</p>
+<p>mysql&gt; CREATE TABLE test (i INT NOT NULL, c CHAR(10) NOT NULL) ENGINE &#x3D; CSV;<br>Query OK, 0 rows affected (0.06 sec)<br>mysql&gt; INSERT INTO test VALUES(1,’record one’),(2,’record two’);<br>Query OK, 2 rows affected (0.05 sec)<br>Records: 2 Duplicates: 0 Warnings: 0<br>mysql&gt; SELECT * FROM test;<br>+—+————+<br>| i |      c     |<br>+—+————+<br>| 1 | record one |<br>| 2 | record two |<br>+—+————+<br>2 rows in set (0.00 sec)</p>
+<p>创建CSV表还会创建相应的元文件 ，用于 存储表的状态 和 表中存在的行数 。此文件的名称与表的名称相 同，后缀为 CSM 。如图所示</p>
+<p><img src="/./Resources/image-20230705111905951.png" srcset="/img/loading.gif" lazyload alt="image-20230705111905951"></p>
+<p>如果检查 test.CSV 通过执行上述语句创建的数据库目录中的文件，其内容使用Notepad++打开如下：</p>
+<p>“1”,”record one”<br>“2”,”record two”</p>
+<p>这种格式可以被 Microsoft Excel 等电子表格应用程序读取，甚至写入。使用Microsoft Excel打开如图所示</p>
+<p><img src="/./Resources/image-20230705111910134.png" srcset="/img/loading.gif" lazyload alt="image-20230705111910134"></p>
+<h3 id="4-6-Memory-引擎：置于内存的表"><a href="#4-6-Memory-引擎：置于内存的表" class="headerlink" title="4.6 Memory 引擎：置于内存的表"></a>4.6 Memory 引擎：置于内存的表</h3><p><strong>概述：</strong></p>
+<p>Memory采用的逻辑介质是内存 ，响应速度很快 ，但是当mysqld守护进程崩溃的时候数据会丢失 。另外，要求存储的数据是数据长度不变的格式，比如，Blob和Text类型的数据不可用(长度不固定的)。</p>
+<p><strong>主要特征：</strong></p>
+<ul>
+<li><p>Memory同时 支持哈希（HASH）索引 和 B+树索引 。</p>
+</li>
+<li><p>Memory表至少比MyISAM表要快一个数量级 。</p>
+</li>
+<li><p>MEMORY 表的大小是受到限制 的。表的大小主要取决于两个参数，分别是 max_rows 和 max_heap_table_size 。其中，max_rows可以在创建表时指定；max_heap_table_size的大小默 认为16MB，可以按需要进行扩大。</p>
+</li>
+<li><p>数据文件与索引文件分开存储。</p>
+</li>
+<li><p>缺点：其数据易丢失，生命周期短。基于这个缺陷，选择MEMORY存储引擎时需要特别小心。</p>
+</li>
+</ul>
+<p><strong>使用Memory存储引擎的场景：</strong></p>
+<ol>
+<li><p>目标数据比较小 ，而且非常频繁的进行访问 ，在内存中存放数据，如果太大的数据会造成内存溢出 。可以通过参数 max_heap_table_size 控制Memory表的大小，限制Memory表的最大的大小。</p>
+</li>
+<li><p>如果数据是临时的 ，而且必须立即可用得到，那么就可以放在内存中。</p>
+</li>
+<li><p>存储在Memory表中的数据如果突然间丢失的话也没有太大的关系 。</p>
+</li>
+</ol>
+<h3 id="4-7-Federated-引擎：访问远程表"><a href="#4-7-Federated-引擎：访问远程表" class="headerlink" title="4.7 Federated 引擎：访问远程表"></a>4.7 Federated 引擎：访问远程表</h3><p><strong>Federated引擎是访问其他MySQL服务器的一个 代理 ，尽管该引擎看起来提供了一种很好的 跨服务 器的灵活性 ，但也经常带来问题，因此 默认是禁用的 。</strong></p>
+<h3 id="4-8-Merge引擎：管理多个MyISAM表构成的表集合"><a href="#4-8-Merge引擎：管理多个MyISAM表构成的表集合" class="headerlink" title="4.8 Merge引擎：管理多个MyISAM表构成的表集合"></a>4.8 Merge引擎：管理多个MyISAM表构成的表集合</h3><h3 id="4-9-NDB引擎：MySQL集群专用存储引擎"><a href="#4-9-NDB引擎：MySQL集群专用存储引擎" class="headerlink" title="4.9 NDB引擎：MySQL集群专用存储引擎"></a>4.9 NDB引擎：MySQL集群专用存储引擎</h3><p>也叫做 NDB Cluster 存储引擎，主要用于 MySQL Cluster 分布式集群 环境，类似于 Oracle 的 RAC 集 群。</p>
+<h3 id="4-10-引擎对比"><a href="#4-10-引擎对比" class="headerlink" title="4.10 引擎对比"></a>4.10 引擎对比</h3><p>MySQL中同一个数据库，不同的表可以选择不同的存储引擎。如下表对常用存储引擎做出了对比。</p>
+<p><img src="/./Resources/image-20230705111919758.png" srcset="/img/loading.gif" lazyload alt="image-20230705111919758"></p>
+<p><img src="/./Resources/image-20230705111925512.png" srcset="/img/loading.gif" lazyload alt="image-20230705111925512"></p>
+<p>其实这些东西大家没必要立即就给记住，列出来的目的就是想让大家明白不同的存储引擎支持不同的功能。</p>
+<p>其实我们最常用的就是 InnoDB 和 MyISAM ，有时会提一下 Memory 。其中 InnoDB 是 MySQL 默认的存储引擎。</p>
+<h2 id="5-MyISAM和InnoDB"><a href="#5-MyISAM和InnoDB" class="headerlink" title="5. MyISAM和InnoDB"></a>5. MyISAM和InnoDB</h2><p>很多人对 InnoDB 和 MyISAM 的取舍存在疑问，到底选择哪个比较好呢？</p>
+<p>MySQL5.5之前的默认存储引擎是MyISAM，5.5之后改为了InnoDB。</p>
+<p>首先对于InnoDB存储引擎，提供了良好的事务管理、崩溃修复能力和并发控制。因为InnoDB存储引擎支持事务，所以对于要求事务完整性的场性要求较高的系统需要选择InnoDB。比如数据操作除了插入和查询意外还包含有很多更新、删除操作，像财务系统等对数据准确性要求较高的系统。缺点是其读写效率稍差，占用的数据空间相对比较大。</p>
+<p>其次对于MyISAM存储引擎，如果是小型应用，系统以读操作和插入操作为主，只有很少的更新、删除操作，并且对事务的要求没有那么高，则可以选择这个存储引擎。MyISAM存储引擎的优势在于占用空间小，处理速度快。缺点是不支持事务的完整性和并发性。</p>
+<p>这两种引擎各有特点，当然你也可以在MySQL中，针对不同的数据表，可以选择不同的存储引擎。</p>
+<p><img src="/./Resources/image-20230705112253907.png" srcset="/img/loading.gif" lazyload alt="image-20230705112253907"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Database/" class="category-chain-item">Database</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Database/MySQL/" class="category-chain-item">MySQL</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/MySQL/">#MySQL</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>第05章 存储引擎</div>
+      <div>http://conquers.github.io/posts/8d469f79.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>wtt</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年7月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

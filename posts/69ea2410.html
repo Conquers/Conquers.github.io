@@ -1,0 +1,1355 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="wtt">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="第08章 索引的创建与设计原则1. 索引的声明与使用1.1 索引的分类MySQL的索引包括普通索引、唯一性索引、全文索引、单列索引、多列索引和空间索引等。  从 功能逻辑 上说，   索引可以分为 4 种：普通索引、唯一索引、主键索引、全文索引。  按照 物理实现 方式，索引可以分为 2 种：聚簇索引和非聚簇索引。  按照 作用字段 个数，索引可以分为 2 种：单列索引和联合索引。   1. 普通">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第08章 索引的创建与设计原则">
+<meta property="og:url" content="http://conquers.github.io/posts/69ea2410.html">
+<meta property="og:site_name" content="Kioo&#39;s Blog">
+<meta property="og:description" content="第08章 索引的创建与设计原则1. 索引的声明与使用1.1 索引的分类MySQL的索引包括普通索引、唯一性索引、全文索引、单列索引、多列索引和空间索引等。  从 功能逻辑 上说，   索引可以分为 4 种：普通索引、唯一索引、主键索引、全文索引。  按照 物理实现 方式，索引可以分为 2 种：聚簇索引和非聚簇索引。  按照 作用字段 个数，索引可以分为 2 种：单列索引和联合索引。   1. 普通">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://conquers.github.io/Resources/default.png">
+<meta property="article:published_time" content="2023-06-08T07:49:37.000Z">
+<meta property="article:modified_time" content="2023-07-18T02:42:52.326Z">
+<meta property="article:author" content="wtt">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://conquers.github.io/Resources/default.png">
+  
+  
+  
+  <title>第08章 索引的创建与设计原则 - Kioo&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/mac.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="第08章 索引的创建与设计原则"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-06-08 15:49" pubdate>
+          2023年6月8日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          18k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          153 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">第08章 索引的创建与设计原则</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="第08章-索引的创建与设计原则"><a href="#第08章-索引的创建与设计原则" class="headerlink" title="第08章 索引的创建与设计原则"></a>第08章 索引的创建与设计原则</h1><h2 id="1-索引的声明与使用"><a href="#1-索引的声明与使用" class="headerlink" title="1. 索引的声明与使用"></a>1. 索引的声明与使用</h2><h3 id="1-1-索引的分类"><a href="#1-1-索引的分类" class="headerlink" title="1.1 索引的分类"></a>1.1 索引的分类</h3><p>MySQL的索引包括普通索引、唯一性索引、全文索引、单列索引、多列索引和空间索引等。</p>
+<ul>
+<li>从 <strong>功能逻辑</strong> 上说，   索引可以分为 4 种：普通索引、唯一索引、主键索引、全文索引。 </li>
+<li>按照 <strong>物理实现</strong> 方式，索引可以分为 2 种：聚簇索引和非聚簇索引。 </li>
+<li>按照 <strong>作用字段</strong> 个数，索引可以分为 2 种：单列索引和联合索引。</li>
+</ul>
+<blockquote>
+<p><strong>1. 普通索引</strong></p>
+</blockquote>
+<p>在创建普通索引时，不附加任何限制条件，只是用于提高查询效率。这类索引可以创建在<strong>任何数据类型</strong>中，其值是否唯一和非空，要由字段本身的完整性约束条件决定。建立索引以后，可以通过索引进行查询。例如，在表 <code>student</code> 的字段 <code>name</code> 上建立一个普通索引，查询记录时就可以根据该索引进行查询。</p>
+<blockquote>
+<p><strong>2. 唯一性索引</strong></p>
+</blockquote>
+<p>使用 <code>UNIQUE</code> 参数可以设置索引为<strong>唯一性索引</strong>，在创建唯一性索引时，限制该索引的值必须是唯一的，但允许有空值。在一张数据表里可以有多个唯一索引。<br>例如，在表 <code>student</code> 的字段 <code>email</code> 中创建唯一性索引，那么字段 <code>email</code> 的值就必须是唯一的。通过唯一性索引，可以更快速地确定某条记录。</p>
+<blockquote>
+<p><strong>3. 主键索引</strong></p>
+</blockquote>
+<p><strong>主键索引就是一种特殊的唯一性索引</strong>，在唯一索引的基础上增加了不为空的约束，也就是 <code>NOT NULL+UNIQUE</code>，一张表里<strong>最多只有一个主键索引</strong>。<br><code>why?</code> 这是由主键索引的物理实现方式决定的，因为数据存储在文件中只能按照一种顺序进行存储。</p>
+<blockquote>
+<p><strong>4. 单列索引</strong></p>
+</blockquote>
+<p>在表中的单个字段上创建索引。单列索引只根据该字段进行索引。单列索引可以是普通索引，也可以是唯一性索引，还可以是全文索引。只要保证该索引只对应一个字段即可。一个表可以有多个单列索引。</p>
+<blockquote>
+<p><strong>5. 多列 (组合、联合) 索引</strong></p>
+</blockquote>
+<p>多列索引是在表的<strong>多个字段组合</strong>上创建一个索引。该索引指向创建时对应的多个字段，可以通过这几个字段进行查询，但是只有查询条件中<strong>使用了这些字段中的第一个字段时才会被使用</strong>。例如，在表中的字段 <code>id</code>、<code>name</code> 和 <code>gender</code> 上建立一个多列索引 <code>idx_id_name_gender</code>，只有在查询条件中使用了字段 <code>id</code> 时该索引才会被使用。使用组合索引时遵循<strong>最左前缀集合</strong>。</p>
+<blockquote>
+<p><strong>6. 全文检索</strong></p>
+</blockquote>
+<p>全文索引(也称全文检索）是目前<strong>搜索引擎</strong>使用的一种关键技术。它能够利用【分词技术】等多种算法智能分析出文本文字中关键词的频率和重要性，然后按照一定的算法规则智能地筛选出我们想要的搜索结果。全文索引非常适合大型数据集，对于小的数据集，它的用处比较小。<br>使用参数 <code>FULLTEXT</code> 可以设置索引为全文索引。在定义索引的列上支持值的全文查找，允许在这些索引列中插入重复值和空值。全文索引只能创建在 <code>CHAR</code>、<code>VARCHAR</code> 或 <code>TEXT</code> 类型及其系列类型的字段上，<strong>查询数据量较大的字符串类型的字段时，使用全文索引可以提高查询速度。</strong>例如，表 <code>student</code> 的字段 <code>information</code> 是 <code>TEXT</code> 类型，该字段包含了很多文字信息。在字段 <code>information</code> 上建立全文索引后，可以提高查询字段 <code>information</code> 的速度。全文索引典型的有两种类型:自然语言的全文索引和布尔全文索引。</p>
+<ul>
+<li>自然语言搜索引擎将计算每一个文档对象和查询的相关度。这里，相关度是基于匹配的关键词的个数，以及关键词在文档中出现的次数。<strong>在整个索引中出现次数越少的词语，匹配时的相关度就越高。</strong>相反，非常常见的单词将不会被搜索，如果一个词语的在超过50%的记录中都出现了，那么自然语言的搜索将不会搜索这类词语。</li>
+</ul>
+<p>MySQL数据库从3.23.23版开始支持全文索引，但MySQL5.6.4以前只有 <code>Myisam</code> 支持，5.6.4版本以后 <code>innodb</code> 才支持，但是官方版本不支持中文分词，需要第三方分词插件。在5.7.6版本，MySQL内置了ngram全文解析器，用来支持亚洲语种的分词。测试或使用全文索引时，要先看一下自己的MySQL版本、存储引擎和数据类型是否支持全文索引。<br>随着大数据时代的到来，关系型数据库应对全文索引的需求已力不从心，逐渐被 <code>solr</code> 、<a href="../ElasticSearch/ElasticSearch%206.x%20%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B.md">ElasticSearch</a>等专门的搜索引擎所替代。</p>
+<blockquote>
+<p><strong>7. 补充：空间索引</strong></p>
+</blockquote>
+<p>使用参数 <code>SPATIAL</code> 可以设置索引为空间索引。空间索引只能建立在空间数据类型上，这样可以提高系统获取空间数据的效率。MySQL中的空间数据类型包括 <code>GEONETRY</code>、<code>POINT</code>、<code>LINESTRING</code>和 <code>POLYGON</code>等。目前只有MyISAM存储引擎支持空间检索，而且索引的字段不能为空值。对于初学者来说，这类索引很少会用到。</p>
+<p>**小结：不同的存储引擎支持的索引类型也不一样 **</p>
+<table>
+<thead>
+<tr>
+<th align="center">存储引擎</th>
+<th align="center"><code>B-tree</code></th>
+<th align="center"><code>Full-text</code></th>
+<th align="center"><code>Hash</code></th>
+<th align="center"><code>R-tree</code></th>
+<th align="center"><code>其他</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>InnoDB</code></td>
+<td align="center">✅</td>
+<td align="center">✅^5.6</td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center">❔</td>
+</tr>
+<tr>
+<td align="center"><code>MyISAM</code></td>
+<td align="center">✅</td>
+<td align="center">✅</td>
+<td align="center">❌</td>
+<td align="center">✅</td>
+<td align="center">❔</td>
+</tr>
+<tr>
+<td align="center"><code>Memory</code></td>
+<td align="center">✅</td>
+<td align="center">❌</td>
+<td align="center">✅</td>
+<td align="center">❌</td>
+<td align="center">❔</td>
+</tr>
+<tr>
+<td align="center"><code>NDB</code></td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center">✅</td>
+<td align="center">❔</td>
+<td align="center">❔</td>
+</tr>
+<tr>
+<td align="center"><code>Archive</code></td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center">❌</td>
+<td align="center">❔</td>
+<td align="center">❔</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🔔</p>
+<p>对于 <code>InnoDB</code> 是否支持哈希索引，确切的应该这么说：</p>
+<ul>
+<li><code>InnoDB</code> 用户无法手动创建哈希索引，这一层上说， <code>InnoDB</code> 确实不支持哈希索引；</li>
+<li><code>InnoDB</code> 会自调优(self-tuning)，如果判定建立自适应哈希索引(Adaptive Hash Index, AHI)，能够提升查询效率，<code>InnoDB</code> 自己会建立相关哈希索引，这一层上说， <code>InnoDB</code> 又是支持哈希索引的；</li>
+</ul>
+<p>参考文献：</p>
+<p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/1050696">https://developer.aliyun.com/article/1050696</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/shenjian58/article/details/102493421">https://blog.csdn.net/shenjian58/article/details/102493421</a></p>
+</blockquote>
+<h3 id="1-2-创建索引"><a href="#1-2-创建索引" class="headerlink" title="1.2 创建索引"></a>1.2 创建索引</h3><p>MySQL支持多种方法在单个或多个列上创建索引：1. 在创建表的定义语句 <code>CREATE TABLE</code> 中指定索引列，2. 使用 <code>ALTER TABLE</code> 语句在存在的表上创建索引，3. 或者使用 <code>CREATE INDEX</code> 语句在已存在的表上添加索引。</p>
+<h4 id="1-创建表的时候创建索引"><a href="#1-创建表的时候创建索引" class="headerlink" title="1. 创建表的时候创建索引"></a>1. 创建表的时候创建索引</h4><p>使用 <code>CREATE TABLE</code> 创建表时，除了可以定义列的数据类型外，还可以定义主键约束、外键约束或者唯一性约束，而不论创建哪种约束，在定义约束的同时相当于在指定列上创建了一个索引。</p>
+<p>举例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE dept<br>(<br>    dept_id   INT PRIMARY KEY AUTO_INCREMENT,<br>    dept_name VARCHAR(20)<br>);<br><br>CREATE TABLE emp<br>(<br>    emp_id   INT PRIMARY KEY AUTO_INCREMENT,<br>    emp_name VARCHAR(20) UNIQUE,<br>    dept_id  INT,<br>    CONSTRAINT emp_dept_id_fk FOREIGN KEY (dept_id) REFERENCES dept (dept_id)<br>)<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20230608154931652.png" srcset="/img/loading.gif" lazyload alt="image-20230608154931652"></p>
+<p>但是，如果显式创建表时创建索引的话，基本语法格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE table_name [col_name data_type]<br>[UNIQUE | FULLTEXT | SPATIAL] [INDEX | KEY] [index_name] (col_name [length]) [ASC | DESC]<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><code>UNIQUE</code>、<code>FULLTEXT</code> 和 <code>SPATIAL</code> 为可选参数，分别表示唯一索引、全文索引和空间索引； </li>
+<li><code>INDEX</code> 与 <code>KEY</code> 为同义词，两者的作用相同，用来指定创建索引； </li>
+<li><code>index_name</code> 指定索引的名称，为可选参数，如果不指定，那么 <code>MySQL默认</code> 会以 <code>col_name</code> 为索引名； </li>
+<li><code>col_name</code> 为需要创建索引的字段列，该列必须从数据表中定义的多个列中选择； </li>
+<li><code>length</code> 为可选参数，表示索引的长度，只有字符串类型的字段才能指定索引长度； </li>
+<li><code>ASC</code> 或 <code>DESC</code> 指定升序或者降序的索引值存储。</li>
+</ul>
+<p><strong>1. 创建普通索引</strong></p>
+<p>在book表中的year_publication字段上建立普通索引，SQL语句如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE book<br>(<br>    book_id          INT,<br>    book_name        VARCHAR(100),<br>    authors          VARCHAR(100),<br>    info             VARCHAR(100),<br>    comment          VARCHAR(100),<br>    year_publication YEAR,<br>    INDEX (year_publication)<br>);<br></code></pre></td></tr></table></figure>
+
+<p>通过命令行查看索引</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 方式一<br><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> book;<br><br><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> `book` (<br>  `book_id` <span class="hljs-type">int</span>(<span class="hljs-number">11</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>,<br>  `book_name` <span class="hljs-type">varchar</span>(<span class="hljs-number">100</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>,<br>  `authors` <span class="hljs-type">varchar</span>(<span class="hljs-number">100</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>,<br>  `info` <span class="hljs-type">varchar</span>(<span class="hljs-number">100</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>,<br>  `comment` <span class="hljs-type">varchar</span>(<span class="hljs-number">100</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>,<br>  `year_publication` <span class="hljs-keyword">year</span>(<span class="hljs-number">4</span>) <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>,<br>  KEY `year_publication` (`year_publication`)<br>) ENGINE<span class="hljs-operator">=</span>InnoDB <span class="hljs-keyword">DEFAULT</span> CHARSET<span class="hljs-operator">=</span>utf8mb4<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 方式二<br><span class="hljs-keyword">SHOW</span> INDEX <span class="hljs-keyword">FROM</span> book;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Table</th>
+<th align="left">Non_unique</th>
+<th align="left">Key_name</th>
+<th align="left">Seq_in_index</th>
+<th align="left">Column_name</th>
+<th align="left">Collation</th>
+<th align="left">Cardinality</th>
+<th align="left">Sub_part</th>
+<th align="left">Packed</th>
+<th align="left">Null</th>
+<th align="left">Index_type</th>
+<th align="left">Comment</th>
+<th align="left">Index_comment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">book</td>
+<td align="left">1（该值为0 | 1）</td>
+<td align="left">year_publication</td>
+<td align="left">1</td>
+<td align="left">year_publication</td>
+<td align="left">A</td>
+<td align="left">0</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">YES</td>
+<td align="left">BTREE（就是B+）</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>通过数据库可视化软件查看索引</p>
+<p>如上图：创建表的时候创建索引</p>
+<p><strong>2. 创建唯一索引</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE test1<br>(<br>    id   INT         NOT NULL,<br>    name varchar(30) NOT NULL,<br>    UNIQUE INDEX uk_idx_id (id)<br>);<br></code></pre></td></tr></table></figure>
+
+<p>该语句执行完毕之后，通过命令行查看索引</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SHOW INDEX FROM test1;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Table</th>
+<th align="left">Non_unique</th>
+<th align="left">Key_name</th>
+<th align="left">Seq_in_index</th>
+<th align="left">Column_name</th>
+<th align="left">Collation</th>
+<th align="left">Cardinality</th>
+<th align="left">Sub_part</th>
+<th align="left">Packed</th>
+<th align="left">Null</th>
+<th align="left">Index_type</th>
+<th align="left">Comment</th>
+<th align="left">Index_comment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">test1</td>
+<td align="left">0</td>
+<td align="left">uk_idx_id</td>
+<td align="left">1</td>
+<td align="left">id</td>
+<td align="left">A</td>
+<td align="left">0</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left"></td>
+<td align="left">BTREE</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🔔</p>
+<p>唯一性约束和唯一性索引的区别到时候在前面补充在唯一性约束中</p>
+</blockquote>
+<p><strong>3. 主键索引</strong></p>
+<p>设定为主键后数据库会自动建立索引，<code>innodb</code> 为聚簇索引，语法：</p>
+<ul>
+<li>随表一起建索引：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE student<br>(<br>    id           INT(10) UNSIGNED AUTO_INCREMENT,<br>    student_no   VARCHAR(200),<br>    student_name VARCHAR(200),<br>    PRIMARY KEY (id)<br>);<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>删除主键索引：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 删除自增约束：添加 auto_increment 自增 约束字段的唯一索引不能被删除。<br>alter table student modify id int;<br><br># 删除主键索引<br>ALTER TABLE student drop PRIMARY KEY;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>修改主键索引：必须先删除掉(drop)原索引，再新建(add)索引</li>
+</ul>
+<p><strong>4. 创建单列索引</strong></p>
+<p>以上创建的索引都是单列索引</p>
+<p><strong>5. 创建组合索引</strong></p>
+<p>举例：创建表test3，在表中的id、name和age字段上建立组合索引，SQL语句如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE test3<br>(<br>    id   INT(11)  NOT NULL,<br>    name CHAR(30) NOT NULL,<br>    age  INT(11)  NOT NULL,<br>    info VARCHAR(255),<br>    INDEX multi_idx (id, name, age)<br>);<br><br># 插入数据，一会需要使用<br>INSERT INTO test.test3 (id, name, age, info) VALUES (1, &#x27;wtt&#x27;, 25, &#x27;666&#x27;)<br></code></pre></td></tr></table></figure>
+
+<p>该语句执行完毕之后，通过命令行查看索引</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SHOW INDEX FROM test3;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Table</th>
+<th align="left">Non_unique</th>
+<th align="left">Key_name</th>
+<th align="left">Seq_in_index</th>
+<th align="left">Column_name</th>
+<th align="left">Collation</th>
+<th align="left">Cardinality</th>
+<th align="left">Sub_part</th>
+<th align="left">Packed</th>
+<th align="left">Null</th>
+<th align="left">Index_type</th>
+<th align="left">Comment</th>
+<th align="left">Index_comment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">test3</td>
+<td align="left">1</td>
+<td align="left">multi_idx</td>
+<td align="left">1</td>
+<td align="left">id</td>
+<td align="left">A</td>
+<td align="left">0</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left"></td>
+<td align="left">BTREE</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">test3</td>
+<td align="left">1</td>
+<td align="left">multi_idx</td>
+<td align="left">2</td>
+<td align="left">name</td>
+<td align="left">A</td>
+<td align="left">0</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left"></td>
+<td align="left">BTREE</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">test3</td>
+<td align="left">1</td>
+<td align="left">multi_idx</td>
+<td align="left">3</td>
+<td align="left">age</td>
+<td align="left">A</td>
+<td align="left">0</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left"></td>
+<td align="left">BTREE</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>在 <code>test3</code> 表中，查询id和name字段，使用EXPLAIN语句查看索引的使用情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">EXPLAIN SELECT * FROM test3 WHERE id=1 AND name=&#x27;wtt&#x27;;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">test3</td>
+<td align="left">null</td>
+<td align="left">ref</td>
+<td align="left">multi_idx</td>
+<td align="left"><strong>multi_idx</strong></td>
+<td align="left">124</td>
+<td align="left">const,const</td>
+<td align="left">1</td>
+<td align="left">100</td>
+<td align="left">null</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">EXPLAIN <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> test3 <span class="hljs-keyword">WHERE</span> name<span class="hljs-operator">=</span><span class="hljs-string">&#x27;wtt&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">test3</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">null</td>
+<td align="left"><strong>null</strong></td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">1</td>
+<td align="left">100</td>
+<td align="left">Using where</td>
+</tr>
+</tbody></table>
+<p>可以看到，查询id和name字段时，使用了名称为 <code>MultiIdx</code> 的索引，如果查询 (name, age) 组合或者单独查询name和age字段，会发现结果中possible_keys和key值为 null，并没有使用在 <code>test3</code> 表中创建的索引进行查询。</p>
+<blockquote>
+<p>🔔</p>
+<p>关于原因在1.1 索引的分类中说明如下：多列索引是在表的<strong>多个字段组合</strong>上创建一个索引。该索引指向创建时对应的多个字段，可以通过这几个字段进行查询，但是只有查询条件中<strong>使用了这些字段中的第一个字段时才会被使用</strong>。例如，在表中的字段 <code>id</code>、<code>name</code> 和 <code>gender</code> 上建立一个多列索引 <code>idx_id_name_gender</code>，只有在查询条件中使用了字段 <code>id</code> 时该索引才会被使用。使用组合索引时遵循**最左前缀集合(原则)**。</p>
+<p>关于**最左前缀集合(原则)**，在后面补充</p>
+</blockquote>
+<p><strong>6. 创建全文索引</strong></p>
+<p><code>FULLTEXT</code> 全文索引可以用于全文检索，并且只为 <code>CHAR</code> 、<code>VARCHAR</code> 和 <code>TEXT</code> 列创建索引。索引总是对整个列进行，不支持局部 (前缀) 索引。</p>
+<p>举例1：创建表test4，在表中的info字段上建立全文索引，SQL语句如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 5.7 之前<br>CREATE TABLE test4<br>(<br>    id   INT      NOT NULL,<br>    name CHAR(30) NOT NULL,<br>    age  INT      NOT NULL,<br>    info VARCHAR(255),<br>    FULLTEXT INDEX futxt_idx_info (info)<br>) ENGINE = MyISAM;<br><br># 5.7 之后<br>CREATE TABLE test4<br>(<br>    id   INT      NOT NULL,<br>    name CHAR(30) NOT NULL,<br>    age  INT      NOT NULL,<br>    info VARCHAR(255),<br>    FULLTEXT INDEX futxt_idx_info (info)<br>);<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在MySQL5.7及之后版本中可以不指定最后的ENGINE了，因为在此版本中InnoDB支持全文索引。</p>
+</blockquote>
+<p>语句执行完毕之后，通过命令行查看索引</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SHOW INDEX FROM test4;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Table</th>
+<th align="left">Non_unique</th>
+<th align="left">Key_name</th>
+<th align="left">Seq_in_index</th>
+<th align="left">Column_name</th>
+<th align="left">Collation</th>
+<th align="left">Cardinality</th>
+<th align="left">Sub_part</th>
+<th align="left">Packed</th>
+<th align="left">Null</th>
+<th align="left">Index_type</th>
+<th align="left">Comment</th>
+<th align="left">Index_comment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">test4</td>
+<td align="left">1</td>
+<td align="left">futxt_idx_info</td>
+<td align="left">1</td>
+<td align="left">info</td>
+<td align="left">null</td>
+<td align="left">0</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">YES</td>
+<td align="left">FULLTEXT</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>由结果可以看到，info字段上已经成功建立了一个名为futxt_idx_info的FULLTEXT索引。</p>
+<p>举例2：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE articles<br>(<br>    id    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,<br>    title VARCHAR(200),<br>    body  TEXT,<br>    FULLTEXT index (title, body)<br>);<br></code></pre></td></tr></table></figure>
+
+<p>创建了一个给title和body字段添加全文索引的表。</p>
+<p>举例3：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE `papers`<br>(<br>    `id`      int(10) unsigned NOT NULL AUTO_INCREMENT,<br>    `title`   varchar(200) DEFAULT NULL,<br>    `content` text,<br>    PRIMARY KEY (`id`),<br>    FULLTEXT KEY `title` (`title`, `content`)<br>) DEFAULT CHARSET = utf8;<br></code></pre></td></tr></table></figure>
+
+<p>不同于like方式的的查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT * FROM papers WHERE content LIKE ‘%查询字符串%’;<br></code></pre></td></tr></table></figure>
+
+<p>全文索引用 <code>match+against</code> 方式查询：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT * FROM papers WHERE MATCH(title,content) AGAINST (‘查询字符串’);<br></code></pre></td></tr></table></figure>
+
+<p>明显的提高查询效率。</p>
+<blockquote>
+<p>注意点 </p>
+<ol>
+<li>使用全文索引前，搞清楚版本支持情况； </li>
+<li>全文索引比 like + % 快 N 倍，但是可能存在精度问题；</li>
+<li>如果需要全文索引的是大量数据，建议先添加数据，再创建索引。</li>
+</ol>
+</blockquote>
+<p><strong>7. 创建空间索引</strong></p>
+<p>空间索引创建中，要求空间类型的字段必须为 非空 。</p>
+<p>举例：创建表 <code>test5</code>，在空间类型为GEOMETRY的字段上创建空间索引，SQL语句如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE test5<br>(<br>    geo GEOMETRY NOT NULL,<br>    SPATIAL INDEX spa_idx_geo (geo)<br>) ENGINE = MyISAM;<br></code></pre></td></tr></table></figure>
+
+<p>该语句执行完毕之后，通过命令行查看索引</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SHOW INDEX FROM test5;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Table</th>
+<th align="left">Non_unique</th>
+<th align="left">Key_name</th>
+<th align="left">Seq_in_index</th>
+<th align="left">Column_name</th>
+<th align="left">Collation</th>
+<th align="left">Cardinality</th>
+<th align="left">Sub_part</th>
+<th align="left">Packed</th>
+<th align="left">Null</th>
+<th align="left">Index_type</th>
+<th align="left">Comment</th>
+<th align="left">Index_comment</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">test5</td>
+<td align="left">1</td>
+<td align="left">spa_idx_geo</td>
+<td align="left">1</td>
+<td align="left">geo</td>
+<td align="left">A</td>
+<td align="left">null</td>
+<td align="left">32</td>
+<td align="left">null</td>
+<td align="left"></td>
+<td align="left">SPATIAL</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>可以看到，<code>test5</code> 表的geo字段上创建了名称为 <code>spa_idx_geo</code> 的空间索引。注意创建时指定空间类型字段值的非空约束，并且表的存储引擎为 <code>MyISAM</code>。</p>
+<h5 id="2-在已经存在的表上创建索引"><a href="#2-在已经存在的表上创建索引" class="headerlink" title="2. 在已经存在的表上创建索引"></a>2. 在已经存在的表上创建索引</h5><p>在已经存在的表中创建索引可以使用 <code>ALTER TABLE</code> 语句或者 <code>CREATE INDEX</code> 语句。</p>
+<p><strong>（1）使用ALTER TABLE语句创建索引</strong> </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 语法<br>ALTER TABLE table_name ADD [UNIQUE | FULLTEXT | SPATIAL] [INDEX | KEY]<br>[index_name] (col_name[length],...) [ASC | DESC]<br><br># 例子<br>ALTER TABLE student ADD INDEX idx_id(id);<br></code></pre></td></tr></table></figure>
+
+<p><strong>（2）使用CREATE INDEX创建索引</strong> </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 在MySQL中， CREATE INDEX 被映射到一个ALTER TABLE语句上<br># 语法<br>CREATE [UNIQUE | FULLTEXT | SPATIAL] INDEX index_name<br>ON table_name (col_name[length],...) [ASC | DESC]<br><br># 例子<br>CREATE INDEX idx_stu_no ON student(student_no)<br></code></pre></td></tr></table></figure>
+
+<h3 id="1-3-删除索引"><a href="#1-3-删除索引" class="headerlink" title="1.3 删除索引"></a>1.3 删除索引</h3><p>使用场景：在需要大量使用增删改的时候，可以先删除索引，之后再加上索引</p>
+<p>经过以上添加索引，<code>student</code> 表的已有索引如图所示</p>
+<p><img src="/Resources/image-20230609094129608.png" srcset="/img/loading.gif" lazyload alt="image-20230609094129608"></p>
+<p><strong>（1）使用ALTER TABLE删除索引</strong>  ALTER TABLE删除索引的基本语法格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 语法<br>ALTER TABLE table_name DROP INDEX index_name;<br><br># 例子<br>ALTER TABLE student DROP INDEX idx_id;<br></code></pre></td></tr></table></figure>
+
+<p><strong>（2）使用DROP INDEX语句删除索引</strong> DROP INDEX删除索引的基本语法格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 语法<br>DROP INDEX index_name ON table_name;<br><br># 例子<br>DROP INDEX idx_stu_no ON student;<br></code></pre></td></tr></table></figure>
+
+<p>结果如图所示：</p>
+<p><img src="/Resources/image-20230609101140589.png" srcset="/img/loading.gif" lazyload alt="image-20230609101140589"></p>
+<blockquote>
+<p>提示: 删除表中的列时，如果要删除的列为索引的组成部分（联合索引），则该列也会从索引中删除。如果组成索引的所有列都被删除，则整个索引将被删除。</p>
+</blockquote>
+<h2 id="2、MySQL8-0索引新特性"><a href="#2、MySQL8-0索引新特性" class="headerlink" title="2、MySQL8.0索引新特性"></a>2、MySQL8.0索引新特性</h2><p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1iq4y1u7vj/?p=130">https://www.bilibili.com/video/BV1iq4y1u7vj/?p=130</a> 8:46</p>
+<h2 id="3、索引的设计原则"><a href="#3、索引的设计原则" class="headerlink" title="3、索引的设计原则"></a>3、索引的设计原则</h2><p>为了使索引的使用效率更高，在创建索引时，必须考虑在哪些字段上创建索引和创建什么类型的索引。<strong>索引设计不合理或者缺少索引都会对数据库和应用程序的性能造成障碍。</strong>高效的索引对于获得良好的性能非常重要。设计索引时，应该考虑相应准则。</p>
+<h3 id="3-1-数据准备"><a href="#3-1-数据准备" class="headerlink" title="3.1 数据准备"></a>3.1 数据准备</h3><p><strong>第1步：创建数据库、创建表</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE DATABASE atguigudb1;<br><br>USE atguigudb1;<br><br>#1.创建学生表和课程表<br>CREATE TABLE `student_info`<br>(<br>    `id`          INT(11) NOT NULL AUTO_INCREMENT,<br>    `student_id`  INT     NOT NULL,<br>    `name`        VARCHAR(20) DEFAULT NULL,<br>    `course_id`   INT     NOT NULL,<br>    `class_id`    INT(11)     DEFAULT NULL,<br>    `create_time` DATETIME    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,<br>    PRIMARY KEY (`id`)<br>) ENGINE = INNODB<br>  AUTO_INCREMENT = 1<br>  DEFAULT CHARSET = utf8;<br><br>CREATE TABLE `course`<br>(<br>    `id`          INT(11) NOT NULL AUTO_INCREMENT,<br>    `course_id`   INT     NOT NULL,<br>    `course_name` VARCHAR(40) DEFAULT NULL,<br>    PRIMARY KEY (`id`)<br>) ENGINE = INNODB<br>  AUTO_INCREMENT = 1<br>  DEFAULT CHARSET = utf8;<br></code></pre></td></tr></table></figure>
+
+<p><strong>第2步：创建模拟数据必需的存储函数</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#函数1：创建随机产生字符串函数<br>DELIMITER //<br>CREATE FUNCTION rand_string(n INT)<br>    RETURNS VARCHAR(255) #该函数会返回一个字符串<br>BEGIN<br>    DECLARE chars_str VARCHAR(100) DEFAULT<br>        &#x27;abcdefghijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ&#x27;;<br>    DECLARE return_str VARCHAR(255) DEFAULT &#x27;&#x27;;<br>    DECLARE i INT DEFAULT 0;<br>    WHILE i &lt; n<br>        DO<br>            SET return_str = CONCAT(return_str, SUBSTRING(chars_str, FLOOR(1 + RAND() * 52), 1));<br>            SET i = i + 1;<br>        END WHILE;<br>    RETURN return_str;<br>END //<br>DELIMITER ;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#函数2：创建随机数函数<br>DELIMITER //<br>CREATE FUNCTION rand_num(from_num INT, to_num INT) RETURNS INT(11)<br>BEGIN<br>    DECLARE i INT DEFAULT 0;<br>    SET i = FLOOR(from_num + RAND() * (to_num - from_num + 1));<br>    RETURN i;<br>END //<br>DELIMITER ;<br></code></pre></td></tr></table></figure>
+
+<p>结果如图所示，两个函数和两个存储过程</p>
+<p><img src="/Resources/image-20230609105630821.png" srcset="/img/loading.gif" lazyload alt="image-20230609105630821"></p>
+<blockquote>
+<p>🔔</p>
+<p>文本所用 <code>Mysql</code> 版本为Docker下的5.7，使用命令查看 <code>Mysql</code> 是不允许创建函数的，但没有出现下面的报错信息</p>
+<p>如果使用<code>MySQL 8</code> ，必须使用如下命令才可以创建函数</p>
+</blockquote>
+<p>创建函数，假如报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">This function has none of DETERMINISTIC......<br></code></pre></td></tr></table></figure>
+
+<p>由于开启过慢查询日志 <code>bin-log</code> , 我们就必须为我们的 <code>function</code> 指定一个参数。</p>
+<p>主从复制，主机会将写操作记录在bin-log日志中。从机读取bin-log日志，执行语句来同步数据。如果使用函数来操作数据，会导致从机和主键操作时间不一致。所以，默认情况下，<code>mysql</code> 不开启创建函数设置。</p>
+<ul>
+<li>查看mysql是否允许创建函数：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 方法1<br>show variables like &#x27;log_bin_trust_function_creators&#x27;;<br># 方法2<br>select @@log_bin_trust_function_creators;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>允许创建函数<ul>
+<li><p>临时修改</p>
+<ul>
+<li><code>set global log_bin_trust_function_creators=1;</code></li>
+</ul>
+</li>
+<li><p>永久生效</p>
+<ul>
+<li>在<code>my.ini[mysqld]</code>中，加上<code>log_bin_trust_function_creators=1</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>第3步：创建插入模拟数据的存储过程</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 存储过程1：创建插入课程表存储过程<br>DELIMITER //<br>CREATE PROCEDURE insert_course(max_num INT)<br>BEGIN<br>    DECLARE i INT DEFAULT 0;<br>    SET autocommit = 0; #设置手动提交事务<br>    REPEAT<br>        #循环<br>        SET i = i + 1; #赋值<br>        INSERT INTO course (course_id, course_name)<br>        VALUES (rand_num(10000, 10100), rand_string(6));<br>    UNTIL i = max_num<br>        END REPEAT;<br>    COMMIT; #提交事务<br>END //<br>DELIMITER ;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 存储过程2：创建插入学生信息表存储过程<br>DELIMITER //<br>CREATE PROCEDURE insert_stu(max_num INT)<br>BEGIN<br>    DECLARE i INT DEFAULT 0;<br>    SET autocommit = 0; #设置手动提交事务<br>    REPEAT<br>        #循环<br>        SET i = i + 1; #赋值<br>        INSERT INTO student_info (course_id, class_id, student_id, NAME)<br>        VALUES (rand_num(10000, 10100), rand_num(10000, 10200), rand_num(1, 200000), rand_string(6));<br>    UNTIL i = max_num<br>        END REPEAT;<br>    COMMIT; #提交事务<br>END //<br>DELIMITER ;<br></code></pre></td></tr></table></figure>
+
+<p><strong>第4步：调用存储过程</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CALL insert_course(100);<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CALL insert_stu(1000000);<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-2-哪些情况适合创建索引"><a href="#3-2-哪些情况适合创建索引" class="headerlink" title="3.2 哪些情况适合创建索引"></a>3.2 哪些情况适合创建索引</h3><p>为方便查询演示索引效果，如果存在查询缓存，需要手动关闭（文本所使用的Mysql-5.7没有查询缓存，如果有，则需要关闭一下）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">show variables like <span class="hljs-string">&#x27;%query_cache%&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">Variable_name</th>
+<th align="left">Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">have_query_cache</td>
+<td align="left">YES</td>
+</tr>
+<tr>
+<td align="left">query_cache_limit</td>
+<td align="left">1048576</td>
+</tr>
+<tr>
+<td align="left">query_cache_min_res_unit</td>
+<td align="left">4096</td>
+</tr>
+<tr>
+<td align="left">query_cache_size</td>
+<td align="left">1048576</td>
+</tr>
+<tr>
+<td align="left">query_cache_type</td>
+<td align="left">OFF</td>
+</tr>
+<tr>
+<td align="left">query_cache_wlock_invalidate</td>
+<td align="left">OFF</td>
+</tr>
+</tbody></table>
+<p>关闭Mysql缓存</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">set</span> global query_cache_type=1;<br></code></pre></td></tr></table></figure>
+
+<h4 id="1-字段的数值有唯一性的限制"><a href="#1-字段的数值有唯一性的限制" class="headerlink" title="1. 字段的数值有唯一性的限制"></a>1. 字段的数值有唯一性的限制</h4><p>索引本身可以起到约束的作用，比如唯一索引、主键索引都是可以起到唯一性约束的，因此在我们的数据表中，如果<strong>某个字段是唯一性的</strong>，就可以直接<strong>创建唯一性索引</strong>，或者<strong>主键索引</strong>。这样可以更快速地通过该索引来确定某条记录。<br>例如，学生表中学号是具有唯一性的字段，为该字段建立唯一性索引可以很快确定某个学生的信息，如果使用姓名的话，可能存在同名现象，从而降低查询速度。</p>
+<blockquote>
+<p>业务上具有唯一特性的字段，即使是组合字段，也<strong>必须</strong>建成唯一索引。（来源：Alibaba《Java开发手册》） </p>
+<p>说明：不要以为唯一索引影响了 insert 速度，这个速度损耗可以忽略，但提高查找速度是明显的。</p>
+</blockquote>
+<h4 id="2-频繁作为-WHERE-查询条件的字段"><a href="#2-频繁作为-WHERE-查询条件的字段" class="headerlink" title="2. 频繁作为 WHERE 查询条件的字段"></a>2. 频繁作为 WHERE 查询条件的字段</h4><p>某个字段在SELECT语句的 WHERE 条件中经常被使用到，那么就需要给这个字段创建索引了。尤其是在数据量大的情况下，创建普通索引就可以大幅提升数据查询的效率。 </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 加索引前<br><span class="hljs-keyword">SELECT</span> course_id, class_id, name, create_time, student_id<br><span class="hljs-keyword">FROM</span> student_info<br><span class="hljs-keyword">where</span> student_id <span class="hljs-operator">=</span> <span class="hljs-number">123110</span>; # <span class="hljs-number">950</span>ms<span class="hljs-operator">+</span><span class="hljs-operator">-</span><br><br><br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> student_info<br>    <span class="hljs-keyword">ADD</span> INDEX idx_id (student_id);<br><br># 加索引后<br><span class="hljs-keyword">SELECT</span> course_id, class_id, name, create_time, student_id<br><span class="hljs-keyword">FROM</span> student_info<br><span class="hljs-keyword">where</span> student_id <span class="hljs-operator">=</span> <span class="hljs-number">123110</span>; # <span class="hljs-number">740</span>ms<span class="hljs-operator">+</span><span class="hljs-operator">-</span>，换了id之后大概也是<span class="hljs-number">740</span>上下<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-经常-GROUP-BY-和-ORDER-BY-的列"><a href="#3-经常-GROUP-BY-和-ORDER-BY-的列" class="headerlink" title="3. 经常 GROUP BY 和 ORDER BY 的列"></a>3. 经常 GROUP BY 和 ORDER BY 的列</h4><p>索引就是让数据按照某种顺序进行存储或检索，因此当我们使用 GROUP BY 对数据进行分组查询，或者使用 ORDER BY 对数据进行排序的时候，就需要<strong>对分组或者排序的字段进行索引</strong> 。如果待排序的列有多个，那么可以在这些列上建立<strong>组合索引</strong> 。</p>
+<h4 id="4-UPDATE、DELETE-的-WHERE-条件列"><a href="#4-UPDATE、DELETE-的-WHERE-条件列" class="headerlink" title="4. UPDATE、DELETE 的 WHERE 条件列"></a>4. UPDATE、DELETE 的 WHERE 条件列</h4><p>对数据按照某个条件进行查询后再进行 UPDATE 或 DELETE 的操作，如果对 WHERE 字段创建了索引，就能大幅提升效率。原理是因为我们需要先根据 WHERE 条件列检索出来这条记录，然后再对它进行更新或删除。<strong>如果进行更新的时候，更新的字段是非索引字段，提升的效率会更明显，这是因为非索引字段更新不需要对索引进行维护。</strong></p>
+<h4 id="5-DISTINCT-字段需要创建索引"><a href="#5-DISTINCT-字段需要创建索引" class="headerlink" title="5. DISTINCT 字段需要创建索引"></a>5. DISTINCT 字段需要创建索引</h4><p>有时候我们需要对某个字段进行去重，使用 DISTINCT，那么对这个字段创建索引，也会提升查询效率。 </p>
+<p>比如，我们想要查询课程表中不同的 student_id 都有哪些，如果我们没有对 student_id 创建索引，执行 SQL 语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT DISTINCT(student_id) FROM `student_info`; # 0.760s<br></code></pre></td></tr></table></figure>
+
+<p>创建索引后，再次执行 <code>sql</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT DISTINCT(student_id) FROM `student_info`;# 0.680s<br></code></pre></td></tr></table></figure>
+
+<p><code>sql</code> 查询效率得到了提升，同时显示出来的 <code>student_id</code> 还是<strong>按照递增的顺序进行展示</strong>的。这是因为索引会对数据按照某种顺序进行排序，所以在去重的时候也会快很多。</p>
+<h4 id="6-多表-JOIN-连接操作时，创建索引注意事项"><a href="#6-多表-JOIN-连接操作时，创建索引注意事项" class="headerlink" title="6. 多表 JOIN 连接操作时，创建索引注意事项"></a>6. 多表 JOIN 连接操作时，创建索引注意事项</h4><p><strong>首先</strong>，连接表的数量尽量不要超过 3 张 ，因为每增加一张表就相当于增加了一次嵌套的循环，数量级增长会非常快，严重影响查询的效率。 </p>
+<p><strong>其次</strong>，对 WHERE 条件创建索引，因为 WHERE 才是对数据条件的过滤。如果在数据量非常大的情况下， 没有 <code>WHERE</code> 条件过滤是非常可怕的。 </p>
+<p><strong>最后</strong>，对用于连接的字段创建索引，并且该字段在多张表中的类型必须一致 。比如 <code>course_id</code> 在 <code>student_info</code> 表和 <code>course</code> 表中都为 <code>int(11)</code> 类型，而不能一个为 <code>int</code>，另一个为 <code>varchar</code> 类型。</p>
+<p>举个例子，如果我们只对 student_id 创建索引，执行 <code>sql</code> 语句：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT s.course_id,<br>       name,<br>       s.student_id,<br>       c.course_name<br>FROM student_info s<br>         JOIN course c ON s.course_id = c.course_id<br>WHERE name = &#x27;SZsRhm&#x27;; #0.921s<br><br># 然后对name建立索引后为0.620<br></code></pre></td></tr></table></figure>
+
+<h4 id="7-使用列的类型小的创建索引"><a href="#7-使用列的类型小的创建索引" class="headerlink" title="7. 使用列的类型小的创建索引"></a>7. 使用列的类型小的创建索引</h4><p>我们这里所说的<strong>类型大小</strong>指的就是该类型表示的<strong>数据范围的大小</strong>。</p>
+<p>我们在定义表结构的时候要显式的指定列的类型，以整数类型为例，有 <code>TINYINT</code>、<code>MEDIUMINT</code>、<code>INT</code>、<br><code>BIGINT</code> 等，它们占用的存储空间依次递增，能表示的整数范围当然也是依次递增。如果我们想要对某个整数列建立索引的话，在表示的整数范围允许的情况下，尽量让索引列使用较小的类型，比如我们能使用 <code>INT</code> 就不要使用 <code>BIGINT</code>，能使用<code>MEDIUMINT</code> 就不要使用 <code>INT</code> 。这是因为：</p>
+<ul>
+<li>数据类型越小，在查询时进行的比较操作越快</li>
+<li>数据类型越小，索引占用的存储空间就越少，在一个数据页内就可以放下更多的记录，从而减少磁盘I&#x2F;0带来的性能损耗，也就意味着可以把更多的数据页缓存在内存中，从而加快读写效率。</li>
+</ul>
+<p>这个建议对于表的主键来说更加适用，因为不仅是聚簇索引中会存储主键值，其他所有的二级索引的节点处都会存储一份记录的主键值，如果主键使用更小的数据类型，也就意味着节省更多的存储空间和更高效的I&#x2F;O。</p>
+<h4 id="8-使用字符串前缀创建索引"><a href="#8-使用字符串前缀创建索引" class="headerlink" title="8. 使用字符串前缀创建索引"></a>8. 使用字符串前缀创建索引</h4><p>假设我们的字符串很长，那存储一个字符串就需要占用很大的存储空间。在我们需要为这个字符串列建立索引时，那就意味着在对应的B+树中有这么两个问题:</p>
+<ul>
+<li><p>B+树索引中的记录需要把该列的完整字符串存储起来，更费时。而且字符串越长，在索引中占用的存储空间越大。</p>
+</li>
+<li><p>如果B+树索引中索引列存储的字符串很长，那在做字符串比较时会占用更多的时间。</p>
+</li>
+</ul>
+<p>我们可以通过截取字段的前面一部分内容建立索引，这个就叫<strong>前缀索引</strong>。这样在查找记录时虽然不能精确的定位到记录的位置，但是能定位到相应前缀所在的位置，然后根据前缀相同的记录的主键值回表查询完整的字符串值。既<strong>节约空间</strong>，又<strong>减少了字符串的比较时间</strong>，还大体能解决排序的问题。</p>
+<p>例如，<code>TEXT</code> 和 <code>BLOG</code> 类型的字段，进行全文检索会很浪费时间，如果只检索字段前面的若干字符，这样可以提高检索速度。</p>
+<p>创建一张商户表，因为地址字段比较长，在地址字段上建立前缀索引</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs mysql">create table shop<br>(<br>    address varchar(120) not null<br>);<br>alter table shop<br>    add index (address(?));<br></code></pre></td></tr></table></figure>
+
+<p>问题是，截取多少呢？截取得多了，达不到节省索引存储空间的目的；截取得少了，重复内容太多，字段的散列度(选择性)会降低。怎么计算不同的长度的选择性呢？</p>
+<p>先看一下字段在全部数据中的选择度：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">select count(distinct address) / count(*) from shop<br></code></pre></td></tr></table></figure>
+
+<p>通过不同长度去计算，与全表的选择性对比：</p>
+<p>公式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">count(distinct left(列名, 索引长度))/count(*)<br></code></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mysql">select count(distinct left(address, 10)) / count(*) as sub10, -- 截取前10个字符的选择度<br>       count(distinct left(address, 15)) / count(*) as sub11, -- 截取前15个字符的选择度<br>       count(distinct left(address, 20)) / count(*) as sub12, -- 截取前20个字符的选择度<br>       count(distinct left(address, 25)) / count(*) as sub13  -- 截取前25个字符的选择度<br>from shop;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>🔔</p>
+<p>越接近于1越好，说明越有区分度</p>
+</blockquote>
+<p><strong>引申另一个问题：索引列前缀对排序的影响</strong></p>
+<p>如果使用了索引列前缀，比方说前边只把address列的 <code>前12个字符</code> 放到了二级索引中，下边这个查询可能就有点尴尬了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT * FROM shop<br>ORDER BY address<br>LIMIT 12;<br></code></pre></td></tr></table></figure>
+
+<p>因为二级索引中不包含完整的address列信息，所以无法对前12个字符相同，后边的字符不同的记录进行排序，也就是使用索引列前缀的方式 <code>无法支持使用索引排序</code> ，只能使用文件排序。</p>
+<p><strong>拓展：Alibaba《Java开发手册》</strong></p>
+<p>【 <strong>强制</strong> 】在 <code>varchar</code> 字段上建立索引时，必须指定索引长度，没必要对全字段建立索引，根据实际文本区分度决定索引长度。 </p>
+<p>说明：索引的长度与区分度是一对矛盾体，一般对字符串类型数据，长度为 20 的索引，区分度会高达 90% 以上 ，可以使用 <code>count(distinct left(列名, 索引长度))/count(*)</code> 的区分度来确定。</p>
+<h4 id="9-区分度高-散列性高-的列适合作为索引"><a href="#9-区分度高-散列性高-的列适合作为索引" class="headerlink" title="9. 区分度高(散列性高)的列适合作为索引"></a>9. 区分度高(散列性高)的列适合作为索引</h4><p>列的基数指的是某一列中不重复数据的个数，比方说某个列包含值 <code>2, 5, 8, 2, 5, 8, 2, 5, 8</code>，虽然有<code>9</code>条记录，但该列的基数却是3。也就是说<strong>在记录行数一定的情况下，列的基数越大，该列中的值越分散；列的基数越小，该列中的值越集中。</strong>这个列的基数指标非常重要，直接影响我们是否能有效的利用索引。最好为列的基数大的列简历索引，为基数太小的列的简历索引效果可能不好。</p>
+<p>可以使用公式<code>select count(distinct a) / count(*) from t1</code> 计算区分度，越接近1越好，一般超过33%就算比较高效的索引了。</p>
+<p>扩展：联合索引把区分度搞(散列性高)的列放在前面。</p>
+<h4 id="10-使用最频繁的列放到联合索引的左侧"><a href="#10-使用最频繁的列放到联合索引的左侧" class="headerlink" title="10. 使用最频繁的列放到联合索引的左侧"></a>10. 使用最频繁的列放到联合索引的左侧</h4><p>这样也可以较少的建立一些索引。同时，由于”最左前缀原则”，可以增加联合索引的使用率。</p>
+<h4 id="11-在多个字段都要创建索引的情况下，联合索引优于单值索引"><a href="#11-在多个字段都要创建索引的情况下，联合索引优于单值索引" class="headerlink" title="11. 在多个字段都要创建索引的情况下，联合索引优于单值索引"></a>11. 在多个字段都要创建索引的情况下，联合索引优于单值索引</h4><h3 id="3-3-限制索引的数目"><a href="#3-3-限制索引的数目" class="headerlink" title="3.3 限制索引的数目"></a>3.3 限制索引的数目</h3><p>在实际工作中，我们也需要注意平衡，索引的数目不是越多越好。我们需要限制每张表上的索引数量，建议单张表索引数量不超过6个。原因:</p>
+<ul>
+<li>每个索引都需要占用磁盘空间，索引越多，需要的<strong>磁盘空间就越大</strong>。</li>
+<li><strong>索引会影响INSERT、DELETE、UPDATE等语句的性能</strong>，因为表中的数据更改的同时，索引也会进行调整和更新，会造成负担。</li>
+<li>优化器在选择如何优化查询时，会根据统一信息，对每一个可以用到的索引来进行评估，以生成出一个最好的执行计划，如果同时有很多个索引都可以用于查询，<strong>会增加 <code>MySQL</code> 优化器生成执行计划时间，降低查询性能</strong>。</li>
+</ul>
+<h3 id="3-4-哪些情况不适合创建索引"><a href="#3-4-哪些情况不适合创建索引" class="headerlink" title="3.4 哪些情况不适合创建索引"></a>3.4 哪些情况不适合创建索引</h3><h4 id="1-在where中使用不到的字段，不要设置索引"><a href="#1-在where中使用不到的字段，不要设置索引" class="headerlink" title="1. 在where中使用不到的字段，不要设置索引"></a>1. 在where中使用不到的字段，不要设置索引</h4><p>WHERE条件 (包括 GROUP BY、ORDER BY) 里用不到的字段不需要创建索引，索引的价值是快速定位，如果起不到定位的字段通常是不需要创建索引的。举个例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT course_id, student_id, create_time<br>FROM student_info<br>WHERE student_id = 41251;<br></code></pre></td></tr></table></figure>
+
+<p>因为我们是按照 student_id 来进行检索的，所以不需要对其他字段创建索引，即使这些字段出现在SELECT字段中。</p>
+<h4 id="2-数据量小的表最好不要使用索引"><a href="#2-数据量小的表最好不要使用索引" class="headerlink" title="2. 数据量小的表最好不要使用索引"></a>2. 数据量小的表最好不要使用索引</h4><p>如果表记录太少，比如少于1000个，那么是不需要创建索引的。表记录太少，是否创建索引对查询效率的影响并不大。甚至说，查询花费的时间可能比遍历索引的时间还要短，索引可能不会产生优化效果。</p>
+<p>举例：创建表1：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE t_without_index(<br>a INT PRIMARY KEY AUTO_INCREMENT,<br>b INT<br>);<br></code></pre></td></tr></table></figure>
+
+<p>提供存储过程1：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#创建存储过程<br>DELIMITER //<br>CREATE PROCEDURE t_wout_insert()<br>BEGIN<br>    DECLARE i INT DEFAULT 1;<br>    WHILE i &lt;= 900<br>    DO<br>        INSERT INTO t_without_index(b) SELECT RAND()*10000;<br>        SET i = i + 1;<br>    END WHILE;<br>    COMMIT;<br>END //<br>DELIMITER ;<br><br>#调用<br>CALL t_wout_insert()<br></code></pre></td></tr></table></figure>
+
+<p>创建表2：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE t_with_index(<br>a INT PRIMARY KEY AUTO_INCREMENT,<br>b INT,<br>INDEX idx_b(b)<br>);<br></code></pre></td></tr></table></figure>
+
+<p>创建存储过程2：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#创建存储过程<br>DELIMITER //<br>CREATE PROCEDURE t_with_insert()<br>BEGIN<br>    DECLARE i INT DEFAULT 1;<br>    WHILE i &lt;= 900<br>    DO<br>        INSERT INTO t_with_index(b) SELECT RAND()*10000;<br>        SET i = i + 1;<br>    END WHILE;<br>    COMMIT;<br>END //<br>DELIMITER ;<br><br>#调用<br>CALL t_with_insert();<br></code></pre></td></tr></table></figure>
+
+<p>查询对比：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs mysql">mysql&gt; select * from t_without_index where b = 9879;<br>+------+------+<br>| a | b |<br>+------+------+<br>| 1242 | 9879 |<br>+------+------+<br>1 row in set (0.00 sec)<br><br>mysql&gt; select * from t_with_index where b = 9879;<br>+-----+------+<br>| a | b |<br>+-----+------+<br>| 112 | 9879 |<br>+-----+------+<br>1 row in set (0.00 sec)<br></code></pre></td></tr></table></figure>
+
+<p>你能看到运行结果相同，但是在数据量不大的情况下，索引就发挥不出作用了。</p>
+<blockquote>
+<p>结论：在数据表中的数据行数比较少的情况下，比如不到 1000 行，是不需要创建索引的。																																																															</p>
+</blockquote>
+<h4 id="3-有大量重复数据的列上不要建立索引"><a href="#3-有大量重复数据的列上不要建立索引" class="headerlink" title="3. 有大量重复数据的列上不要建立索引"></a>3. 有大量重复数据的列上不要建立索引</h4><p>在条件表达式中经常用到的不同值较多的列上建立索引，但字段中如果有大量重复数据，也不用创建索引。比如在学生表的”性别”字段上只有“男”与“女”两个不同值，因此无须建立索引。如果建立索引，不但不会提高查询效率，反而会严重降低数据更新速度。</p>
+<p>举例1：要在 100 万行数据中查找其中的 50 万行（比如性别为男的数据），一旦创建了索引，你需要先 访问 50 万次索引，然后再访问 50 万次数据表，这样加起来的开销比不使用索引可能还要大。</p>
+<p>举例2：假设有一个学生表，学生总数为 100 万人，男性只有 10 个人，也就是占总人口的 10 万分之 1。</p>
+<p>学生表 student_gender 结构如下。其中数据表中的 student_gender 字段取值为 0 或 1，0 代表女性，1 代表男性。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE student_gender(<br>    student_id INT(11) NOT NULL,<br>    student_name VARCHAR(50) NOT NULL,<br>    student_gender TINYINT(1) NOT NULL,<br>    PRIMARY KEY(student_id)<br>)ENGINE = INNODB;<br></code></pre></td></tr></table></figure>
+
+<p>如果我们要筛选出这个学生表中的男性，可以使用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">SELECT * FROM student_gender WHERE student_gender = 1;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>结论：当数据重复度大，比如高于 10% 的时候，也不需要对这个字段使用索引。</p>
+</blockquote>
+<h4 id="4-避免对经常更新的表创建过多的索引"><a href="#4-避免对经常更新的表创建过多的索引" class="headerlink" title="4. 避免对经常更新的表创建过多的索引"></a>4. 避免对经常更新的表创建过多的索引</h4><p>第一层含义：频繁更新的字段不一定要创建索引。因为更新数据的时候，也需要更新索引，如果索引太多，在更新索引的时候也会造成负担，从而影响效率。</p>
+<p>第二层含义：避免对经常更新的表创建过多的索引，并且索引中的列尽可能少。此时，虽然提高了查询速度，同时却降低更新表的速度。</p>
+<h4 id="5-不建议用无序的值作为索引"><a href="#5-不建议用无序的值作为索引" class="headerlink" title="5. 不建议用无序的值作为索引"></a>5. 不建议用无序的值作为索引</h4><p>例如身份证、UUID(在索引比较时需要转为ASCII，并且插入时可能造成页分裂)、MD5、HASH、无序长字符串等。</p>
+<h4 id="6-删除不再使用或者很少使用的索引"><a href="#6-删除不再使用或者很少使用的索引" class="headerlink" title="6. 删除不再使用或者很少使用的索引"></a>6. 删除不再使用或者很少使用的索引</h4><p>表中的数据被大量更新，或者数据的使用方式被改变后，原有的一些索引可能不再需要。数据库管理员应当定期找出这些索引，将它们删除，从而减少索引对更新操作的影响。</p>
+<h4 id="7-不要定义夯余或重复的索引"><a href="#7-不要定义夯余或重复的索引" class="headerlink" title="7. 不要定义夯余或重复的索引"></a>7. 不要定义夯余或重复的索引</h4><p>① 冗余索引 </p>
+<p>举例：建表语句如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE person_info(<br>    id INT UNSIGNED NOT NULL AUTO_INCREMENT,<br>    name VARCHAR(100) NOT NULL,<br>    birthday DATE NOT NULL,<br>    phone_number CHAR(11) NOT NULL,<br>    country varchar(100) NOT NULL,<br>    PRIMARY KEY (id),<br>    KEY idx_name_birthday_phone_number (name(10), birthday, phone_number),<br>    KEY idx_name (name(10))<br>);<br></code></pre></td></tr></table></figure>
+
+<p>我们知道，通过 idx_name_birthday_phone_number 索引就可以对 name 列进行快速搜索，再创建一个专门针对 name 列的索引就算是一个 余索引 ，维护这个索引只会增加维护的成本，并不会对搜索有什么好处。</p>
+<p>② 重复索引 </p>
+<p>另一种情况，我们可能会对某个列重复建立索引 ，比方说这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE repeat_index_demo (<br>col1 INT PRIMARY KEY,<br>col2 INT,<br>UNIQUE uk_idx_c1 (col1),<br>INDEX idx_c1 (col1)<br>);<br></code></pre></td></tr></table></figure>
+
+<p>我们看到，col1 既是主键、又给它定义为一个唯一索引，还给它定义了一个普通索引，可是主键本身就会生成聚簇索引，所以定义的唯一索引和普通索引是重复的，这种情况要避免。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Database/" class="category-chain-item">Database</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Database/MySQL/" class="category-chain-item">MySQL</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/MySQL/">#MySQL</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>第08章 索引的创建与设计原则</div>
+      <div>http://conquers.github.io/posts/69ea2410.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>wtt</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年6月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

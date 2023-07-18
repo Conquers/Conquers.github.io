@@ -1,0 +1,1448 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="wtt">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="第10章 索引优化与查询优化都有哪些维度可以进行数据库调优？简言之：  索引失效、没有充分利用到索引——建立索引 关联查询太多JOIN（设计缺陷或不得已的需求）——SQL 优化 服务器调优及各个参数设置（缓冲、线程数等）——调整 my.cnf 数据过多——分库分表  关于数据库调优的知识非常分散。不同的DBMS，不同的公司，不同的职位，不同的项目遇到的问题都不尽相同。这里我们分为三个章节进行细致讲">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第10章 索引优化与查询优化">
+<meta property="og:url" content="http://conquers.github.io/posts/ada7f77e.html">
+<meta property="og:site_name" content="Kioo&#39;s Blog">
+<meta property="og:description" content="第10章 索引优化与查询优化都有哪些维度可以进行数据库调优？简言之：  索引失效、没有充分利用到索引——建立索引 关联查询太多JOIN（设计缺陷或不得已的需求）——SQL 优化 服务器调优及各个参数设置（缓冲、线程数等）——调整 my.cnf 数据过多——分库分表  关于数据库调优的知识非常分散。不同的DBMS，不同的公司，不同的职位，不同的项目遇到的问题都不尽相同。这里我们分为三个章节进行细致讲">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://conquers.github.io/Resources/default.png">
+<meta property="article:published_time" content="2023-06-09T10:05:10.000Z">
+<meta property="article:modified_time" content="2023-07-18T02:42:52.327Z">
+<meta property="article:author" content="wtt">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://conquers.github.io/Resources/default.png">
+  
+  
+  
+  <title>第10章 索引优化与查询优化 - Kioo&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/mac.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="第10章 索引优化与查询优化"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-06-09 18:05" pubdate>
+          2023年6月9日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          14k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          119 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">第10章 索引优化与查询优化</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="第10章-索引优化与查询优化"><a href="#第10章-索引优化与查询优化" class="headerlink" title="第10章 索引优化与查询优化"></a>第10章 索引优化与查询优化</h1><p>都有哪些维度可以进行数据库调优？简言之：</p>
+<ul>
+<li>索引失效、没有充分利用到索引——建立索引</li>
+<li>关联查询太多JOIN（设计缺陷或不得已的需求）——<code>SQL</code> 优化</li>
+<li>服务器调优及各个参数设置（缓冲、线程数等）——调整 <code>my.cnf</code></li>
+<li>数据过多——分库分表</li>
+</ul>
+<p>关于数据库调优的知识非常分散。不同的DBMS，不同的公司，不同的职位，不同的项目遇到的问题都不尽相同。这里我们分为三个章节进行细致讲解。</p>
+<p>虽然 <code>SQL</code> 查询优化的技术有很多，但是大方向上完全可以分<strong>物理查询优化</strong>和<strong>逻辑查询优化</strong>两大块。</p>
+<ul>
+<li>物理查询优化是通过<strong>索引</strong>和<strong>表连接方式</strong>等技术来进行优化，这里重点需要掌握索引的使用。</li>
+<li>逻辑查询优化就是通过 <code>sql</code> <strong>等价变换</strong>提升查询效率，直白一点就是说，换一种查询写法效率可能更高。</li>
+</ul>
+<h3 id="1-数据准备"><a href="#1-数据准备" class="headerlink" title="1. 数据准备"></a>1. 数据准备</h3><p>学员表插50万条，班级表插1万条。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE DATABASE atguigudb2;<br>USE atguigudb2;<br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤1：建表</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE `class`<br>(<br>    `id`        INT(11) NOT NULL AUTO_INCREMENT,<br>    `className` VARCHAR(30) DEFAULT NULL,<br>    `address`   VARCHAR(40) DEFAULT NULL,<br>    `monitor`   INT     NULL,<br>    PRIMARY KEY (`id`)<br>) ENGINE = INNODB<br>  AUTO_INCREMENT = 1<br>  DEFAULT CHARSET = utf8;<br><br>CREATE TABLE `student`<br>(<br>    `id`      INT(11) NOT NULL AUTO_INCREMENT,<br>    `stuno`   INT     NOT NULL,<br>    `name`    VARCHAR(20) DEFAULT NULL,<br>    `age`     INT(3)      DEFAULT NULL,<br>    `classId` INT(11)     DEFAULT NULL,<br>    PRIMARY KEY (`id`)<br>    #CONSTRAINT `fk_class_id` FOREIGN KEY (`classId`) REFERENCES `t_class` (`id`)<br>) ENGINE = INNODB<br>  AUTO_INCREMENT = 1<br>  DEFAULT CHARSET = utf8;<br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤2：设置参数(可选)</strong></p>
+<p><code>MySQL 8</code> 须使用允许创建函数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">set global log_bin_trust_function_creators=1; # 不加global只是当前窗口有效。<br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤3：创建函数</strong></p>
+<p>保证每条数据都不同。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#随机产生字符串<br>DELIMITER //<br>CREATE FUNCTION rand_string(n INT) RETURNS VARCHAR(255)<br>BEGIN<br>    DECLARE chars_str VARCHAR(100) DEFAULT<br>        &#x27;abcdefghijklmnopqrstuvwxyzABCDEFJHIJKLMNOPQRSTUVWXYZ&#x27;;<br>    DECLARE return_str VARCHAR(255) DEFAULT &#x27;&#x27;;<br>    DECLARE i INT DEFAULT 0;<br>    WHILE i &lt; n<br>        DO<br>            SET return_str = CONCAT(return_str, SUBSTRING(chars_str, FLOOR(1 + RAND() * 52), 1));<br>            SET i = i + 1;<br>        END WHILE;<br>    RETURN return_str;<br>END //<br>DELIMITER ;<br>#假如要删除<br>#drop function rand_string;<br></code></pre></td></tr></table></figure>
+
+<p>随机产生班级编号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#用于随机产生多少到多少的编号<br>DELIMITER //<br>CREATE FUNCTION rand_num(from_num INT, to_num INT) RETURNS INT(11)<br>BEGIN<br>    DECLARE i INT DEFAULT 0;<br>    SET i = FLOOR(from_num + RAND() * (to_num - from_num + 1));<br>    RETURN i;<br>END //<br>DELIMITER ;<br>#假如要删除<br>#drop function rand_num;<br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤4：创建存储过程</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#创建往stu表中插入数据的存储过程<br>DELIMITER //<br>CREATE PROCEDURE insert_stu(START INT, max_num INT)<br>BEGIN<br>    DECLARE i INT DEFAULT 0;<br>    SET autocommit = 0; #设置手动提交事务<br>    REPEAT<br>        #循环<br>        SET i = i + 1; #赋值<br>        INSERT INTO student (stuno, name, age, classId)<br>        VALUES ((START + i), rand_string(6), rand_num(1, 50), rand_num(1, 1000));<br>    UNTIL i = max_num<br>        END REPEAT;<br>    COMMIT; #提交事务<br>END //<br>DELIMITER ;<br>#假如要删除<br>#drop PROCEDURE insert_stu;<br></code></pre></td></tr></table></figure>
+
+<p>创建往class表中插入数据的存储过程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#执行存储过程，往class表添加随机数据<br>DELIMITER //<br>CREATE PROCEDURE `insert_class`(max_num INT)<br>BEGIN<br>    DECLARE i INT DEFAULT 0;<br>    SET autocommit = 0;<br>    REPEAT<br>        SET i = i + 1;<br>        INSERT INTO class (classname, address, monitor)<br>        VALUES (rand_string(8), rand_string(10), rand_num(1, 100000));<br>    UNTIL i = max_num<br>        END REPEAT;<br>    COMMIT;<br>END //<br>DELIMITER ;<br>#假如要删除<br>#drop PROCEDURE insert_class;<br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤5：调用存储过程</strong></p>
+<p>class</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#执行存储过程，往class表添加1万条数据<br>CALL insert_class(10000);<br></code></pre></td></tr></table></figure>
+
+<p>stu</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#执行存储过程，往stu表添加50万条数据<br>CALL insert_stu(100000, 500000);<br></code></pre></td></tr></table></figure>
+
+<p><strong>步骤6：删除某表上的索引(可选)</strong></p>
+<p>创建存储过程：用于多次测试，方便删除表中的索引</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs mysql">DELIMITER //<br>CREATE PROCEDURE `proc_drop_index`(dbname VARCHAR(200),tablename VARCHAR(200))<br>BEGIN<br>        DECLARE done INT DEFAULT 0;<br>        DECLARE ct INT DEFAULT 0;<br>        DECLARE _index VARCHAR(200) DEFAULT &#x27;&#x27;;<br>        DECLARE _cur CURSOR FOR SELECT index_name FROM<br>information_schema.STATISTICS WHERE table_schema=dbname AND table_name=tablename AND<br>seq_in_index=1 AND index_name &lt;&gt;&#x27;PRIMARY&#x27; ;<br>#每个游标必须使用不同的declare continue handler for not found set done=1来控制游标的结束<br>		DECLARE CONTINUE HANDLER FOR NOT FOUND set done=2 ;<br>#若没有数据返回,程序继续,并将变量done设为2<br>        OPEN _cur;<br>        FETCH _cur INTO _index;<br>        WHILE _index&lt;&gt;&#x27;&#x27; DO<br>            SET @str = CONCAT(&quot;drop index &quot; , _index , &quot; on &quot; , tablename );<br>            PREPARE sql_str FROM @str ;<br>            EXECUTE sql_str;<br>            DEALLOCATE PREPARE sql_str;<br>            SET _index=&#x27;&#x27;;<br>            FETCH _cur INTO _index;<br>        END WHILE;<br>    CLOSE _cur;<br>END //<br>DELIMITER ;<br></code></pre></td></tr></table></figure>
+
+<p>执行存储过程</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CALL proc_drop_index(&quot;dbname&quot;,&quot;tablename&quot;);<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-索引失效案例"><a href="#2-索引失效案例" class="headerlink" title="2. 索引失效案例"></a>2. 索引失效案例</h3><p>MySQL中提高性能的一个最有效的方式是对数据表设计合理的索引。索引提供了高效访问数据的方法，并且加快查询的速度，因此索引对查询的速度有着至关重要的影响。</p>
+<ul>
+<li>使用索引可以快速地定位表中的某条记录，从而提高数据库查询的速度，提高数据库的性能。</li>
+<li>如果查询时没有使用索引，查询语句就会扫描表中的所有记录。在数据量大的情况下，这样查询的速度会很慢。</li>
+</ul>
+<p>大多数情况下都（默认）采用 <code>B+树</code> 来构建索引。只是空间列类型的索引使用 <code>R-树</code>，并且MEMORY表还支持hash索引。</p>
+<p>其实，用不用索引，最终都是优化器说了算。优化器是基于什么的优化器? 基于cost开销( <code>CostBaseOptimizer</code>)，它不是基于规则( <code>Rule-BasedOptimizer</code> )，也不是基于语义。怎么样开销小就怎么来。</p>
+<p>另外，<strong>SQL语句是否使用索引，跟数据库版本、数据量、数据选择度都有关系。</strong></p>
+<h4 id="2-1-全值匹配我最爱"><a href="#2-1-全值匹配我最爱" class="headerlink" title="2.1 全值匹配我最爱"></a>2.1 全值匹配我最爱</h4><p>这一部分，老师讲的不太懂</p>
+<p>个人理解：当某一个表中，同时存在单列索引和联合索引的时候，由于联合索引能够比单列索引限制更少的范围，就会导致单列索引失效，从而使用联合索引。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 首先同时创建以下索引</span><br>CREATE INDEX idx_age ON student(age);<br>CREATE INDEX idx_age_classid ON student(age,classId);<br>CREATE INDEX idx_age_classid_name ON student(age,classId,name);<br><br><span class="hljs-comment"># 查看执行计划</span><br>EXPLAIN SELECT SQL_NO_CACHE *<br>FROM student<br>WHERE age = 50<br>  AND classId = 995<br>  AND name = <span class="hljs-string">&#x27;aaaaaa&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ref</td>
+<td align="left">idx_age,idx_age_classid,idx_age_classid_name</td>
+<td align="left">idx_age_classid_name</td>
+<td align="left">73</td>
+<td align="left">const,const,const</td>
+<td align="left">1</td>
+<td align="left">100</td>
+<td align="left">null</td>
+</tr>
+</tbody></table>
+<p>如上表格，执行上述 <code>sql</code> 时，会选择使用 <code>idx_age_classid_name</code> 的索引，没有使用 <code>idx_age</code> 和 <code>idx_age_name</code>的索引，这是因为<code>idx_age_classid_name</code> 能够将结果范围限制的更小，回表查询的范围也就更小，从而cost开销越低。验证如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># json格式的分析最为详细，可以用来查看cost开销</span><br>EXPLAIN format = json SELECT SQL_NO_CACHE *<br>FROM student<br>WHERE age = 50<br>  AND classId = 995<br>  AND name = <span class="hljs-string">&#x27;aaaaaa&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>测试方法：使用EXPLAIN查看</p>
+<table>
+<thead>
+<tr>
+<th align="center">索引</th>
+<th align="center">cost</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>idx_age_classid_name</code></td>
+<td align="center">“1.20”</td>
+</tr>
+<tr>
+<td align="center"><code>&quot;idx_age_classid&quot;</code></td>
+<td align="center">“20.40”&#96;·</td>
+</tr>
+<tr>
+<td align="center"><code>&quot;idx_age&quot;</code></td>
+<td align="center">“6349.40”</td>
+</tr>
+</tbody></table>
+<h4 id="2-2-最佳左前缀法则"><a href="#2-2-最佳左前缀法则" class="headerlink" title="2.2 最佳左前缀法则"></a>2.2 最佳左前缀法则</h4><p>在MySQL建立联合索引时会遵守最佳左前缀原则，即最左优先，在检索数据时从联合索引的最左边开始匹配。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 使用索引`&quot;idx_age&quot;`<br>EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> student.age <span class="hljs-operator">=</span> <span class="hljs-number">30</span> <span class="hljs-keyword">AND</span> student.name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;aaaaaa&#x27;</span>;<br><br># 没有使用索引<br>EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> student.classId <span class="hljs-operator">=</span> <span class="hljs-number">1</span> <span class="hljs-keyword">AND</span> student.name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;aaaaaa&#x27;</span>;<br><br># 使用索引`idx_age_classid_name`<br>EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> student.classId <span class="hljs-operator">=</span> <span class="hljs-number">4</span> <span class="hljs-keyword">AND</span> student.age <span class="hljs-operator">=</span> <span class="hljs-number">30</span> <span class="hljs-keyword">AND</span> student.name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;aaaaaa&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<p>第二句 <code>sql</code> 没有使用到 <code>idx_age_classid_name</code> 索引的原因：跳过了 age</p>
+<p>第三句 <code>sql</code> 使用到 <code>idx_age_classid_name</code> 索引的原因：优化器会自动调整顺序</p>
+<p>结论：MySQL可以为多个字段创建索引，一个索引可以包含16个字段。对于多列索引，<strong>过滤条件要使用索引必须按照索引建立时的顺序，依次满足，一旦跳过某个字段，索引后面的字段都无法被使用</strong>。如果查询条件中没有用这些字段中第一个字段时，多列（或联合）索引不会被使用。</p>
+<p>🔔补充：除了以上完全没有使用到某个索引外，还存在着使用部分索引的情况</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 删除索引`&quot;idx_age&quot;`后<br>EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> student.age <span class="hljs-operator">=</span> <span class="hljs-number">30</span> <span class="hljs-keyword">AND</span> student.name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;aaaaaa&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ref</td>
+<td align="left">idx_age_classid_name,idx_age_classid</td>
+<td align="left">idx_age_classid</td>
+<td align="left">5</td>
+<td align="left">const</td>
+<td align="left">18290</td>
+<td align="left">10</td>
+<td align="left">Using where</td>
+</tr>
+</tbody></table>
+<p>如上表，使用的索引为 <code>idx_age_classid</code>，但是 <code>key_len</code> 为5，是因为只用了联合索引中的age部分，后面的class_id没有用到。</p>
+<blockquote>
+<p>拓展：Alibaba《Java开发手册》 </p>
+<p>索引文件具有 B-Tree 的最左前缀匹配特性，如果左边的值未确定，那么无法使用此索引。</p>
+</blockquote>
+<h4 id="2-3-主键插入顺序"><a href="#2-3-主键插入顺序" class="headerlink" title="2.3 主键插入顺序"></a><del>2.3 主键插入顺序</del></h4><p><strong>这部分好像跟索引失效没有什么关系，只是说可以尽量保持主键递增的规则，避免无谓的性能损耗。</strong></p>
+<p>对于一个使用 <code>InnoDB</code> 存储引擎的表来说，在我们没有显式的创建索引时，表中的数据实际上都是存储在聚簇索引的叶子节点的。而记录又是存储在数据页中的，数据页和记录又是按照记录主键值从小到大的顺序进行排序，所以如果我们插入的记录的主键值是依次增大的话，那我们每插满一个数据页就换到下一个数据页继续插，而如果我们插入的主键值忽大忽小的话，就比较麻烦了，假设某个数据页存储的记录已经满了，它存储的主键值在1~180之间:</p>
+<p><img src="/Resources/image-20230609170641953.png" srcset="/img/loading.gif" lazyload alt="image-20230609170641953"></p>
+<p>如果此时再插入一条主键值为 9 的记录，那它插入的位置就如下图：</p>
+<p><img src="/Resources/image-20230609170748912.png" srcset="/img/loading.gif" lazyload alt="image-20230609170748912"></p>
+<p>可这个数据页已经满了，再插进来咋办呢？我们需要把当前页面分裂成两个页面，把本页中的一些记录移动到新创建的这个页中。页面分裂和记录移位意味着什么？意味着：<strong>性能损耗</strong>！所以如果我们想尽量避免这样无谓的性能损耗，最好让插入的记录的主键值依次递增，这样就不会发生这样的性能损耗了。 所以我们建议：让主键具有<code>AUTO_INCREMENT</code> ，让存储引擎自己为表生成主键，而不是我们手动插入 ， 比如： <code>person_info</code> 表：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE person_info(<br>    id INT UNSIGNED NOT NULL AUTO_INCREMENT,<br>    name VARCHAR(100) NOT NULL,<br>    birthday DATE NOT NULL,<br>    phone_number CHAR(11) NOT NULL,<br>    country varchar(100) NOT NULL,<br>    PRIMARY KEY (id),<br>    KEY idx_name_birthday_phone_number (name(10), birthday, phone_number)<br>);<br></code></pre></td></tr></table></figure>
+
+<p>我们自定义的主键列 <code>id</code> 拥有 <code>AUTO_INCREMENT</code> 属性，在插入记录时存储引擎会自动为我们填入自增的主键值。这样的主键占用空间小，顺序写入，减少页分裂。</p>
+<h4 id="2-4-计算、函数导致索引失效"><a href="#2-4-计算、函数导致索引失效" class="headerlink" title="2.4 计算、函数导致索引失效"></a>2.4 计算、函数导致索引失效</h4><p><strong>函数导致索引失效</strong>举例如下：</p>
+<p>如果没有对 <code>name</code> 创建索引，需先创建</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> INDEX idx_name <span class="hljs-keyword">ON</span> student(NAME);<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> student.name <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;abc%&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">range</td>
+<td align="left">idx_name</td>
+<td align="left">idx_name</td>
+<td align="left">63</td>
+<td align="left">null</td>
+<td align="left">20</td>
+<td align="left">100</td>
+<td align="left">Using index condition</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> <span class="hljs-keyword">LEFT</span>(student.name,<span class="hljs-number">3</span>) <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;abc&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">499086</td>
+<td align="left">100</td>
+<td align="left">Using where</td>
+</tr>
+</tbody></table>
+<p>从上面的表格可以看出：第一个 <code>sql</code> 使用到了索引，而第二个则没有，是因为使用了字符串函数 <code>LEFT</code></p>
+<blockquote>
+<p>🔔</p>
+<p>另外，如果第一条 <code>sql</code> 中 <code>LIKE</code> 后面跟的是 <code>%abc</code> 同样会导致索引失效，这是因为当%在前面时，对B+树来说，只能去一个一个的比较，见2.9</p>
+</blockquote>
+<p><strong>计算导致索引失效</strong>举例如下：</p>
+<p>如果没有对 <code>stuno</code> 创建索引，需先创建</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> INDEX idx_sno <span class="hljs-keyword">ON</span> student(stuno);<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE id, stuno, NAME <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> stuno <span class="hljs-operator">+</span> <span class="hljs-number">1</span> <span class="hljs-operator">=</span> <span class="hljs-number">900001</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">499086</td>
+<td align="left">100</td>
+<td align="left">Using where</td>
+</tr>
+</tbody></table>
+<p>从上面的表格可以看出：上述 <code>sql</code> 没有使用到索引，是因为使用了计算</p>
+<h4 id="2-5-类型转换导致索引失效"><a href="#2-5-类型转换导致索引失效" class="headerlink" title="2.5 类型转换导致索引失效"></a>2.5 类型转换导致索引失效</h4><p>当发生类型转换时，不管是隐式还是显式，都会导致索引失效</p>
+<p>举例如下数据库对于 <code>name</code> 字段的定义是 <code>varchar</code>，但是 <code>where</code> 写的是 <code>int</code>，<code>mysql</code> 就会自动隐式转换</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 未使用到索引<br>EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> name <span class="hljs-operator">=</span> <span class="hljs-number">123</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">499086</td>
+<td align="left">11.11</td>
+<td align="left">Using where</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 使用到索引<br>EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> name<span class="hljs-operator">=</span><span class="hljs-string">&#x27;123&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ref</td>
+<td align="left">idx_name</td>
+<td align="left">idx_name</td>
+<td align="left">63</td>
+<td align="left">const</td>
+<td align="left">1</td>
+<td align="left">100</td>
+<td align="left">null</td>
+</tr>
+</tbody></table>
+<p>从上面的表格可以看出：第一个 <code>sql</code> 没有使用到索引，而第二个使用到了，是因为第一个 <code>sql</code> 发生了隐式转换</p>
+<h4 id="2-6-范围条件右边的列索引失效"><a href="#2-6-范围条件右边的列索引失效" class="headerlink" title="2.6 范围条件右边的列索引失效"></a>2.6 范围条件右边的列索引失效</h4><p>为防止之前创建的索引对这部分的验证造成干扰，需删除除主键外的其他索引</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> student <span class="hljs-keyword">DROP</span> INDEX idx_name;<br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> student <span class="hljs-keyword">DROP</span> INDEX idx_age_classid;<br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> student <span class="hljs-keyword">DROP</span> INDEX idx_age_classid_name;<br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> student <span class="hljs-keyword">DROP</span> INDEX idx_sno;<br><br># 这个好像没起作用<br><span class="hljs-keyword">call</span> proc_drop_index(<span class="hljs-string">&#x27;atguigudb2&#x27;</span>, <span class="hljs-string">&#x27;student&#x27;</span>)<br></code></pre></td></tr></table></figure>
+
+<p>举例说明如下：</p>
+<p>首先创建索引</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> INDEX idx_age_classId_name <span class="hljs-keyword">ON</span> student (age, classId, name);<br></code></pre></td></tr></table></figure>
+
+<p>查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">EXPLAIN <span class="hljs-keyword">SELECT</span> SQL_NO_CACHE <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> student.age<span class="hljs-operator">=</span><span class="hljs-number">30</span> <span class="hljs-keyword">AND</span> student.classId<span class="hljs-operator">&gt;</span><span class="hljs-number">20</span> <span class="hljs-keyword">AND</span> student.name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;abc&#x27;</span> ;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">range</td>
+<td align="left">idx_age_classId_name</td>
+<td align="left">idx_age_classId_name</td>
+<td align="left">10</td>
+<td align="left">null</td>
+<td align="left">18568</td>
+<td align="left">10</td>
+<td align="left">Using index condition</td>
+</tr>
+</tbody></table>
+<p>从上述表中可以看到，该语句使用到了刚刚创建的联合索引，但是 <code>key_len</code> 为10，这是因为使用了 <code>student.classId&gt;20</code> 后导致后面的不再会使用索引了，10 &#x3D; 4 + 1 + 4 + 1，分别为 age int 占4个字节，null 占一个字节，classid int 占4个字节，null 占一个字节。而根据范围查找筛选后的数据，无法保证范围查找后面的字段是有序的，例如：a_b_c这个索引，你根据b范围查找&gt;2的，在满足b&gt;2的情况下，如b：3，4，c可能是5,3，因为c无序，那么c的索引便失效了。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> student<br>(<br>    id      <span class="hljs-type">int</span> auto_increment<br>        <span class="hljs-keyword">primary</span> key,<br>    stuno   <span class="hljs-type">int</span>         <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>,<br>    name    <span class="hljs-type">varchar</span>(<span class="hljs-number">20</span>) <span class="hljs-keyword">null</span>,<br>    age     <span class="hljs-type">int</span>(<span class="hljs-number">3</span>)      <span class="hljs-keyword">null</span>,<br>    classId <span class="hljs-type">int</span>         <span class="hljs-keyword">null</span><br>)<br># <span class="hljs-type">int</span>(<span class="hljs-number">3</span>) 和 <span class="hljs-type">int</span> 所占字节都是一样的，它在数据库里面存储的都是<span class="hljs-number">4</span>个字节的长度，在使用<span class="hljs-type">int</span>(<span class="hljs-number">3</span>)的时候如果你输入的是<span class="hljs-number">10</span>，会默认给你存储位<span class="hljs-number">010</span>,也就是说这个<span class="hljs-number">3</span>代表的是默认的一个长度，当你不足<span class="hljs-number">3</span>位时，会帮你不全，当你超过<span class="hljs-number">3</span>位时，就没有任何的影响。<br><br>计算规则<br><span class="hljs-number">1.</span>索引字段，非<span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>，加<span class="hljs-number">1</span>个字节。<br><span class="hljs-number">2.</span>定长字段：tinyiny占<span class="hljs-number">1</span>个字节、<span class="hljs-type">int</span>占<span class="hljs-number">4</span>个字节、bitint占<span class="hljs-number">8</span>个字节、<span class="hljs-type">date</span>占<span class="hljs-number">3</span>个字节、datetime占<span class="hljs-number">5</span>个字节，<span class="hljs-type">char</span>(n)占n个字符。<br><span class="hljs-number">3.</span>变长字段：<span class="hljs-type">varchar</span>(n)占n个字符<span class="hljs-operator">+</span><span class="hljs-number">2</span>个字节。<br><span class="hljs-number">4.</span>不同的字符集，一个字符占用的字节数不同：<br><br>latin1编码，每个字符占用一个字节<br>gbk编码，每个字符占用两个字节<br>utf8编码，每个字符占用三个字节<br>utf8mb4编码，每个字符占用四个字节<br></code></pre></td></tr></table></figure>
+
+<p>即只要使用了(&lt;) (&lt;&#x3D;) (&gt;) (&gt;&#x3D;) 和 between 等，则后面的语句不再会使用到索引</p>
+<p>解决办法：将需要使用范围的条件放置至最后，具体如下</p>
+<p>建立索引为 <code>create index idx_age_name_classId on student(age,name,classId);</code></p>
+<p>查询条件为 <code>EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE student.age=30 AND student.name = &#39;abc&#39; AND student.classId&gt;20;</code></p>
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">range</td>
+<td align="left">idx_age_classId_name,idx_age_name_classId</td>
+<td align="left">idx_age_name_classId</td>
+<td align="left">73</td>
+<td align="left">null</td>
+<td align="left">1</td>
+<td align="left">100</td>
+<td align="left">Using index condition</td>
+</tr>
+</tbody></table>
+<p>因此可以看到 <code>key_len</code> 变为了73 &#x3D; 4 + 1 +4 + 1 + 62 + 1；</p>
+<blockquote>
+<p>应用开发中范围查询，例如：金额查询，日期查询往往都是范围查询。应将查询条件放置where语句最后。（创建的联合索引中，务必把范围涉及到的字段写在最后）</p>
+</blockquote>
+<h4 id="2-7-不等于-x3D-或者-lt-gt-索引失效"><a href="#2-7-不等于-x3D-或者-lt-gt-索引失效" class="headerlink" title="2.7 不等于(!&#x3D; 或者&lt;&gt;)索引失效"></a>2.7 不等于(!&#x3D; 或者&lt;&gt;)索引失效</h4><ul>
+<li>为name字段创建索引</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE INDEX idx_name ON student(NAME);<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>查看索引是否失效</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE student.name &lt;&gt; &#x27;abc&#x27;;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">idx_name</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">499086</td>
+<td align="left">50.14</td>
+<td align="left">Using where</td>
+</tr>
+</tbody></table>
+<p>场景举例：用户提出需求，将财务数据，产品利润金额不等于0的都统计出来。</p>
+<h4 id="2-8-is-null可以使用索引，is-not-null无法使用索引"><a href="#2-8-is-null可以使用索引，is-not-null无法使用索引" class="headerlink" title="2.8 is null可以使用索引，is not null无法使用索引"></a><del>2.8 is null可以使用索引，is not null无法使用索引</del></h4><p>结论：<strong>有时候走，有时候不走。这个基于MySQL自身的查询优化。</strong></p>
+<p>以下可以不看</p>
+<ul>
+<li>创建索引</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> INDEX idx_age <span class="hljs-keyword">ON</span> student(age);<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>IS NULL: 可以触发索引</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE age IS NULL;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ref</td>
+<td align="left">idx_age_classId_name,idx_age_name_classId,idx_age</td>
+<td align="left">idx_age_classId_name</td>
+<td align="left">5</td>
+<td align="left">const</td>
+<td align="left">1</td>
+<td align="left">100</td>
+<td align="left">Using index condition</td>
+</tr>
+</tbody></table>
+<ul>
+<li>IS NOT NULL: 无法触发索引</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE age IS NOT NULL;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">idx_age_classId_name,idx_age_name_classId,idx_age</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">499086</td>
+<td align="left">50</td>
+<td align="left">Using where</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>结论：最好在设计数据库的时候就将<code>字段设置为 NOT NULL 约束</code>，比如你可以将 INT 类型的字段，默认值设置为0。将字符类型的默认值设置为空字符串(‘’)。</p>
+<p>扩展：同理，在查询中使用<code>not like</code>也无法使用索引，导致全表扫描。</p>
+</blockquote>
+<h4 id="2-9-like以通配符-开头索引失效"><a href="#2-9-like以通配符-开头索引失效" class="headerlink" title="2.9 like以通配符%开头索引失效"></a>2.9 like以通配符%开头索引失效</h4><p>在使用LIKE关键字进行查询的查询语句中，如果匹配字符串的第一个字符为’%’，索引就不会起作用。只有’%’不在第一个位置，索引才会起作用。</p>
+<blockquote>
+<p>拓展：Alibaba《Java开发手册》 </p>
+<p>【强制】页面搜索严禁左模糊或者全模糊，如果需要请走搜索引擎来解决。</p>
+<p><strong>面试</strong>：<code>MySQL</code> 使用 like “%x“，索引不一定会失效</p>
+<p><a target="_blank" rel="noopener" href="https://www.xiaolincoding.com/mysql/index/index_issue.html">https://www.xiaolincoding.com/mysql/index/index_issue.html</a></p>
+</blockquote>
+<h4 id="2-10-OR-前后存在非索引的列，索引失效"><a href="#2-10-OR-前后存在非索引的列，索引失效" class="headerlink" title="2.10 OR 前后存在非索引的列，索引失效"></a>2.10 OR 前后存在非索引的列，索引失效</h4><p>在WHERE子句中，如果在OR前的条件列进行了索引，而在OR后的条件列没有进行索引，那么索引会失效。也就是说，<strong>OR前后的两个条件中的列都是索引时，查询中才使用索引。</strong></p>
+<p>因为OR的含义就是两个只要满足一个即可，因此<strong>只有一个条件列进行了索引是没有意义</strong>的，只要有条件列没有进行索引，就会进行全表扫描，因此索引的条件列也会失效。</p>
+<p>查询语句使用OR关键字的情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 未使用到索引<br>EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE age = 10 OR classid = 100;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">ALL</td>
+<td align="left">idx_age_classId_name,idx_age_name_classId,idx_age</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">null</td>
+<td align="left">499086</td>
+<td align="left">11.88</td>
+<td align="left">Using where</td>
+</tr>
+</tbody></table>
+<p>因为classId字段上没有索引，所以上述查询语句没有使用索引。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">#使用到索引<br>EXPLAIN SELECT SQL_NO_CACHE * FROM student WHERE age = 10 OR name = &#x27;Abel&#x27;;<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">select_type</th>
+<th align="left">table</th>
+<th align="left">partitions</th>
+<th align="left">type</th>
+<th align="left">possible_keys</th>
+<th align="left">key</th>
+<th align="left">key_len</th>
+<th align="left">ref</th>
+<th align="left">rows</th>
+<th align="left">filtered</th>
+<th align="left">Extra</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">SIMPLE</td>
+<td align="left">student</td>
+<td align="left">null</td>
+<td align="left">index_merge</td>
+<td align="left">idx_age_classId_name,idx_age_name_classId,idx_name,idx_age</td>
+<td align="left">idx_age,idx_name</td>
+<td align="left">5,63</td>
+<td align="left">null</td>
+<td align="left">10074</td>
+<td align="left">100</td>
+<td align="left">Using union(idx_age,idx_name); Using where</td>
+</tr>
+</tbody></table>
+<p>因为age字段和name字段上都有索引，所以查询中使用了索引。你能看到这里使用到了<code>index_merge</code>，简单来说index_merge就是对age和name分别进行了扫描，然后将这两个结果集进行了合并。这样做的好处就是<strong>避免了全表扫描</strong>。</p>
+<h4 id="2-11-数据库和表的字符集统一使用utf8mb4"><a href="#2-11-数据库和表的字符集统一使用utf8mb4" class="headerlink" title="2.11 数据库和表的字符集统一使用utf8mb4"></a>2.11 数据库和表的字符集统一使用utf8mb4</h4><p>统一使用 <code>utf8mb4</code> (5.5.3版本以上支持)兼容性更好，统一字符集可以避免由于字符集转换产生的乱码。不同的 <strong>字符集</strong> 进行比较前需要进行 <strong>转换</strong> 会造成索引失效。</p>
+<h4 id="2-12-练习及一般性建议"><a href="#2-12-练习及一般性建议" class="headerlink" title="2.12 练习及一般性建议"></a>2.12 练习及一般性建议</h4><p><strong>练习：</strong>假设：index(a,b,c)</p>
+<table>
+<thead>
+<tr>
+<th align="center">Where</th>
+<th>索引是否被使用</th>
+<th align="center">使用到哪个索引</th>
+<th align="center">原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>where a= 3</code></td>
+<td>✅</td>
+<td align="center"><code>a</code></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><code>where a = 3 and b=5</code></td>
+<td>✅</td>
+<td align="center"><code>a</code> <code>b</code></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><code>where a = 3 and b=5 and c=4</code></td>
+<td>✅</td>
+<td align="center"><code>a</code> <code>b</code> <code>c</code></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><code>where b= 3 or where b= 3 and c= 4 orwhere c= 4</code></td>
+<td>❌</td>
+<td align="center"></td>
+<td align="center">2.10</td>
+</tr>
+<tr>
+<td align="center"><code>where a= 3 and c= 5</code></td>
+<td>✅</td>
+<td align="center"><code>a</code></td>
+<td align="center">2.2</td>
+</tr>
+<tr>
+<td align="center"><code>where a= 3 and b &gt; 4 and c= 5</code></td>
+<td>✅</td>
+<td align="center"><code>a</code> <code>b</code></td>
+<td align="center">2.6</td>
+</tr>
+<tr>
+<td align="center"><code>where a is null and b is not null</code></td>
+<td>❔</td>
+<td align="center"></td>
+<td align="center"><code>is null</code> 和 <code>is not null</code> 不一定，具体看优化器</td>
+</tr>
+<tr>
+<td align="center"><code>where a &lt;&gt; 3</code></td>
+<td>❌</td>
+<td align="center"></td>
+<td align="center">2.7</td>
+</tr>
+<tr>
+<td align="center"><code>where abs(a)=3</code></td>
+<td>❌</td>
+<td align="center"></td>
+<td align="center">2.4</td>
+</tr>
+<tr>
+<td align="center"><code>where a = 3 and b like &#39;kk% &#39; and c = 4</code></td>
+<td>✅</td>
+<td align="center"><code>a</code> <code>b</code> <code>c</code></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center"><code>where a= 3 and b like &#39;%kk&#39; and c= 4</code></td>
+<td>✅</td>
+<td align="center"><code>a</code></td>
+<td align="center">2.9</td>
+</tr>
+<tr>
+<td align="center"><code>where a= 3 and b like &#39;%kk%&#39; and c= 4</code></td>
+<td>✅</td>
+<td align="center"><code>a</code></td>
+<td align="center">2.9</td>
+</tr>
+<tr>
+<td align="center"><code>where a = 3 and b like &#39;k%kk%&#39;and c = 4</code></td>
+<td>✅</td>
+<td align="center"><code>a</code> <code>b</code> <code>c</code></td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p><strong>一般性建议</strong></p>
+<ul>
+<li>对于单列索引，尽量选择针对当前query过滤性更好的索引</li>
+<li>在选择组合索引的时候，当前query中过滤性最好的字段在索引字段顺序中，位置越靠前越好。</li>
+<li>在选择组合索引的时候，尽量选择能够当前query中where子句中更多的索引。</li>
+<li>在选择组合索引的时候，如果某个字段可能出现范围查询时，尽量把这个字段放在索引次序的最后面。</li>
+</ul>
+<p><strong>总之，书写SQL语句时，尽量避免造成索引失效的情况</strong></p>
+<h2 id="7-优化分页查询"><a href="#7-优化分页查询" class="headerlink" title="7. 优化分页查询"></a>7. 优化分页查询</h2><p>一般分页查询时，通过创建覆盖索引能够比较好地提高性能。一个常见又非常头疼的问题就是 <code>limit 2000000,10</code>（2000000是起始下标，10是长度）此时需要<code>Mysql</code> 排序前200,0010记录，仅仅返回200,0000 - 200,0010的记录，其他记录丢弃，查询排序的代价非常大。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">EXPLAIN <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student LIMIT <span class="hljs-number">2000000</span>,<span class="hljs-number">10</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="/Resources/image-20230608143554543.png" srcset="/img/loading.gif" lazyload alt="image-20230608143554543"></p>
+<p><strong>优化思路一</strong></p>
+<p>在索引上完成排序分页操作，最后根据主键关联回原表查询所需要的其他列内容。（覆盖索引+子查询）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mysql">EXPLAIN<br>SELECT *<br>FROM student t,<br>     (SELECT id FROM student ORDER BY id LIMIT 2000000,10) a<br>WHERE t.id = a.id;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220705225625166.png" srcset="/img/loading.gif" lazyload alt="image-20220705225625166"></p>
+<p><strong>优化思路二</strong></p>
+<p>该方案适用于主键自增的表且记录没有删除，可以把Limit 查询转换成某个位置的查询。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">EXPLAIN SELECT * FROM student WHERE id &gt; 2000000 LIMIT 10;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220705225654124.png" srcset="/img/loading.gif" lazyload alt="image-20220705225654124"></p>
+<h2 id="8-覆盖索引"><a href="#8-覆盖索引" class="headerlink" title="8. 覆盖索引"></a>8. 覆盖索引</h2><h3 id="8-1-什么是覆盖索引？"><a href="#8-1-什么是覆盖索引？" class="headerlink" title="8.1 什么是覆盖索引？"></a>8.1 什么是覆盖索引？</h3><p><strong>理解方式一</strong>：索引是高效找到行的一个方法，但是一般数据库也能使用索引找到一个列的数据，因此它不必读取整个行。毕竟索引叶子节点存储了它们索引的数据；当能通过读取索引就可以得到想要的数据，那就不需要读取行了。<strong>一个索引包含了满足查询结果的数据就叫做覆盖索引</strong>。</p>
+<p><strong>理解方式二</strong>：非聚簇复合索引的一种形式，它包括在查询里的SELECT、JOIN和WHERE子句用到的所有列 （即建索引的字段正好是覆盖查询条件中所涉及的字段）。</p>
+<p>简单说就是：<code>索引列+主键</code> 包含 <code>SELECT 到 FROM之间查询的列</code>。图第二种：索引列（name） + 主键（id） 满足结果</p>
+<p>简单说就是：<strong>覆盖索引不需要回表查询</strong></p>
+<p><img src="/Resources/image-20230608112549642.png" srcset="/img/loading.gif" lazyload alt="image-20230608112549642"></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1iq4y1u7vj/?p=147">https://www.bilibili.com/video/BV1iq4y1u7vj/?p=147</a> 11：55</p>
+<p><strong>举例一：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mysql"># 删除之前的索引<br>DROP INDEX idx_age_stuno ON student;<br>CREATE INDEX idx_age_name ON student(age, NAME);<br>EXPLAIN SELECT * FROM student WHERE age &lt;&gt; 20;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220706124528680.png" srcset="/img/loading.gif" lazyload alt="image-20220706124528680"></p>
+<p><strong>举例二：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">EXPLAIN SELECT * FROM student WHERE NAME LIKE &#x27;%abc&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220706124612180.png" srcset="/img/loading.gif" lazyload alt="image-20220706124612180"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE INDEX idx_age_name ON student(age, NAME);<br>EXPLAIN SELECT id,age,NAME FROM student WHERE NAME LIKE &#x27;%abc&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220706125113658.png" srcset="/img/loading.gif" lazyload alt="image-20220706125113658"></p>
+<p>上述都使用到了声明的索引，下面的情况则不然，查询列依然多了classId,结果是未使用到索引：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mysql">EXPLAIN SELECT id,age,NAME,classId FROM student WHERE NAME LIKE &#x27;%abc&#x27;;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20220706125351116.png" srcset="/img/loading.gif" lazyload alt="image-20220706125351116"></p>
+<h3 id="8-2-覆盖索引的利弊"><a href="#8-2-覆盖索引的利弊" class="headerlink" title="8.2 覆盖索引的利弊"></a>8.2 覆盖索引的利弊</h3><img src="Resources/image-20220706125943936.png" srcset="/img/loading.gif" lazyload alt="image-20220706125943936" style="zoom:80%;float:left" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Database/" class="category-chain-item">Database</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Database/MySQL/" class="category-chain-item">MySQL</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/MySQL/">#MySQL</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>第10章 索引优化与查询优化</div>
+      <div>http://conquers.github.io/posts/ada7f77e.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>wtt</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年6月9日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

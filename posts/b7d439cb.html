@@ -1,0 +1,1632 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="wtt">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="第15章 锁1、概述锁是计算机协调多个进程或线程并发访问某一资源的机制。在程序开发中会存在多线程同步的问题，当多个线程并发访问某个数据的时候，尤其是针对一些敏感的数据（比如订单、金额等)，我们就需要保证这个数据在任何时刻最多只有一个线程在访问，保证数据的完整性和一致性。在开发过程中加锁是为了保证数据的一致性，这个思想在数据库领域中同样很重要。 在数据库中，除传统的计算资源（如CPU、RAM、I&amp;#">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第15章 锁">
+<meta property="og:url" content="http://conquers.github.io/posts/b7d439cb.html">
+<meta property="og:site_name" content="Kioo&#39;s Blog">
+<meta property="og:description" content="第15章 锁1、概述锁是计算机协调多个进程或线程并发访问某一资源的机制。在程序开发中会存在多线程同步的问题，当多个线程并发访问某个数据的时候，尤其是针对一些敏感的数据（比如订单、金额等)，我们就需要保证这个数据在任何时刻最多只有一个线程在访问，保证数据的完整性和一致性。在开发过程中加锁是为了保证数据的一致性，这个思想在数据库领域中同样很重要。 在数据库中，除传统的计算资源（如CPU、RAM、I&amp;#">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://conquers.github.io/Resources/banner-MySQL.png">
+<meta property="article:published_time" content="2023-06-16T06:08:36.000Z">
+<meta property="article:modified_time" content="2023-07-18T02:42:52.330Z">
+<meta property="article:author" content="wtt">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://conquers.github.io/Resources/banner-MySQL.png">
+  
+  
+  
+  <title>第15章 锁 - Kioo&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/mac.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="第15章 锁"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-06-16 14:08" pubdate>
+          2023年6月16日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          35k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          290 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">第15章 锁</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="第15章-锁"><a href="#第15章-锁" class="headerlink" title="第15章 锁"></a>第15章 锁</h1><h2 id="1、概述"><a href="#1、概述" class="headerlink" title="1、概述"></a>1、概述</h2><p><strong>锁</strong>是计算机协调多个进程或线程<strong>并发访问某一资源</strong>的机制。在程序开发中会存在多线程同步的问题，当多个线程并发访问某个数据的时候，尤其是针对一些敏感的数据（比如订单、金额等)，我们就需要保证这个数据在任何时刻<strong>最多只有一个线程在访问</strong>，<strong>保证数据的完整性和一致性</strong>。在开发过程中加锁是为了保证数据的一致性，这个思想在数据库领域中同样很重要。</p>
+<p>在数据库中，除传统的计算资源（如CPU、RAM、I&#x2F;O等）的争用以外，数据也是一种供许多用户共享的资源。为保证数据的一致性，需要<strong>对并发操作进行控制</strong> ，因此产生了锁 。同时锁机制也为实现 <code>MySQL</code> 的各个<strong>隔离级别提供了保证</strong>。锁冲突也是影响数据库并发访问性能的一个重要因素。所以锁对数据库而言显得尤其重要，也更加复杂。</p>
+<h2 id="2、MySQL并发事务访问相同记录"><a href="#2、MySQL并发事务访问相同记录" class="headerlink" title="2、MySQL并发事务访问相同记录"></a>2、MySQL并发事务访问相同记录</h2><p>并发事务访问相同记录的情况大致可以划分为3种：</p>
+<h3 id="2-1-读-读情况"><a href="#2-1-读-读情况" class="headerlink" title="2.1 读-读情况"></a>2.1 读-读情况</h3><p>即并发事务相继读取相同的记录。读取操作本身不会对记录有任何影响，并不会引起什么问题，所以<strong>允许</strong>这种情况的发生。</p>
+<h3 id="2-2-写-写情况"><a href="#2-2-写-写情况" class="headerlink" title="2.2 写-写情况"></a>2.2 写-写情况</h3><p>即并发事务相继对相同的记录做出改动。</p>
+<p>在这种情况下会发生脏写的问题，任何一种隔离级别都<strong>不允许</strong>这种问题的发生。所以在多个未提交事务相继对一条记录做改动时，需要让它们<strong>排队执行</strong>，这个排队的过程其实是<strong>通过锁来实现的</strong>。这个所谓的锁其实是一个内存中的结构，在事务执行前本来是没有锁的，也就是说一开始是没有锁结构和记录进行关联的，如图所示：</p>
+<p><img src="/Resources/image-20230625165741828.png" srcset="/img/loading.gif" lazyload alt="image-20230625165741828"></p>
+<p>当一个事务想对这条记录做改动时，首先会看看内存中有没有与这条记录关联的锁结构 ，当没有的时候就会在内存中生成一个锁结构与之关联。比如，事务 <code>T1</code> 要对这条记录做改动，就需要生成一个<strong>锁结构</strong>与之关联：</p>
+<p><img src="/Resources/image-20230625165745767.png" srcset="/img/loading.gif" lazyload alt="image-20230625165745767"></p>
+<p>在锁结构里有很多信息，为了简化理解，只把两个比较重要的属性拿了出来：</p>
+<ul>
+<li><p><code>trx信息</code>：代表这个锁结构是哪个事务生成的。</p>
+</li>
+<li><p><code>is_waiting</code>：代表当前事务是否在等待。</p>
+</li>
+</ul>
+<p>在事务 <code>T1</code> 改动了这条记录后，就生成了一个锁结构与该记录关联，因为之前没有别的事务为这条记录加锁，所以 <code>is_waiting</code> 属性就是 <code>false</code>，我们把这个场景就称值为获取锁成功，或者<strong>加锁成功</strong>，然后就可以继续执行操作了。</p>
+<p>在事务 <code>T1</code> 提交之前，另一个事务 <code>T2</code> 也想对该记录做改动，那么先看看有没有锁结构与这条记录关联，发现有一个锁结构与之关联后，然后也生成了一个锁结构与这条记录关联，不过此时生成的锁中的 <code>is_waiting</code> 属性值为 <code>true</code>，表示当前事务需要等待，我们把这个场景就称之为获取锁失败，或者<strong>加锁失败</strong>，图示：</p>
+<p><img src="/Resources/image-20230625165754235.png" srcset="/img/loading.gif" lazyload alt="image-20230625165754235"></p>
+<p>在事务 <code>T1</code> 提交之后，就会把该事务生成的锁结构释放掉，然后看看还有没有别的事务在等待获取锁，发现了事务 <code>T2</code> 还在等待获取锁，所以把事务 <code>T2</code> 对应的锁结构的 <code>is_waiting</code> 属性设置为 <code>false</code>，然后把该事务对应的线程唤醒，让它继续执行，此时事务 <code>T2</code> 就算获取到锁了。效果就是这样。</p>
+<p><img src="/Resources/image-20230625165759186.png" srcset="/img/loading.gif" lazyload alt="image-20230625165759186"></p>
+<p>小结几种说法：</p>
+<ul>
+<li>不加锁<ul>
+<li>意思就是不需要在内存中生成对应的锁结构，可以直接执行操作。</li>
+</ul>
+</li>
+<li>获取锁成功（加锁成功）<ul>
+<li>意思就是在内存中生成了对应的锁结构 ，而且锁结构的 <code>is_waiting</code> 属性为 <code>false</code> ，也就是事务可以<strong>继续执行</strong>操作。</li>
+</ul>
+</li>
+<li>获取锁失败（加锁失败、没有获取到锁）<ul>
+<li>意思就是在内存中生成了对应的锁结构 ，不过锁结构的 <code>is_waiting</code> 属性为 <code>true</code> ，也就是事务需要<strong>等待</strong>，不可以继续执行操作。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-3-读-写或写-读情况"><a href="#2-3-读-写或写-读情况" class="headerlink" title="2.3 读-写或写-读情况"></a>2.3 读-写或写-读情况</h3><p>即一个事务进行读取操作，另一个进行改动操作。这种情况下可能发生 <code>脏读</code>、 <code>不可重复读</code> 、<code>幻读</code> 的问题。</p>
+<p>各个数据库厂商对 <code>SQL标准</code> 的支持都可能不一样。比如 <code>MySQL</code> 在 <code>REPEATABLE READ</code> 隔离级别上就已经解决了 <code>幻读</code> 问题。</p>
+<blockquote>
+<p>对于<code>SQL标准</code>中的<code>REPEATABLE READ</code> 是没有解决幻读的。</p>
+</blockquote>
+<h3 id="2-4-并发问题的解决方案"><a href="#2-4-并发问题的解决方案" class="headerlink" title="2.4 并发问题的解决方案"></a>2.4 并发问题的解决方案</h3><p>怎么解决 <strong>脏读</strong>、 <strong>不可重复读</strong> 、<strong>幻读</strong> 这些问题呢？其实有两种可选的解决方案：</p>
+<blockquote>
+<p>方案一：<strong>读</strong>操作利用 <strong><a href="%E7%AC%AC16%E7%AB%A0%20%E5%A4%9A%E7%89%88%E6%9C%AC%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6.md">多版本并发控制(MVCC)</a><strong>，</strong>写</strong>操作利用 <strong>加锁</strong></p>
+</blockquote>
+<ul>
+<li><p><code>MVCC</code> ：生成一个 <code>ReadView</code>，通过 <code>ReadView</code> 找到符合条件的记录版本（历史版本由undo日志构建)。<strong>查询语句</strong>只能读到在生成 <code>ReadView</code> <strong>之前已提交事务所做的更改</strong>，在生成 <code>ReadView</code> 之前未提交的事务或者之后才开启的事务所做的更改是看不到的。而<strong>写操作</strong>肯定针对的是<strong>最新版本的记录</strong>，读记录的历史版本和改动记录的最新版本本身并不冲突，也就是采用 <code>MVCC</code> 时，读-写操作并不冲突。</p>
+</li>
+<li><p>普通的 <code>SELECT</code> 语句在 <code>READ COMMITTED</code> 和 <code>REPEATABLE READ</code> 隔离级别下会使用到 <code>MVCC</code> 读取记录。</p>
+<ul>
+<li><p>在 <code>READ COMMITTED</code> 隔离级别下，一个事务在执行过程中每次执行SELECT操作时都会生成一 个 <code>ReadView</code>，<code>ReadView</code> 的存在本身就保证了<strong>事务不可以读取到未提交的事务所做的更改</strong> ，也就是避免了脏读现象；</p>
+</li>
+<li><p>在 <code>REPEATABLE READ</code> 隔离级别下，一个事务在执行过程中只有 <code>第一次执行SELECT操作</code> 才会生成一个 <code>ReadView</code>，之后的SELECT操作都 <code>复用</code> 这个 <code>ReadView</code>，这样也就避免了不可重复读和大部分幻读的问题（快照读解决了，当前读没有解决，读加锁，就只是在原来读取的数据行加了锁，但增加数据行就产生幻读了）</p>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>方案二：<strong>读、写</strong>操作都采用 <strong>加锁</strong> 的方式。</p>
+</blockquote>
+<ul>
+<li><p>如果我们的一些业务场景不允许读取记录的旧版本，而是每次都必须去读取记录的最新版本。比如，在银行存款的事务中，你需要先把账户的余额读出来，然后将其加上本次存款的数额，最后再写到数据库中。在将账户余额读取出来后，就不想让别的事务再访问该余额，直到本次存款事务执行完成，其他事务才可以访问账户的余额。这样在读取记录的时候就需要对其进行加锁。操作，这样也就意味着读操作和写操作也像写-写操作那样排队执行。</p>
+<ul>
+<li><p>脏读的产生是因为当前事务读取了另一个未提交事务写的一条记录，如果另一个事务在写记录的时候就给这条记录加锁，那么当前事务就无法继续读取该记录了，所以也就不会有脏读问题的产生了。</p>
+</li>
+<li><p>不可重复读的产生是因为当前事务先读取一条记录，另外一个事务对该记录做了改动之后并提交之后，当前事务再次读取时会获得不同的值，如果在当前事务读取记录时就给该记录加锁，那么另一个事务就无法修改该记录，自然也不会发生不可重复读了。</p>
+</li>
+<li><p>幻读问题的产生是因为当前事务读取了一个范围的记录，然后另外的事务向该范围内插入了新记录，当前事务再次读取该范围的记录时发现了新插入的新记录。采用加锁的方式解决幻读问题就有一些麻烦，因为当前事务在第一次读取记录时幻影记录并不存在，所以读取的时候加锁就有点尴尬（因为此时根本看不到新加的数据，要保证可重复读)。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>小结：</p>
+<ul>
+<li>采用 <code>MVCC</code> 方式的话， 读-写 操作彼此并不冲突， 性能更高 。</li>
+<li>采用 <code>加锁</code> 方式的话， 读-写 操作彼此需要排队执行，影响性能。</li>
+</ul>
+<p>一般情况下我们当然愿意采用 <code>MVCC</code> 来解决 <code>读-写</code> 操作并发执行的问题，但是业务在某些特殊情况下，要求必须采用 <code>加锁</code> 的方式执行。下面就讲解下 <code>MySQL</code> 中不同类别的锁。</p>
+<h2 id="3、锁的不同角度分类"><a href="#3、锁的不同角度分类" class="headerlink" title="3、锁的不同角度分类"></a>3、锁的不同角度分类</h2><p>锁的分类图，如下：</p>
+<p><img src="/Resources/image-20230625165809844.png" srcset="/img/loading.gif" lazyload alt="image-20230625165809844"></p>
+<h3 id="3-1-从数据操作的类型划分：读锁、写锁"><a href="#3-1-从数据操作的类型划分：读锁、写锁" class="headerlink" title="3.1 从数据操作的类型划分：读锁、写锁"></a>3.1 从数据操作的类型划分：读锁、写锁</h3><p>对于数据库中并发事务的读-读情况并不会引起什么问题。对于写-写、读-写或写-读这些情况可能会引起一些问题，需要使用 <code>MVCC</code> 或者加锁的方式来解决它们。在使用加锁的方式解决问题时，由于既要允许读-读情况不受影响，又要使写-写、读-写或写-读情况中的操作相互阻塞，所以 <code>MySQL</code>实现一个由两种类型的锁组成的锁系统来解决。这两种类型的锁通常被称为<strong>读锁或者共享锁</strong> (<code>Shared Lock</code> , <code>SLock</code>)和<strong>写锁或者排他锁</strong>( <code>Exclusive Lock</code>，<code>XLock</code>)</p>
+<ul>
+<li><p><strong>读锁</strong> ：也称为共享锁、英文用 S 表示。针对同一份数据，多个事务的读操作可以同时进行而不会互相影响，相互不阻塞的。</p>
+</li>
+<li><p><strong>写锁</strong> ：也称为排他锁、英文用 X 表示。当前写操作没有完成前，它会阻断其他写锁和读锁。这样就能确保在给定的时间里，只有一个事务能执行写入，并防止其他用户读取正在写入的同一资源。</p>
+</li>
+</ul>
+<p><strong>需要注意的是对于 <code>InnoDB</code> 引擎来说，读锁和写锁可以加在表上，也可以加在行上。</strong></p>
+<p>举例（行级读写锁)︰如果一个事务 <code>T1</code> 已经获得了某个行r的读锁，那么此时另外的一个事务 <code>T2</code> 是可以去获得这个行r的读锁的，因为读取操作并没有改变行r的数据；但是，如果某个事务 <code>T3</code> 想获得行r的写锁，则它必须等待事务 <code>T1</code> 、<code>T2</code> 释放掉行r上的读锁才行，如下所示</p>
+<p><img src="/Resources/image-20230625165824431.png" srcset="/img/loading.gif" lazyload alt="image-20230625165824431"></p>
+<p>X锁和S锁兼容性如下：这里的兼容是指对<strong>同一张表或记录的锁</strong>的兼容性情况。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>X锁</th>
+<th>S锁</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>X锁</strong></td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>S锁</strong></td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>只要有X锁，都是不可以兼容的！即只有S锁和S锁是兼容的。</p>
+</blockquote>
+<h4 id="1-锁定读"><a href="#1-锁定读" class="headerlink" title="1. 锁定读"></a>1. 锁定读</h4><p>在采用加锁方式解决脏读、不可重复读、幻读这些问题时，读取一条记录时需要获取该记录的S锁，其实是不严谨的，<strong>有时候需要在读取记录时就获取记录的X锁</strong>，来禁止别的事务读写该记录，为此 <code>MySQL</code> 提出了两种比较特殊的SELECT语句格式:</p>
+<ul>
+<li><p><code>S锁</code></p>
+  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> ... LOCK <span class="hljs-keyword">IN</span> SHARE MODE<br># 或(<span class="hljs-number">8.0</span>新增) <br><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FOR</span> SHARE<br></code></pre></td></tr></table></figure>
+<ul>
+<li>加上 <code>S锁</code> 后，其他事务只能获取 <code>S锁</code> ，如果想要获取 <code>X锁</code> ，必须等待所有的 <code>S锁</code> 释放</li>
+</ul>
+</li>
+<li><p><code>X锁</code></p>
+  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> ... <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li>加上 <code>X锁</code> 后，其他事务如果想要获取 <code>S锁</code> 或者 <code>X锁</code> ，必须等待该 <code>X锁</code> 释放</li>
+</ul>
+</li>
+</ul>
+<p><strong>MySQL8.0 新特性：</strong></p>
+<p>在5.7及之前的版本，<code>SELECT ... FOR UPDATE</code>，如果获取不到锁，会一直等待，直到<code>innodb_lock_wait_timeout</code> 超时。</p>
+<p>在8.0版本中，<code>SELECT ... FOR UPDATE</code>，<code>SELECT ... FOR SHARE</code>添加 <code>NOWAIT</code> 、<code>SKIP LOCKED</code>语法，跳过锁等待，或者跳过锁定。</p>
+<ul>
+<li><p>通过添加 <code>NOWAIT</code> 、<code>SKIP LOCKED</code>语法，能够立即返回。如果查询的行已经加锁：</p>
+<ul>
+<li><p><code>NOWAIT</code> 会立即报错返回。</p>
+</li>
+<li><p><code>SKIP LOCKED</code> 会立即返回不包含被锁定的行。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>创建测试表和测试数据如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">show</span> variables <span class="hljs-keyword">like</span> <span class="hljs-string">&#x27;innodb_lock_wait_timeout&#x27;</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">------------------------+-----+  </span><br><span class="hljs-operator">|</span>Variable_name           <span class="hljs-operator">|</span><span class="hljs-keyword">Value</span><span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">------------------------+-----+  </span><br><span class="hljs-operator">|</span>innodb_lock_wait_timeout<span class="hljs-operator">|</span><span class="hljs-number">50</span>   <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">------------------------+-----+  </span><br><br><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> account(  <br>id <span class="hljs-type">INT</span> <span class="hljs-keyword">PRIMARY</span> KEY AUTO_INCREMENT,  <br>NAME <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">15</span>),  <br>balance <span class="hljs-type">DECIMAL</span>(<span class="hljs-number">10</span>,<span class="hljs-number">2</span>)  <br>);  <br><br><span class="hljs-operator">+</span><span class="hljs-comment">--+----+-------+  </span><br><span class="hljs-operator">|</span>id<span class="hljs-operator">|</span>NAME<span class="hljs-operator">|</span>balance<span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">--+----+-------+  </span><br><span class="hljs-operator">|</span><span class="hljs-number">1</span> <span class="hljs-operator">|</span>张三  <span class="hljs-operator">|</span><span class="hljs-number">50.00</span>  <span class="hljs-operator">|</span>  <br><span class="hljs-operator">|</span><span class="hljs-number">2</span> <span class="hljs-operator">|</span>李四  <span class="hljs-operator">|</span><span class="hljs-number">0.00</span>   <span class="hljs-operator">|</span>  <br><span class="hljs-operator">|</span><span class="hljs-number">3</span> <span class="hljs-operator">|</span>王五  <span class="hljs-operator">|</span><span class="hljs-number">100.00</span> <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">--+----+-------+</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>S锁和X锁的兼容性：会话7和会话8都可以正常读取数据，会话9由于是获取 <code>X锁</code>，所以一直等待，当会话7和会话8 <code>commit</code> 之后， 会话9则可以正常获取 <code>X锁</code></p>
+</blockquote>
+<p><img src="/Resources/image-20230625165831435.png" srcset="/img/loading.gif" lazyload alt="image-20230625165831435"></p>
+<p><img src="/Resources/image-20230625165834751.png" srcset="/img/loading.gif" lazyload alt="image-20230625165834751"></p>
+<blockquote>
+<p>S锁和S锁的兼容性：此时会话9已经拥有 <code>X锁</code>， 会话8由于是获取 <code>X锁</code>，所以一直等待，当会话9 <code>commit</code> 之后， 会话8则可以正常获取 <code>X锁</code>。</p>
+</blockquote>
+<p><img src="/Resources/image-20230625165838385.png" srcset="/img/loading.gif" lazyload alt="image-20230625165838385"></p>
+<blockquote>
+<p>以上的 <code>FOR UPDATE</code> 是行锁：对不同记录进行加X锁，互不影响</p>
+</blockquote>
+<p><img src="/Resources/image-20230616145355752.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230616145355752"></p>
+<blockquote>
+<p>验证 <code>NOWAIT</code> 、<code>SKIP LOCKED</code></p>
+</blockquote>
+<p>会话9中对id为2的记录加 <code>X锁</code>，分别使用 <code>NOWAIT</code> 和 <code>SKIP LOCKED</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">begin</span>;  <br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> account <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">2</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;  <br><br>[<span class="hljs-number">42000</span>][<span class="hljs-number">1064</span>] You have an error <span class="hljs-keyword">in</span> your <span class="hljs-keyword">SQL</span> syntax; <span class="hljs-keyword">check</span> the manual that corresponds <span class="hljs-keyword">to</span> your MySQL server version <span class="hljs-keyword">for</span> the <span class="hljs-keyword">right</span> syntax <span class="hljs-keyword">to</span> use near <span class="hljs-string">&#x27;NOWAIT&#x27;</span> <span class="hljs-keyword">at</span> line <span class="hljs-number">1</span><br><br>该数据库版本为 `<span class="hljs-number">5.7</span><span class="hljs-number">.36</span>` 不支持这两个关键字。<br></code></pre></td></tr></table></figure>
+
+<p>错误原因：数据库版本 <code>5.7.36</code> 不支持这两个关键字，使用  <code>MySQL 8</code> 后测试如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 会话<span class="hljs-number">1</span>  <br><br><span class="hljs-keyword">begin</span>;  <br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> account <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">2</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;  <br><br># 会话<span class="hljs-number">2</span>  <br><br><span class="hljs-keyword">begin</span>;  <br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> account <span class="hljs-keyword">for</span> <span class="hljs-keyword">update</span> nowait;  <br>[HY000][<span class="hljs-number">3572</span>] Statement aborted because lock(s) could <span class="hljs-keyword">not</span> be acquired immediately <span class="hljs-keyword">and</span> NOWAIT <span class="hljs-keyword">is</span> set.  <br><br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> account <span class="hljs-keyword">for</span> <span class="hljs-keyword">update</span> <span class="hljs-keyword">skip</span> locked ;  <br><span class="hljs-operator">+</span><span class="hljs-comment">--+----+-------+  </span><br><span class="hljs-operator">|</span>id<span class="hljs-operator">|</span>NAME<span class="hljs-operator">|</span>balance<span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">--+----+-------+  </span><br><span class="hljs-operator">|</span><span class="hljs-number">1</span> <span class="hljs-operator">|</span>张三  <span class="hljs-operator">|</span><span class="hljs-number">50.00</span>  <span class="hljs-operator">|</span>  <br><span class="hljs-operator">|</span><span class="hljs-number">3</span> <span class="hljs-operator">|</span>王五  <span class="hljs-operator">|</span><span class="hljs-number">100.00</span> <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">--+----+-------+</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="2-写操作"><a href="#2-写操作" class="headerlink" title="2. 写操作"></a>2. 写操作</h4><p>平常所用到的写操作无非是 <code>DELETE</code>、<code>UPDATE</code>、<code>INSERT</code> 这三种：</p>
+<ul>
+<li><p><code>DELETE</code></p>
+<p>  对一条记录做DELETE操作的过程其实是先在B+树中定位到这条记录的位置，然后获取这条记录的X锁，再执行delete mark操作。我们也可以把这个定位待删除记录在B+树中位置的过程看成是一个获取X锁的锁定读。</p>
+</li>
+<li><p><code>UPDATE</code>：在对一条记录做UPDATE操作时分为三种情况:</p>
+<ul>
+<li><p>📌未修改该记录的主键值</p>
+<ul>
+<li><p>情况1：<strong>就地修改</strong>（被更新的列占用的<strong>存储空间在修改前后未发生变化</strong>） 则先在B+树中定位到这条记录的位置，然后再获取一下记录的X锁，最后在原记录的位置进行修改操作。我们也可以把这个定位待修改记录在B+树中位置的过程看成是一个获取X锁的锁定读。</p>
+</li>
+<li><p>情况2：<strong>删除+新增</strong>（至少有一个被更新的列占用的<strong>存储空间在修改前后发生变化</strong>） 则先在B+树中定位到这条记录的位置，然后获取一下记录的X锁，将该记录彻底删除掉（就是把记录彻底移入垃圾链表)，最后再插入一条新记录。这个定位待修改记录在B+树中位置的过程看成是一个获取×锁的锁定读，新插入的记录由 <code>INSERT</code> 操作提供的 <a href="#1.%20%E9%9A%90%E5%BC%8F%E9%94%81">隐式锁</a> 进行保护。</p>
+</li>
+</ul>
+</li>
+<li><p>📌修改了该记录的键值</p>
+<ul>
+<li>情况3：<strong>删除+新增</strong> 则相当于在原记录上做DELETE操作之后再来一次INSERT操作，加锁操作就需要按照DELETE和INSERT的规则进行了。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code>INSERT</code></p>
+<ul>
+<li>一般情况下，新插入一条记录的操作并不加锁，通过一种称之为 <a href="#1.%20%E9%9A%90%E5%BC%8F%E9%94%81">隐式锁</a> 的结构来保护这条新插入的记录在本事务提交前不被别的事务访问。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-2-从数据操作的粒度划分：表级锁、页级锁、行锁"><a href="#3-2-从数据操作的粒度划分：表级锁、页级锁、行锁" class="headerlink" title="3.2 从数据操作的粒度划分：表级锁、页级锁、行锁"></a>3.2 从数据操作的粒度划分：表级锁、页级锁、行锁</h3><p>为了尽可能提高数据库的并发度，每次锁定的数据范围越小越好。理论上每次只锁定当前操作的数据的方案会得到最大的并发度，但是管理锁是很耗资源的事情（涉及获取、检查、释放锁等动作)。因此数据库系统需要在高并发响应和系统性能两方面进行平衡，这样就产生了 <code>锁粒度(Lock granularity)</code> 的概念。</p>
+<p>对一条记录加锁影响的也只是这条记录而已，我们就说这个锁的粒度比较细；其实一个事务也可以在表级别进行加锁，自然就被称之为表级锁或者表锁，对一个表加锁影响整个表中的记录，我们就说这个锁的粒度比较粗。锁的粒度主要分为 <code>表级锁</code>、<code>页级锁</code> 和 <code>行锁</code>。</p>
+<h4 id="1-表锁（Table-Lock）"><a href="#1-表锁（Table-Lock）" class="headerlink" title="1. 表锁（Table Lock）"></a>1. 表锁（Table Lock）</h4><p>该锁会锁定整张表，它是 <code>MySQL</code> 中最基本的锁策略，并<strong>不依赖于存储引擎</strong>（不管你是MySQL的什么存储引擎，对于表锁的策略都是一样的)，并且表锁是<strong>开销最小的策略</strong>（因为粒度比较大)。由于表级锁一次会将整个表锁定，所以可以很好的避免死锁问题。当然，锁的粒度大所带来最大的负面影响就是出现锁资源争用的概率也会最高，导致<strong>并发率大打折扣</strong>。</p>
+<h5 id="表级别的S锁、X锁"><a href="#表级别的S锁、X锁" class="headerlink" title="表级别的S锁、X锁"></a>表级别的S锁、X锁</h5><p>在对某个表执行SELECT、INSERT、DELETE、UPDATE语句时，InnoDB 存储引擎是不会为这个表添加表级别的 <code>S锁</code> 或者 <code>X锁</code> 的。</p>
+<p>在对某个表执行一些诸如 <code>ALTER TABLE</code> 、 <code>DROP TABLE</code> 这类的 DDL 语句时，其他事务对这个表并发执行诸如SELECT、INSERT、DELETE、UPDATE的语句会发生阻塞。同理，某个事务中对某个表执行SELECT、INSERT、DELETE、UPDATE语句时，在其他会话中对这个表执行 <code>DDL</code> 语句也会发生阻塞。这个过程其实是通过在 server层使用一种称之为 <code>元数据锁</code> （英文名： Metadata Locks ， 简称 MDL ）结构来实现的。</p>
+<p>一般情况下，不会使用InnoDB存储引擎提供的表级别的 <code>S锁</code> 和 <code>X锁</code> 。只会在一些特殊情况下，比方说 <code>崩溃恢复</code> 过程中用到。比如，在系统变量 <code>autocommit=0，innodb_table_locks = 1</code> 时， 手动获取 InnoDB存储引擎提供的表t 的 <code>S锁</code> 或者 <code>X锁</code> 可以这么写：</p>
+<ul>
+<li><p><code>LOCK TABLES t READ</code> ：InnoDB存储引擎会对表 t 加表级别的 <code>S锁</code>。</p>
+</li>
+<li><p><code>LOCK TABLES t WRITE</code> ：InnoDB存储引擎会对表 t 加表级别的 <code>X锁</code> 。</p>
+</li>
+</ul>
+<p>不过尽量避免在使用InnoDB存储引擎的表上使用 <code>LOCK TABLES</code> 这样的手动锁表语句，它们并不会提供什么额外的保护，只是会降低并发能力而已。InnoDB的厉害之处还是实现了更细粒度的 <code>行锁</code> ，关于 InnoDB表级别的 <code>S锁</code> 和<code>X锁</code> 大家了解一下就可以了。</p>
+<p><strong>举例：</strong>下面我们讲解MyISAM引擎下的表锁。</p>
+<p>步骤1：创建表并添加数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> mylock(  <br>id <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> <span class="hljs-keyword">PRIMARY</span> KEY auto_increment,  <br>NAME <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">20</span>)  <br>)ENGINE myisam;  <br><br># 插入一条数据  <br><br><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> mylock(NAME) <span class="hljs-keyword">VALUES</span>(<span class="hljs-string">&#x27;a&#x27;</span>);  <br><br># 查询表中所有数据  <br><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> mylock;  <br><span class="hljs-operator">+</span><span class="hljs-comment">----+------+  </span><br><span class="hljs-operator">|</span> id <span class="hljs-operator">|</span> Name <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">----+------+  </span><br><span class="hljs-operator">|</span> <span class="hljs-number">1</span>  <span class="hljs-operator">|</span> a    <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">----+------+</span><br></code></pre></td></tr></table></figure>
+
+<p>步骤2：查看表上加过的锁</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">OPEN</span> TABLES; # 主要关注In_use字段的值  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+------+------+-----------+  </span><br><span class="hljs-operator">|</span>Database  <span class="hljs-operator">|</span><span class="hljs-keyword">Table</span> <span class="hljs-operator">|</span>In_use<span class="hljs-operator">|</span>Name_locked<span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+------+------+-----------+  </span><br><span class="hljs-operator">|</span>atguigudb3<span class="hljs-operator">|</span>mylock<span class="hljs-operator">|</span><span class="hljs-number">0</span>     <span class="hljs-operator">|</span><span class="hljs-number">0</span>          <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+------+------+-----------+  </span><br><br># 或者  <br><br><span class="hljs-keyword">SHOW</span> <span class="hljs-keyword">OPEN</span> TABLES <span class="hljs-keyword">where</span> In_use <span class="hljs-operator">&gt;</span> <span class="hljs-number">0</span>;  <br><span class="hljs-keyword">Empty</span> <span class="hljs-keyword">set</span>  <br><br># 上面的结果表明，当前数据库中没有被锁定的表 <br></code></pre></td></tr></table></figure>
+
+<p>步骤3：手动增加表锁命令</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs sql">LOCK TABLES mylock READ; # 存储引擎会对表t加表级别的共享锁。共享锁也叫读锁或S锁（Share的缩写）  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+------+------+-----------+  </span><br><span class="hljs-operator">|</span>Database  <span class="hljs-operator">|</span><span class="hljs-keyword">Table</span> <span class="hljs-operator">|</span>In_use<span class="hljs-operator">|</span>Name_locked<span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+------+------+-----------+  </span><br><span class="hljs-operator">|</span>atguigudb3<span class="hljs-operator">|</span>mylock<span class="hljs-operator">|</span><span class="hljs-number">1</span>     <span class="hljs-operator">|</span><span class="hljs-number">0</span>          <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+------+------+-----------+  </span><br><br><br>LOCK TABLES mylock WRITE; # 存储引擎会对表t加表级别的排他锁。排他锁也叫独占锁、写锁或X锁（exclusive的缩写）<br></code></pre></td></tr></table></figure>
+
+<p>步骤4：释放表锁</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">UNLOCK TABLES; # 使用此命令解锁当前加锁的表  <br></code></pre></td></tr></table></figure>
+
+<p>步骤5：实验读锁的阻塞情况</p>
+<p>我们为mylock表加read锁（读阻塞写），观察阻塞的情况，流程如下：</p>
+<p><img src="/Resources/image-20230619151248369.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230619151248369"></p>
+<p><img src="/Resources/image-20230619151252817.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230619151252817"></p>
+<p>步骤6：实验写锁的阻塞情况</p>
+<p>为mylock表加write锁，观察阻塞的情况，流程如下：</p>
+<p><img src="/Resources/image-20230619151255452.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230619151255452"></p>
+<p><strong>总结</strong>：</p>
+<p>MyISAM在执行查询语句（SELECT）前，会给涉及的所有表加读锁，在执行增删改操作前，会给涉及的表加写锁。InnoDB存储引擎是不会为这个表添加表级别的读锁和写锁的。</p>
+<p>MySQL的表级锁有两种模式：（以MyISAM表进行操作的演示）</p>
+<ul>
+<li><p>表共享<strong>读锁</strong>（Table Read Lock）</p>
+</li>
+<li><p>表独占<strong>写锁</strong>（Table Write Lock）</p>
+</li>
+</ul>
+<p><img src="/Resources/image-20220711220929248.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20220711220929248"></p>
+<p>为什么加锁之后不能操作其他表：因为对表A加锁再操作表B，此时若别的线程对B加锁再操作表A，这时候就会死锁。</p>
+<h5 id="意向锁-（intention-lock）"><a href="#意向锁-（intention-lock）" class="headerlink" title="意向锁 （intention lock）"></a>意向锁 （intention lock）</h5><p>InnoDB 支持 <code>多粒度锁（multiple granularity locking）</code> ，它允许<strong>行级锁</strong>与<strong>表级锁</strong>共存，而<strong>意向锁就是其中的一种表锁</strong>。</p>
+<ol>
+<li><p>意向锁的存在是为了协调行锁和表锁的关系，支持多粒度（表锁和行锁）的锁并存。</p>
+</li>
+<li><p>意向锁是一种不与行级锁冲突的表级锁，这一点非常重要。</p>
+</li>
+<li><p>表明 “某个事务正在某些行持有了锁或该事务准备去持有锁”</p>
+</li>
+</ol>
+<p>意向锁分为两种：</p>
+<ul>
+<li><p><strong>意向共享锁</strong>（intention shared lock, IS）：事务有意向对表中的某些行加<strong>共享锁</strong>（S锁）</p>
+  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- 事务要获取某些行的 S 锁，必须先获得表的 IS 锁。  </span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">column</span> <span class="hljs-keyword">FROM</span> <span class="hljs-keyword">table</span> ... LOCK <span class="hljs-keyword">IN</span> SHARE MODE;<br></code></pre></td></tr></table></figure>
+</li>
+<li><p><strong>意向排他锁</strong>（intention exclusive lock, IX）：事务有意向对表中的某些行加<strong>排他锁</strong>（X锁）</p>
+  <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- 事务要获取某些行的 X 锁，必须先获得表的 IX 锁。  </span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">column</span> <span class="hljs-keyword">FROM</span> <span class="hljs-keyword">table</span> ... <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<p>即：意向锁是由<strong>存储引擎维护</strong>的 ，用户无法手动操作意向锁，在为数据行加共享 &#x2F; 排他锁之前， InnoDB 会先获取该数据行所在数据表的对应意向锁。</p>
+<p><strong>1. 意向锁要解决的问题</strong></p>
+<p>现在有两个事务，分别是T1和T2，其中T2试图在该表级别上应用共享或排它锁，如果没有意向锁存在，那么T2就需要去检查各个页或行是否存在锁；如果存在意向锁，那么此时就会受到由T1控制的表级别意向锁的阻塞。T2在锁定该表前不必检查各个页或行锁，而只需检查表上的意向锁。简单来说就是给更大一级别的空间示意里面是否已经上过锁。</p>
+<p>在数据表的场景中，如果我们给某一行数据加上了排它锁，数据库会自动给更大一级的空间，比如数据页或数据表加上意向锁，告诉其他人这个数据页或数据表已经有人上过排它锁了，这样当其他人想要获取数据表排它锁的时候，只需要了解是否有人已经获取了这个数据表的意向排他锁即可。</p>
+<ul>
+<li><p>如果事务想要获得数据表中某些记录的共享锁，就需要在数据表上添加<strong>意向共享锁</strong>。</p>
+</li>
+<li><p>如果事务想要获得数据表中某些记录的排他锁，就需要在数据表上添加<strong>意向排他锁</strong>。</p>
+</li>
+</ul>
+<p>这时，意向锁会告诉其他事务已经有人锁定了表中的某些记录。</p>
+<p><img src="/Resources/%E6%84%8F%E5%90%91%E9%94%81-1687161078174-2.jpg?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="意向锁"></p>
+<p><strong>举例：</strong>创建表teacher,插入6条数据，事务的隔离级别默认为<code>Repeatable-Read</code>，如下所示。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> `teacher` (  <br>	`id` <span class="hljs-type">int</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,  <br>    `name` <span class="hljs-type">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,  <br>    <span class="hljs-keyword">PRIMARY</span> KEY (`id`)  <br>)ENGINE<span class="hljs-operator">=</span>InnoDB <span class="hljs-keyword">DEFAULT</span> CHARSET<span class="hljs-operator">=</span>utf8mb4 <span class="hljs-keyword">COLLATE</span><span class="hljs-operator">=</span>utf8mb4_general_ci  <br><br><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> `teacher` <span class="hljs-keyword">VALUES</span>  <br>(<span class="hljs-string">&#x27;1&#x27;</span>, <span class="hljs-string">&#x27;zhangsan&#x27;</span>),  <br>(<span class="hljs-string">&#x27;2&#x27;</span>, <span class="hljs-string">&#x27;lisi&#x27;</span>),  <br>(<span class="hljs-string">&#x27;3&#x27;</span>, <span class="hljs-string">&#x27;wangwu&#x27;</span>),  <br>(<span class="hljs-string">&#x27;4&#x27;</span>, <span class="hljs-string">&#x27;zhaoliu&#x27;</span>),  <br>(<span class="hljs-string">&#x27;5&#x27;</span>, <span class="hljs-string">&#x27;songhongkang&#x27;</span>),  <br>(<span class="hljs-string">&#x27;6&#x27;</span>, <span class="hljs-string">&#x27;leifengyang&#x27;</span>);  <br><br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">SELECT</span> @<span class="hljs-variable">@transaction_isolation</span>;  <br><span class="hljs-operator">+</span><span class="hljs-comment">-------------------------+  </span><br><span class="hljs-operator">|</span> @<span class="hljs-variable">@transaction_isolation</span> <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">-------------------------+  </span><br><span class="hljs-operator">|</span> REPEATABLE<span class="hljs-operator">-</span>READ         <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">-------------------------+</span><br></code></pre></td></tr></table></figure>
+
+<p>假设事务A获取了某一行的排他锁，并未提交，语句如下所示:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> teacher <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">6</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+<p>事务B想要获取teacher表的表读锁，语句如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><br>LOCK TABLES teacher READ;<br></code></pre></td></tr></table></figure>
+
+<p>因为共享锁与排他锁互斥，所以事务B在试图对teacher表加共享锁的时候，必须保证两个条件。</p>
+<p>（1）当前没有其他事务持有teacher表的排他锁</p>
+<p>（2）当前没有其他事务持有teacher表中任意一行的排他锁。</p>
+<p>为了检测是否满足第二个条件，事务B必须在确保teacher表不存在任何排他锁的前提下，去检测表中的每一行是否存在排他锁。很明显这是一个效率很差的做法，但是有了意向锁之后，情况就不一样了。</p>
+<p>意向锁是怎么解决这个问题的呢？首先，我们需要知道意向锁之间的兼容互斥性，如下所示。</p>
+<blockquote>
+<p>为了对比，贴上之前的X锁和S锁的兼容性</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>X锁</th>
+<th>S锁</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>X锁</strong></td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>S锁</strong></td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</tbody></table>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>意向排他锁(IX)</th>
+<th>意向共享锁(IS)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>意向排他锁(IX)</strong></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>意向共享锁(IS)</strong></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody></table>
+<p>即意向锁之间是互相兼容的（因为意向锁实际上刻画的是行被锁了），虽然意向锁和自家兄弟互相兼容，但是它会与普通的排他&#x2F;共享锁互斥。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>意向排他锁(IX)</th>
+<th>意向共享锁(IS)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>X锁</strong></td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><strong>S锁</strong></td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</tbody></table>
+<p>注意这上面的的X&#x2F;S锁指的都是表锁，<strong>意向锁不会与行级的共享&#x2F;排他锁互斥</strong>。因为意向锁的本质就是一个标识，表明表中存在读锁或者写锁，如果直接加了表锁，就不需要去标识表中是否存在锁。</p>
+<p><strong>互斥</strong></p>
+<p>事务A获取了某一行的排他锁，并未提交：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> teacher <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">6</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+<p>此时teacher表存在两把锁：teacher表上的意向排他锁与id为6的数据行上的排他锁。事务B想要获取teacher表的共享锁。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><br>LOCK TABLES teacher READ;  # 阻塞<br></code></pre></td></tr></table></figure>
+
+<p>此时事务B检测事务A持有teacher表的意向排他锁，就可以得知事务A持有该表中某些数据行的排他锁，那么事务B对teacher表的加锁请求就会被排斥（阻塞），而无需去检测表中的每一行数据是否存在排他锁。</p>
+<p><strong>兼容</strong></p>
+<p>事务A获取了某一行的共享锁，并未提交：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> teacher <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">6</span> LOCK <span class="hljs-keyword">IN</span> SHARE MODE;<br></code></pre></td></tr></table></figure>
+
+<p>此时teacher表存在两把锁：teacher表上的意向共享锁与id为6的数据行上的共享锁。事务B想要获取teacher表的共享锁。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><br>LOCK TABLES teacher READ;  #正常执行，不会阻塞<br></code></pre></td></tr></table></figure>
+
+<p><strong>2.意向锁的并发性</strong></p>
+<p>意向锁不会与行级的共享 &#x2F; 排他锁互斥！正因为如此，意向锁并不会影响到多个事务对不同数据行加排他锁时的并发性。（不然我们直接用普通的表锁就行了）</p>
+<p>我们扩展一下上面 teacher表的例子来概括一下意向锁的作用（一条数据从被锁定到被释放的过程中，可能存在多种不同锁，但是这里我们只着重表现意向锁）。</p>
+<p>事务A先获得了某一行的排他锁，并未提交：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> teacher <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">6</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+<p>此时teacher表存在两把锁：teacher表上的意向排他锁与id为6的数据行上的排他锁。之后事务B想要获取teacher表上的共享锁。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br> <br>LOCK TABLES teacher READ;<br></code></pre></td></tr></table></figure>
+
+<p>事务B检测到事务A持有teacher表的意向排他锁。事务B对teacher表的加锁请求被阻塞（排斥）。最后事务C也想获取teacher表中某一行的排他锁。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> teacher <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">5</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+<p>事务C申请teacher表的意向排他锁。事务C检测到事务A持有teacher表的意向排他锁。因为意向锁之间并不互斥，所以事务C获取到了teacher表的意向排他锁。因为id为5的数据行上不存在任何排他锁，最终事务C成功获取到了该数据行上的排他锁。</p>
+<p><img src="/Resources/%E6%84%8F%E5%90%91%E9%94%81%E5%92%8C%E9%94%81%E7%9A%84%E5%85%BC%E5%AE%B9%E6%80%A7.jpg?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="意向锁和锁的兼容性"></p>
+<p><strong>从上面的案例可以得到如下结论：</strong></p>
+<ol>
+<li><p>InnoDB 支持 <code>多粒度锁</code> ，特定场景下，行级锁可以与表级锁共存。</p>
+</li>
+<li><p>意向锁之间互不排斥，但除了 IS 与 S 兼容外，<strong>意向锁会与 表级别的共享锁 &#x2F; 排他锁 互斥</strong> 。</p>
+</li>
+<li><p>IX，IS是表级锁，不会和行级的X，S锁发生冲突。只会和表级的X，S发生冲突。</p>
+</li>
+<li><p>意向锁在保证并发性的前提下，实现了<strong>行锁和表锁共存</strong>且<strong>满足事务隔离性</strong>的要求。</p>
+</li>
+</ol>
+<h5 id="自增锁（AUTO-INC锁）"><a href="#自增锁（AUTO-INC锁）" class="headerlink" title="自增锁（AUTO-INC锁）"></a>自增锁（AUTO-INC锁）</h5><p>在使用 <code>MySQL</code> 过程中，我们可以为表的某个列添加 <code>AUTO_INCREMENT</code> 属性。举例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> `teacher` (  <br>`id` <span class="hljs-type">int</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> AUTO_INCREMENT,  <br>`name` <span class="hljs-type">varchar</span>(<span class="hljs-number">255</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,  <br><span class="hljs-keyword">PRIMARY</span> KEY (`id`)  <br>) ENGINE<span class="hljs-operator">=</span>InnoDB <span class="hljs-keyword">DEFAULT</span> CHARSET<span class="hljs-operator">=</span>utf8mb4 <span class="hljs-keyword">COLLATE</span><span class="hljs-operator">=</span>utf8mb4_general_ci;<br></code></pre></td></tr></table></figure>
+
+<p>由于这个表的id字段声明了AUTO_INCREMENT，意味着在书写插入语句时不需要为其赋值，SQL语句如下所示。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> `teacher` (name) <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">&#x27;zhangsan&#x27;</span>), (<span class="hljs-string">&#x27;lisi&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>上边的插入语句并没有为id列显式赋值，所以系统会自动为它赋上递增的值，结果如下所示。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql"> mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> teacher;  <br> <span class="hljs-operator">+</span><span class="hljs-comment">--+--------+  </span><br> <span class="hljs-operator">|</span>id<span class="hljs-operator">|</span>name    <span class="hljs-operator">|</span>  <br> <span class="hljs-operator">+</span><span class="hljs-comment">--+--------+  </span><br> <span class="hljs-operator">|</span><span class="hljs-number">1</span> <span class="hljs-operator">|</span>zhangsan<span class="hljs-operator">|</span>  <br> <span class="hljs-operator">|</span><span class="hljs-number">2</span> <span class="hljs-operator">|</span>lisi    <span class="hljs-operator">|</span>  <br> <span class="hljs-operator">+</span><span class="hljs-comment">--+--------+</span><br></code></pre></td></tr></table></figure>
+
+<p>上面插入数据是一种简单的插入模式。除此之外，还有批量插入和混合模式插入。</p>
+<ul>
+<li><p>插入模式：可以预先确定要插入的行数（当语句被初始处理时）的语句。</p>
+</li>
+<li><p>批量插入：事先不知道要插入的行数（和所需自动递增值的数量）的语句。</p>
+</li>
+<li><p>混合模式插入：跟插入模式一样，但插入的时候指定了部分id的值。</p>
+</li>
+</ul>
+<p>对于上面数据插入的案例，MySQL中采用了自增锁的方式来实现，**<code>AUTO-INC</code> 锁是当向使用含有AUTO_INCREMENT列的表中插入数据时需要获取的一种特殊的表级锁<strong>，在执行插入语句时就在表级别加一个AUTO-INC锁，然后为每条待插入记录的 <code>AUTO_INCREMENT</code> 修饰的列分配递增的值，在该语句执行结束后，再把 <code>AUTO-INC</code> 锁释放掉。</strong>一个事务在持有 <code>AUTO-INC</code> 锁的过程中，其他事务的插入语句都要被阻塞<strong>，可以保证一个语句中分配的递增值是连续的。也正因为此，其并发性显然并不高，</strong>当我们向一个有 <code>AUTO_INCREMENT</code> 关键字的主键插入值的时候，每条语句都要对这个表锁进行竞争**，这样的并发潜力其实是很低下的，所以Innodb通过 <code>innodb_autoinc_lock_mode</code> 的不同取值（0，1，2）来提供不同的锁定机制，来显著提高SQL语句的可伸缩性和性能。</p>
+<p><strong>以下插入数据均表示向包含了 <code>AUTO_INCREMENT</code> 列表中插入数据。</strong></p>
+<blockquote>
+<p>传统锁定模式：<code>innodb_autoinc_lock_mode = 0</code></p>
+</blockquote>
+<p>在该模式下，每当我们向表中插入数据时，都会获得一个特殊的表级 <code>AUTO-INC</code> 锁，并且当语句执行完之后就会释放，这样一来可以保证生成的自增值是连续的。并且在 <code>binlog</code> 中重放的时候，可以保证 master 与 slave 中数据的 <code>AUTO_INCREMENT</code> 列是相同的。但因为是表级锁，在<strong>同一时间多个事务中插入数据</strong>的时候，对于 <code>AUTO-INC</code> 锁的争夺会<strong>限制并发能力</strong>。</p>
+<p><img src="/Resources/1460000040497978.jpeg?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="img"></p>
+<blockquote>
+<p>连续锁定模式：<code>innodb_autoinc_lock_mode = 1</code></p>
+</blockquote>
+<p>在 <code>MySQL 8.0</code> 之前，连续锁定模式是默认使用的模式，之所以提出这种模式，是因为传统模式存在影响性能的弊端，所以才有了连续模式。</p>
+<p>在该模式下，如果要插入的<strong>行数</strong>是<strong>已知</strong>的，即像 <code>INSERT INTO</code> 这种简单的、能提前确认数量的新增语句，就<strong>不会使用自增锁</strong>。</p>
+<p>在该模式下，如果要插入的<strong>行数</strong>是<strong>未知</strong>的，即像 <code>INSERT INTO ... SELECT ...</code> 这种语句，<code>INSERT</code> 的值来源于另一个 <code>SELECT</code> 语句，则<strong>还需获取自增锁</strong>。</p>
+<blockquote>
+<p>交错锁定模式：<code>innodb_autoinc_lock_mode = 2</code></p>
+</blockquote>
+<p>从 <code>MySQL 8.0</code> 开始，交错锁定模式是默认使用的模式。</p>
+<p>在该模式下，所有的 <code>INSERT</code> 语句，包含 <code>INSERT</code> 和 <code>INSERT INTO ... SELECT</code> ，都不会使用 <code>AUTO-INC</code> 自增锁，而是使用较为轻量的 <code>mutex</code> 锁。这样一来，多条 <code>INSERT</code> 语句可以并发的执行，这也是三种锁模式中扩展性最好的一种。</p>
+<p>但缺点是当搭配 binlog 的日志格式是 statement 一起使用的时候，在「主从复制的场景」中会发生<strong>数据不一致的问题</strong>。</p>
+<p><img src="/Resources/1460000040497979.jpeg?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="img"></p>
+<h5 id="元数据锁（MDL锁）"><a href="#元数据锁（MDL锁）" class="headerlink" title="元数据锁（MDL锁）"></a>元数据锁（MDL锁）</h5><p><code>MySQL 5.5</code> 引入了 <code>Meta Data Lock</code>，简称 <code>MDL</code> 锁，属于表锁范畴。<code>MDL</code> 的作用是，保证读写的正确性。比如，如果一个查询正在遍历一个表中的数据，而执行期间另一个线程对这个表结构做变更，增加了一列，那么查询线程拿到的结果跟表结构对不上，肯定是不行的。</p>
+<p>因此，<strong>当对一个表做增删改查操作的时候，加 <code>MDL</code> 读锁；当要对表做结构变更操作的时候，加 <code>MDL</code> 写锁</strong>。</p>
+<p>读锁之间不互斥，因此你可以有多个线程同时对一张表增删查改。读写锁之间、写锁之间都是互斥的，用来保证变更表结构操作的安全性，解决了 <code>DML</code> 和 <code>DDL</code> 操作之间的一致性问题。<code>MDL</code> 锁不需要显式使用，在访问一个表的时候会被自动加上。</p>
+<p><img src="/Resources/%E5%85%83%E6%95%B0%E6%8D%AE%E9%94%81.jpg?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="元数据锁"></p>
+<p><strong>举例：元数据锁的使用场景模拟</strong></p>
+<p><strong>会话A：</strong>从表中查询数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br><br><span class="hljs-keyword">SELECT</span> <span class="hljs-built_in">COUNT</span>(<span class="hljs-number">1</span>) <span class="hljs-keyword">FROM</span> teacher;  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+  </span><br><span class="hljs-operator">|</span> <span class="hljs-built_in">COUNT</span>(<span class="hljs-number">1</span>) <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+  </span><br><span class="hljs-operator">|</span> <span class="hljs-number">2</span>        <span class="hljs-operator">|</span>  <br><span class="hljs-operator">+</span><span class="hljs-comment">----------+</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>会话B：</strong>修改表结构，增加新列</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">BEGIN</span>;  <br>  <br><span class="hljs-keyword">alter</span> <span class="hljs-keyword">table</span> teacher <span class="hljs-keyword">add</span> age <span class="hljs-type">int</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>;<br></code></pre></td></tr></table></figure>
+
+<p><strong>会话C：</strong>查看当前MySQL的进程</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"> <span class="hljs-keyword">show</span> processlist;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/Resources/image-20230620161423895.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230620161423895"></p>
+<p>通过会话C可以看出会话B被阻塞，这是由于会话A拿到了teacher表的元数据读锁，会话B想申请teacher表的元数据写锁，由于读写锁互斥，会话B需要等待会话A释放元数据锁才能执行。</p>
+<p><strong>元数据锁可能会带来的问题</strong></p>
+<p>如果读锁后面有元数据写锁正在堵塞，那么后面的所有元数据读锁都必须等待写锁的释放。</p>
+<p><img src="/Resources/%E5%85%83%E6%95%B0%E6%8D%AE%E9%94%81%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98.drawio.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="元数据锁可能会带来的问题.drawio"></p>
+<h4 id="2-行锁（Row-Lock）"><a href="#2-行锁（Row-Lock）" class="headerlink" title="2. 行锁（Row Lock）"></a>2. 行锁（Row Lock）</h4><p>该部分指的是在 Innodb 存储引擎下的行锁。</p>
+<p>行锁（Row Lock）也称为记录锁，顾名思义，就是锁住某一行记录。需要注意的是，MySQL服务器层并没有实现行锁机制，<strong>行级锁只在存储引擎层实现</strong>。</p>
+<p><strong>优点：</strong>锁定力度小，发生锁冲突概率低，并发度高。</p>
+<p><strong>缺点：</strong>对于锁的开销比较大，加锁会比较慢，容易出现死锁情况。</p>
+<p><code>InnoDB</code> 与 <code>MyISAM</code> 的最大不同有两点：一是支持<strong>事务</strong>（TRANSACTION）；二是采用了<strong>行级锁</strong>。</p>
+<p>首先我们初始化表数据如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> student (  <br>id <span class="hljs-type">INT</span>,  <br>name <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">20</span>),  <br>class <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">10</span>),  <br><span class="hljs-keyword">PRIMARY</span> KEY (id)  <br>) Engine<span class="hljs-operator">=</span>InnoDB CHARSET<span class="hljs-operator">=</span>utf8;  <br><br><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> student <span class="hljs-keyword">VALUES</span>  <br>(<span class="hljs-number">1</span>, <span class="hljs-string">&#x27;张三&#x27;</span>, <span class="hljs-string">&#x27;一班&#x27;</span>),  <br>(<span class="hljs-number">3</span>, <span class="hljs-string">&#x27;李四&#x27;</span>, <span class="hljs-string">&#x27;一班&#x27;</span>),  <br>(<span class="hljs-number">8</span>, <span class="hljs-string">&#x27;王五&#x27;</span>, <span class="hljs-string">&#x27;二班&#x27;</span>),  <br>(<span class="hljs-number">15</span>, <span class="hljs-string">&#x27;赵六&#x27;</span>, <span class="hljs-string">&#x27;二班&#x27;</span>),  <br>(<span class="hljs-number">20</span>, <span class="hljs-string">&#x27;钱七&#x27;</span>, <span class="hljs-string">&#x27;三班&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>student表中的聚簇索引的简图如下所示。</p>
+<p><img src="/Resources/image-20230620161540379.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230620161540379"></p>
+<h5 id="记录锁（Record-Locks）"><a href="#记录锁（Record-Locks）" class="headerlink" title="记录锁（Record Locks）"></a>记录锁（Record Locks）</h5><p>记录锁也就是仅仅把一条记录锁，官方的类型名称为：<code>LOCK_REC_NOT_GAP</code>。比如我们把id值为8的那条记录加一个记录锁的示意图如果所示。仅仅是锁住了id值为8的记录，对周围的数据没有影响。</p>
+<p><img src="/Resources/image-20220713164811567.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20220713164811567"></p>
+<p>举例如下：</p>
+<p><img src="/Resources/image-20230620161637349.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230620161637349"></p>
+<p>记录锁是有S锁和X锁之分的，称之为 <code>S型记录锁</code> 和 <code>X型记录锁</code> 。</p>
+<ul>
+<li><p>当一个事务获取了一条记录的S型记录锁后，其他事务也可以继续获取该记录的S型记录锁，但不可以继续获取X型记录锁；</p>
+</li>
+<li><p>当一个事务获取了一条记录的X型记录锁后，其他事务既不可以继续获取该记录的S型记录锁，也不可以继续获取X型记录锁。</p>
+</li>
+</ul>
+<h5 id="间隙锁（Gap-Locks）"><a href="#间隙锁（Gap-Locks）" class="headerlink" title="间隙锁（Gap Locks）"></a>间隙锁（Gap Locks）</h5><blockquote>
+<p><code>SQL92</code> 标准中 <code>REPEATABLE READ</code> 没有解决幻读，在 <code>MySQL</code> 的 <code>REPEATABLE READ</code> 中解决了大部分幻读问题。</p>
+</blockquote>
+<p><code>MySQL</code> 在 <code>REPEATABLE READ</code> 隔离级别下是可以解决幻读问题的，解决方案有两种，可以使用 <code>MVCC</code> 方案解决，也可以采用<strong>加锁</strong>方案解决。但是在使用加锁方案解决时有个大问题，就是事务在第一次执行读取操作时，那些幻影记录尚不存在，我们<strong>无法给这些幻影记录加上记录锁</strong> 。<code>InnoDB</code> 提出了一种称之为 <code>Gap Locks</code> 的锁，官方的类型名称为：<code>LOCK_GAP</code> ，我们可以简称为 <code>gap锁</code> 。</p>
+<p>示例：在id值为8的记录加上 <code>gap</code> 锁</p>
+<p><img src="/Resources/image-20220713171650888.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20220713171650888"></p>
+<p>由于间隙锁的存在，其他事务就无法在3-8之间插入数据。</p>
+<p> 会话1：加上间隙锁，5 -&gt; (3,8)  </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">begin</span>;  <br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">5</span> lock <span class="hljs-keyword">in</span> share mode ;  <br></code></pre></td></tr></table></figure>
+
+<p> 会话2：测试间隙锁：处于一直等待状态，直到超时  </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">begin</span>;  <br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> student (id,name,class) <span class="hljs-keyword">value</span> (<span class="hljs-number">6</span>,<span class="hljs-string">&#x27;tom&#x27;</span>,<span class="hljs-string">&#x27;二班&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>间隙锁的提出<strong>是为了防止插入幻影记录而提出的</strong>，间隙锁之间是兼容的，即两个事务可以同时持有包含共同间隙范围的间隙锁，并不存在互斥关系。</p>
+<p><img src="/Resources/%E9%97%B4%E9%9A%99%E9%94%81.jpg?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="间隙锁"></p>
+<p>但是对于最后一条记录之后的间隙，即 (20,+∞) 应该怎么办呢？此时就需要使用数据页中的两条伪记录。</p>
+<ul>
+<li><p><code>Infimum</code>记录，表示该页面中最小的记录。</p>
+</li>
+<li><p><code>Supremun</code>记录，表示该页面中最大的记录。</p>
+</li>
+</ul>
+<p>为了阻止其他事务在 (20,+∞) 区间插入新的数据，我们可以给索引中的最后一条记录，也就是id值为20的那条记录所在页面的 <code>Supremun</code> 记录加上一个 <code>gap</code> 锁，如图所示。</p>
+<p><img src="/Resources/image-20230621111108755.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230621111108755"></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">注：该部分需要用MySQL <span class="hljs-number">8</span> 测试  <br> <span class="hljs-keyword">begin</span>;  <br> <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> student <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">25</span> lock <span class="hljs-keyword">in</span> share mode;  <br> <span class="hljs-keyword">Empty</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.01</span> sec)  <br><br> # 此时就会在<span class="hljs-number">20</span>的后面（Supremun的前面）加上间隙锁<br></code></pre></td></tr></table></figure>
+
+<p>检测：</p>
+<p><img src="/Resources/image-20230621111113541.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230621111113541"></p>
+<p><img src="/Resources/image-20230621111116223.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230621111116223"></p>
+<p>尽管间隙锁可以解决幻读问题，但间隙锁的引入，可能会导致死锁问题（前提没有打开死锁检测，如果有死锁检测，Innodb会自动检测死锁，T2插入数据直接报错返回，T1直接成功，见死锁部分的如何处理死锁的方式2），示例如下图：</p>
+<p><img src="/Resources/%E9%97%B4%E9%9A%99%E9%94%81%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%97%AE%E9%A2%98-1687331109255-5.jpg?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="间隙锁带来的问题"></p>
+<h5 id="临键锁（Next-Key-Locks）"><a href="#临键锁（Next-Key-Locks）" class="headerlink" title="临键锁（Next-Key Locks）"></a>临键锁（Next-Key Locks）</h5><p>有时候我们既想锁住某条记录，又想阻止其他事务在该记录前边的间隙插入新记录 ，所以<code>InnoDB</code> 就提出了一种称之为 <code>Next-Key Locks</code> 的锁，官方的类型名称为： <code>LOCK_ORDINARY</code> ，我们也可以简称为 <code>next-key</code> 锁。<code>Next-Key Locks</code> 是在存储引擎 <code>InnoDB</code> 、事务级别在可重复读的情况下使用的数据库锁， <code>InnoDB</code> 默认的锁就是 <code>Next-Key Locks</code> 。比如，我们把id值为8的那条记录加一个 <code>next-key</code> 锁的示意图如下：</p>
+<p><img src="/Resources/image-20230621113118663.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230621113118663"></p>
+<p>$Next-Key\ Locks &#x3D; Record\ Lock + Gap\ Lock$。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">begin</span>;  <br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> student <span class="hljs-keyword">where</span> id <span class="hljs-operator">&lt;=</span><span class="hljs-number">8</span> <span class="hljs-keyword">and</span> id <span class="hljs-operator">&gt;</span> <span class="hljs-number">3</span> <span class="hljs-keyword">for</span> <span class="hljs-keyword">update</span>;  <br><br># 此时，临键锁的范围为(<span class="hljs-number">3</span>,<span class="hljs-number">8</span>]<br></code></pre></td></tr></table></figure>
+
+<h5 id="插入意向锁-Insert-Intention-Locks"><a href="#插入意向锁-Insert-Intention-Locks" class="headerlink" title="插入意向锁(Insert Intention Locks)"></a>插入意向锁(Insert Intention Locks)</h5><p>一个事务在插入一条记录的时候，需要判断插入位置是否已被其他事务加了间隙锁（包括 next-key locks）。</p>
+<p>如果有的话，插入操作就会发生<strong>阻塞</strong>，直到拥有间隙锁的那个事务提交为止（释放间隙锁的时刻），在此期间会生成一个<strong>插入意向锁</strong>，表明有事务想在某个区间插入新记录，但是现在处于等待状态。<code>InnoDB</code> 就把这种类型的锁命名为 <code>Insert Intention Locks</code>，官方的类型名称为： <code>LOCK_INSERT_INTENTION</code>，我们称为插入意向锁。</p>
+<p>插入意向锁是在插入一条记录行前，由 <strong><code>INSERT</code></strong> 操作产生的一种<strong>间隙锁</strong>。该锁用于表示插入意向，当多个事务在同一区间插入位置不同的多条数据时，事务之间不需要互相等待。示例如下图：</p>
+<p>事实上<strong>插入意向锁并不会阻止别的事务继续获取该记录上任何类型的锁。</strong></p>
+<p><img src="/Resources/%E6%8F%92%E5%85%A5%E6%84%8F%E5%90%91%E9%94%81-1687331635561-7.jpg?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="插入意向锁"></p>
+<h4 id="3-页锁"><a href="#3-页锁" class="headerlink" title="3. 页锁"></a>3. 页锁</h4><p>页锁就是在页的粒度上进行锁定，锁定的数据资源比行锁要多，因为一个页中可以有多个行记录。当我们使用页锁的时候，会出现数据浪费的现象，但这样的浪费最多也就是一个页上的数据行。<strong>页锁的开销介于表锁和行锁之间，会出现死锁。锁定粒度介于表锁和行锁之间，并发度一般。</strong></p>
+<p>每个层级的锁数量是有限制的，因为锁会占用内存空间，锁空间的大小是有限的。当某个层级的锁数量超过了这个层级的阈值时，就会进行锁升级。锁升级就是用更大粒度的锁替代多个更小粒度的锁，比如 <code>InnoDB</code> 中行锁升级为表锁，这样做的好处是占用的锁空间降低了，但同时数据的并发度也下降了。</p>
+<h3 id="3-3-从对待锁的态度划分-乐观锁、悲观锁"><a href="#3-3-从对待锁的态度划分-乐观锁、悲观锁" class="headerlink" title="3.3 从对待锁的态度划分:乐观锁、悲观锁"></a>3.3 从对待锁的态度划分:乐观锁、悲观锁</h3><p>从对待锁的态度来看锁的话，可以将锁分成乐观锁和悲观锁，从名字中也可以看出这两种锁是两种看待数据并发的思维方式。需要注意的是，乐观锁和悲观锁并不是锁，而是锁的设计思想。</p>
+<h4 id="1-悲观锁（Pessimistic-Locking）"><a href="#1-悲观锁（Pessimistic-Locking）" class="headerlink" title="1. 悲观锁（Pessimistic Locking）"></a>1. 悲观锁（Pessimistic Locking）</h4><p>悲观锁是一种思想，顾名思义，就是很悲观，对数据被其他事务的修改持保守态度，会通过数据库自身的锁机制来实现，从而保证数据操作的排它性。</p>
+<p>悲观锁总是假设最坏的情况，每次去拿数据的时候都认为别人会修改，所以每次在拿数据的时候都会上锁，这样别人想拿这个数据就会阻塞直到它拿到锁（<strong>共享资源每次只给一个线程使用，其它线程阻塞， 用完后再把资源转让给其它线程</strong>）。比如行锁，表锁等，读锁，写锁等，都是在做操作之前先上锁，当其他线程想要访问数据时，都需要阻塞挂起。Java 中 <code>synchronized</code> 和 <code>ReentrantLock</code> 等独占锁就是悲观锁思想的实现。</p>
+<p><strong>秒杀案例1：</strong></p>
+<p>商品秒杀过程中，库存数量的减少，避免出现超卖的情况。比如，商品表中有一个字段为quantity表示当前该商品的库存量。假设商品为华为mate40，id为1001，quantity&#x3D;100个。如果不使用锁的情况下，操作方法如下所示</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">#第<span class="hljs-number">1</span>步:查出商品库存  <br><span class="hljs-keyword">select</span> quantity <span class="hljs-keyword">from</span> items <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1001</span>;  <br>#第<span class="hljs-number">2</span>步:如果库存大于<span class="hljs-number">0</span>，则根据商品信息生产订单  <br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> orders (item_id)<span class="hljs-keyword">values</span>( <span class="hljs-number">1001</span> ) ;  <br>#第<span class="hljs-number">3</span>步:修改商品的库存，num表示购买数量  <br><span class="hljs-keyword">update</span> items <span class="hljs-keyword">set</span> quantity <span class="hljs-operator">=</span> quantity<span class="hljs-operator">-</span>num <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1001</span>;<br></code></pre></td></tr></table></figure>
+
+<p>这样写的话，在并发量小的公司没有大的问题，但是如果在高并发环境下可能出现以下问题</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>线程A</th>
+<th>线程B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td><code>step1</code>（查询还有100部手机）</td>
+<td><code>step1</code>（查询还有100部手机）</td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td><code>step2</code>（生成订单）</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>step2</code>（生成订单）</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td><code>step3</code>（减库存1）</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>step3</code>（减库存2）</td>
+<td></td>
+</tr>
+</tbody></table>
+<p>其中线程B此时已经下单并且减完库存，这个时候线程A依然去执行 <code>step3</code>，就造成了超卖。</p>
+<p>我们使用悲观锁可以解决这个问题，商品信息从查询出来到修改，中间有一个生成订单的过程，使用悲观锁的原理就是，当我们在查询items信息后就把当前的数据锁定，直到我们修改完毕后再解锁。那么整个过程中，因为数据被锁定了，就不会出现有第三者来对其进行修改了。而这样做的前提是<strong>需要将要执行的 <code>SQL</code> 语句放在同一个事务中，否则达不到锁定数据行的目的</strong>。修改如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">#第<span class="hljs-number">1</span>步:查出商品库存  <br><span class="hljs-keyword">select</span> quantity <span class="hljs-keyword">from</span> items <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1001</span> <span class="hljs-keyword">for</span> <span class="hljs-keyword">update</span>;  <br>#第<span class="hljs-number">2</span>步:如果库存大于<span class="hljs-number">0</span>，则根据商品信息生产订单  <br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> orders (item_id)<span class="hljs-keyword">values</span>( <span class="hljs-number">1001</span> ) ;  <br>#第<span class="hljs-number">3</span>步:修改商品的库存，num表示购买数量  <br><span class="hljs-keyword">update</span> items <span class="hljs-keyword">set</span> quantity <span class="hljs-operator">=</span> quantity<span class="hljs-operator">-</span>num <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1001</span>;<br></code></pre></td></tr></table></figure>
+
+<p><code>select .... for update</code> （意向排他锁）是 <code>MySQL</code> 中的悲观锁。此时在items表中，id为1001的那条数据就被我们锁定了，其他的要执行 <code>select quantity from items where id = 1001 for update;</code> 语句的事务必须等本次事务提交之后才能执行。这样我们可以保证当前的数据不会被其它事务修改。</p>
+<p>注意：</p>
+<ul>
+<li><p>当执行 <code>select quantity from items where id = 1001 for update;</code> 语句之后，如果在其他事务中执行 <code>select quantity from items where id = 1001;</code> 语句，并不会受第一个事务的影响，仍然可以正常查询出数据。（innodb默认是快照读，和锁没关系，所以加了锁也能读）</p>
+</li>
+<li><p>注意：<code>select ... for update</code> 语句执行过程中所有扫描的行都会被锁上，因此在MySQL中<strong>用悲观锁必须确定使用了索引</strong>，而不是全表扫描，<strong>否则将会把整个表锁住</strong>。</p>
+</li>
+</ul>
+<p>悲观锁不适用的场景较多，它存在一些不足，因为悲观锁大多数情况下依靠数据库的锁机制来实现，以保证程序的并发访问性，同时这样对数据库性能开销影响也很大，特别是<strong>长事务</strong>而言，这样的<strong>开销往往无法承受</strong>，这时就需要乐观锁。</p>
+<h4 id="2-乐观锁（Optimistic-Locking）"><a href="#2-乐观锁（Optimistic-Locking）" class="headerlink" title="2. 乐观锁（Optimistic Locking）"></a>2. 乐观锁（Optimistic Locking）</h4><p>乐观锁认为对同一数据的并发操作不会总发生，属于小概率事件，不用每次都对数据上锁，但是在更新的时候会判断一下在此期间别人有没有去更新这个数据，也就是<strong>不采用数据库自身的锁机制，而是通过程序来实现</strong>。在程序上，我们可以采用 <code>版本号机制</code> 或者 <code>CAS机制</code> 实现。<strong>乐观锁适用于多读的应用类型， 这样可以提高吞吐量</strong>。在Java中 <code>java.util.concurrent.atomic</code> 包下的原子变量类就是使用了乐观锁的一种实现方式：<code>CAS机制</code>。</p>
+<p><strong>1. 乐观锁的版本号机制</strong></p>
+<p>在表中设计一个 <code>版本字段 version</code> ，第一次读的时候，会获取 <code>version</code> 字段的取值。然后对数据进行更新或删除操作时，会执行 <code>UPDATE ... SET version=version+1 WHERE version=version</code> 。此时 如果已经有事务对这条数据进行了更改，修改就不会成功。</p>
+<p>这种方式类似我们熟悉的SVN、CVS版本管理系统，当我们修改了代码进行提交时，首先会检查当前版本号与服务器上的版本号是否一致，如果一致就可以直接提交，如果不一致就需要更新服务器上的最新代码，然后再进行提交。</p>
+<p><strong>2. 乐观锁的时间戳机制</strong></p>
+<p>时间戳和版本号机制一样，也是在更新提交的时候，将当前数据的时间戳和更新之前取得的时间戳进行比较，如果两者一致则更新成功，否则就是版本冲突。</p>
+<p>你能看到乐观锁就是程序员自己控制数据并发操作的权限，基本是通过给数据行增加一个戳（版本号或者时间戳），从而证明当前拿到的数据是否最新。</p>
+<p><strong>秒杀案例1：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql"> #第<span class="hljs-number">1</span>步:查出商品库存  <br> <span class="hljs-keyword">select</span> quantity <span class="hljs-keyword">from</span> items <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1001</span>  <br> #第<span class="hljs-number">2</span>步:如果库存大于<span class="hljs-number">0</span>，则根据商品信息生产订单  <br> <span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> orders (item_id)<span class="hljs-keyword">values</span>( <span class="hljs-number">1001</span> ) ;  <br> #第<span class="hljs-number">3</span>步:修改商品的库存，num表示购买数量  <br> <span class="hljs-keyword">update</span> items <span class="hljs-keyword">set</span> quantity <span class="hljs-operator">=</span> quantity<span class="hljs-operator">-</span>num , version <span class="hljs-operator">=</span> version<span class="hljs-operator">+</span><span class="hljs-number">1</span> <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1001</span> <span class="hljs-keyword">and</span> version <span class="hljs-operator">=</span> #&#123;version&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>注意，如果数据表是 <strong>读写分离</strong> 的表，当matser表中写入的数据没有及时同步到slave表中时，会造成更新一直失败的问题。此时需要 <strong>强制读取 <code>master</code> 表中的数据</strong>（即将select语句放到事务中即可，这时候查询的就是master主库了。)</p>
+<p>如果我们对同一条数据进行<strong>频繁的修改</strong>的话，那么就会出现这么一种场景，每次修改都只有一个事务能更新成功，在业务感知上面就有大量的失败操作。</p>
+<p>我们把代码修改如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql">#第<span class="hljs-number">1</span>步:查出商品库存  <br><span class="hljs-keyword">select</span> quantity <span class="hljs-keyword">from</span> items <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1001</span>  <br>#第<span class="hljs-number">2</span>步:如果库存大于<span class="hljs-number">0</span>，则根据商品信息生产订单  <br><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> orders (item_id)<span class="hljs-keyword">values</span>( <span class="hljs-number">1001</span> ) ;  <br>#第<span class="hljs-number">3</span>步:修改商品的库存，num表示购买数量  <br><span class="hljs-keyword">update</span> items <span class="hljs-keyword">set</span> quantity <span class="hljs-operator">=</span> quantity<span class="hljs-operator">-</span>num  <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1001</span> <span class="hljs-keyword">and</span> quantity<span class="hljs-operator">-</span>num <span class="hljs-operator">&gt;</span> <span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+<h4 id="3-两种锁的适用场景"><a href="#3-两种锁的适用场景" class="headerlink" title="3. 两种锁的适用场景"></a>3. 两种锁的适用场景</h4><p>从这两种锁的设计思想中，我们总结一下乐观锁和悲观锁的适用场景：</p>
+<ol>
+<li><p>乐观锁适合<strong>读操作多</strong>的场景，相对来说写的操作比较少。它的优点在于程序实现，不存在死锁问题，不过适用场景也会相对乐观，因为它阻止不了除了程序以外的数据库操作。</p>
+</li>
+<li><p>悲观锁适合<strong>写操作多</strong>的场景，因为写的操作具有排它性。采用悲观锁的方式，可以在数据库层面阻止其他事务对该数据的操作权限，防止 <strong>读 - 写</strong> 和 <strong>写 - 写</strong> 的冲突。</p>
+</li>
+</ol>
+<p><img src="/Resources/image-20230621165755960.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230621165755960"></p>
+<h3 id="3-4-按加锁的方式划分：显式锁、隐式锁"><a href="#3-4-按加锁的方式划分：显式锁、隐式锁" class="headerlink" title="3.4 按加锁的方式划分：显式锁、隐式锁"></a>3.4 按加锁的方式划分：显式锁、隐式锁</h3><h4 id="1-隐式锁"><a href="#1-隐式锁" class="headerlink" title="1. 隐式锁"></a>1. 隐式锁</h4><p>一个事务在执行 <code>INSERT</code> 操作时，如果即将插入的间隙已经被其他事务加了 <code>gap锁</code> ，那么本次 <code>INSERT</code> 操作会阻塞，并且当前事务会在该间隙上加一个<strong>插入意向锁</strong>，否则一般情况下 <code>INSERT</code> 操作是不加锁的。</p>
+<p>如果一个事务首先插入了一条记录（此时并没有在内存生产与该记录关联的锁结构），然后另一个事务：</p>
+<ul>
+<li><p>使用 <code>SELECT ... LOCK IN SHARE MODE</code> （获取这条记录的S锁），使用 <code>SELECT ... FOR UPDATE</code> （获取这条记录的X锁）</p>
+<p>  如果允许这种情况的发生，那么可能<strong>产生脏读问题</strong>。</p>
+</li>
+<li><p>修改这条记录（获取这条记录的X锁）</p>
+<p>  如果允许这种情况的发生，那么可能<strong>产生脏写问题</strong>。</p>
+</li>
+</ul>
+<p>这时候我们前边提过的事务id又要起作用了。我们把聚簇索引和二级索引中的记录分开看一下:</p>
+<ul>
+<li><p><strong>情景一</strong>：对于聚簇索引记录来说，有一个 <code>trx_id</code> 隐藏列，该隐藏列记录着最后改动该记录的 <code>事务 id</code> 。那么如果在当前事务中新插入一条聚簇索引记录后，该记录的 <code>trx_id</code> 隐藏列代表的的就是当前事务的 <code>事务id</code> ，如果其他事务此时想对该记录添加 <strong>S锁</strong> 或者 <strong>X锁</strong> 时，首先会看一下该记录的 <code>trx_id</code> 隐藏列代表的事务是否是当前的活跃事务，如果是的话，那么就帮助当前事务创建一个 <strong>X锁</strong> （也就是为当前事务创建一个锁结构， <code>is_waiting: false</code> ），然后自己进入等待状态 （也就是为自己也创建一个锁结构， <code>is_waiting: true</code> ）。</p>
+</li>
+<li><p><strong>情景二</strong>：对于二级索引记录来说，本身并没有 <code>trx_id</code> 隐藏列，但是在二级索引页面的 <code>Page Header</code> 部分有一个 <code>PAGE_MAX_TRX_ID</code> 属性，该属性代表对该页面做改动的最大的 <code>事务id</code> ，如果 <code>PAGE_MAX_TRX_ID</code> 属性值小于当前最小的活跃事务id ，那么说明对该页面做修改的事务都已经提交了，否则就需要在页面中定位到对应的二级索引记录，然后回表找到它对应的聚簇索引记录，然后再重复 情景一 的做法。</p>
+</li>
+</ul>
+<p>即：一个事务对新插入的记录可以不显式的加锁（生成一个锁结构)，但是由于事务id的存在，相当于加了一个隐式锁。别的事务在对这条记录加s锁或者X锁时，由于隐式锁的存在，会先帮助当前事务生成一个锁结构，然后自己再生成一个锁结构后进入等待状态。</p>
+<p>隐式锁是一种<strong>延迟加锁</strong>的机制，从而来减少加锁的数量。</p>
+<p>隐式锁在实际内存对象中并不含有这个锁信息。只有当产生锁等待时，隐式锁转化为显式锁。</p>
+<p><code>InnoDB</code> 的 <code>insert</code> 操作，对插入的记录不加锁，但是此时如果另一个线程进行当前读，类似以下的用例，session 2会锁等待session 1，那么这是如何实现的呢?</p>
+<p><strong>session 1:</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">begin</span>;  <br>Query OK, <span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> affected (<span class="hljs-number">0.00</span> sec)  <br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">insert</span> <span class="hljs-keyword">INTO</span> student <span class="hljs-keyword">VALUES</span>(<span class="hljs-number">34</span>,&quot;周八&quot;,&quot;二班&quot;);  <br>Query OK, <span class="hljs-number">1</span> <span class="hljs-type">row</span> affected (<span class="hljs-number">0.00</span> sec)<br></code></pre></td></tr></table></figure>
+
+<p><strong>session 2:</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">begin</span>;  <br>Query OK, <span class="hljs-number">0</span> <span class="hljs-keyword">rows</span> affected (<span class="hljs-number">0.00</span> sec)  <br>mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> student lock <span class="hljs-keyword">in</span> share mode;  <br><br># 当前事务被阻塞  <br><br># 隐式锁 <span class="hljs-operator">-</span><span class="hljs-operator">&gt;</span> 显式锁（在查询之前，执行<span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> performance_schema.data_lock_waits，是<span class="hljs-keyword">Empty</span> <span class="hljs-keyword">set</span>;）<br></code></pre></td></tr></table></figure>
+
+<p>执行下述语句，输出结果：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs sql"> mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> performance_schema.data_lock_waits\G;  <br> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> <span class="hljs-number">1.</span> <span class="hljs-type">row</span> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span>  <br> ENGINE: INNODB  <br> REQUESTING_ENGINE_LOCK_ID: <span class="hljs-number">140562531358232</span>:<span class="hljs-number">7</span>:<span class="hljs-number">4</span>:<span class="hljs-number">9</span>:<span class="hljs-number">140562535668584</span>  <br> REQUESTING_ENGINE_TRANSACTION_ID: <span class="hljs-number">422037508068888</span>  <br> REQUESTING_THREAD_ID: <span class="hljs-number">64</span>  <br> REQUESTING_EVENT_ID: <span class="hljs-number">6</span>  <br> REQUESTING_OBJECT_INSTANCE_BEGIN: <span class="hljs-number">140562535668584</span>  <br> BLOCKING_ENGINE_LOCK_ID: <span class="hljs-number">140562531351768</span>:<span class="hljs-number">7</span>:<span class="hljs-number">4</span>:<span class="hljs-number">9</span>:<span class="hljs-number">140562535619104</span>  <br> BLOCKING_ENGINE_TRANSACTION_ID: <span class="hljs-number">15902</span>  <br> BLOCKING_THREAD_ID: <span class="hljs-number">64</span>  <br> BLOCKING_EVENT_ID: <span class="hljs-number">6</span>  <br> BLOCKING_OBJECT_INSTANCE_BEGIN: <span class="hljs-number">140562535619104</span>  <br> <span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.00</span> sec)<br></code></pre></td></tr></table></figure>
+
+<p>隐式锁的逻辑过程如下：</p>
+<ol>
+<li><p><code>InnoDB</code> 的每条记录中都一个隐含的 <code>trx_id</code> 字段，这个字段存在于聚簇索引的 <code>B+</code> 树中。</p>
+</li>
+<li><p>在操作一条记录前，首先根据记录中的 <code>trx_id</code> 检查该事务是否是活动的事务(未提交或回滚)。如果是活动的事务，首先将 <code>隐式锁</code> 转换为 <code>显式锁</code> (就是为该事务添加一个锁)。</p>
+</li>
+<li><p>检查是否有锁冲突，如果有冲突，创建锁，并设置为waiting状态。如果没有冲突不加锁，跳到5。</p>
+</li>
+<li><p>等待加锁成功，被唤醒，或者超时。</p>
+</li>
+<li><p>写数据，并将自己的 <code>trx_id</code> 写入 <code>trx_id</code> 字段。</p>
+</li>
+</ol>
+<h4 id="2-显式锁"><a href="#2-显式锁" class="headerlink" title="2. 显式锁"></a>2. 显式锁</h4><p>通过特定的语句进行加锁，我们一般称之为显式加锁，例如：</p>
+<p>显式加共享锁：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> .... lock <span class="hljs-keyword">in</span> share mode<br></code></pre></td></tr></table></figure>
+
+<p>显式加排它锁：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> .... <span class="hljs-keyword">for</span> <span class="hljs-keyword">update</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="3-5-其它锁之：全局锁"><a href="#3-5-其它锁之：全局锁" class="headerlink" title="3.5 其它锁之：全局锁"></a>3.5 其它锁之：全局锁</h3><p>全局锁就是<strong>对整个数据库实例加锁</strong>。当你需要让整个库处于<strong>只读状态</strong>的时候，可以使用这个命令，之后其他线程的以下语句会被阻塞：数据更新语句（数据的增删改）、数据定义语句（包括建表、修改表结构等）和更新类事务的提交语句。</p>
+<p>全局锁的<strong>典型使用场景</strong>是：做<strong>全库逻辑备份</strong>。</p>
+<p>全局锁的命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">Flush tables <span class="hljs-keyword">with</span> read lock<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-6-其它锁之：死锁"><a href="#3-6-其它锁之：死锁" class="headerlink" title="3.6 其它锁之：死锁"></a>3.6 其它锁之：死锁</h3><h4 id="1-概念"><a href="#1-概念" class="headerlink" title="1. 概念"></a>1. 概念</h4><p>两个事务都持有对方需要的锁，并且在等待对方释放，并且双方都不会释放自己的锁。</p>
+<blockquote>
+<p>参考：间隙锁的死锁</p>
+<p><img src="/Resources/image-20230625145911928.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230625145911928"></p>
+</blockquote>
+<p><strong>举例1：</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>事务1</th>
+<th>事务2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>start transaction; update account set money&#x3D;10 where id&#x3D;1;</td>
+<td>start transaction;</td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>update account set money&#x3D;10 where id&#x3D;2;</td>
+</tr>
+<tr>
+<td>3</td>
+<td>update account set money&#x3D;20 where id&#x3D;2;</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td>update account set money&#x3D;10 where id&#x3D;1;</td>
+</tr>
+</tbody></table>
+<p><strong>举例2：</strong></p>
+<p>用户A给用户B转账100，再次同时，用户B也给用户A转账100。这个过程，可能导致死锁。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql">#事务<span class="hljs-number">1</span>  <br><span class="hljs-keyword">update</span> account <span class="hljs-keyword">set</span> balance <span class="hljs-operator">=</span> balance <span class="hljs-operator">-</span> <span class="hljs-number">100</span> <span class="hljs-keyword">where</span> name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;A&#x27;</span>;#操作<span class="hljs-number">1</span>  <br><span class="hljs-keyword">update</span> account <span class="hljs-keyword">set</span> balance <span class="hljs-operator">=</span> balance <span class="hljs-operator">+</span> <span class="hljs-number">100</span> <span class="hljs-keyword">where</span> name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;B&#x27;</span>;#操作<span class="hljs-number">3</span>  <br><br>#事务<span class="hljs-number">2</span>  <br><span class="hljs-keyword">update</span> account <span class="hljs-keyword">set</span> balance <span class="hljs-operator">=</span> balance <span class="hljs-operator">-</span> <span class="hljs-number">100</span> <span class="hljs-keyword">where</span> name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;B&#x27;</span>;#操作<span class="hljs-number">2</span>  <br><span class="hljs-keyword">update</span> account <span class="hljs-keyword">set</span> balance <span class="hljs-operator">=</span> balance <span class="hljs-operator">+</span> <span class="hljs-number">100</span> <span class="hljs-keyword">where</span> name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;A&#x27;</span>;#操作<span class="hljs-number">4</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>举例3:</strong></p>
+<p>四个车都想往前开，都想其他车让开，造成死锁问题</p>
+<p><img src="/Resources/image-20230625150656544.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230625150656544"></p>
+<h4 id="2-产生死锁的必要条件"><a href="#2-产生死锁的必要条件" class="headerlink" title="2. 产生死锁的必要条件"></a>2. 产生死锁的必要条件</h4><ol>
+<li><p>两个或者两个以上事务</p>
+</li>
+<li><p>每个事务都已经持有锁并且申请新的锁</p>
+</li>
+<li><p>锁资源同时只能被同一个事务持有或者不兼容</p>
+</li>
+<li><p>事务之间因为持有锁和申请锁导致彼此循环等待</p>
+</li>
+</ol>
+<blockquote>
+<p>死锁的关键在于：两个（或以上）的Session加锁的顺序不一致。</p>
+</blockquote>
+<h4 id="3-如何处理死锁"><a href="#3-如何处理死锁" class="headerlink" title="3. 如何处理死锁"></a>3. 如何处理死锁</h4><p><strong>方式1：</strong>等待，直到超时（ <code>innodb_lock_wait_timeout=50s</code> )</p>
+<p>即当两个事务互相等待时，当一个事务等待时间<strong>超过设置的阈值</strong>时，就将其<strong>回滚</strong>，另外事务继续进行。这种方法简单有效，在 <code>innodb</code> 中，参数 <code>innodb_lock_wait_timeout</code> 用来设置超时时间。</p>
+<p>缺点：对于在线服务来说，这个等待时间往往是无法接受的，但如果修改超时时间较短的话，容易误伤普通的锁等待。</p>
+<p><strong>方式2：</strong>使用死锁检测处理死锁程序</p>
+<p>方式1检测死锁太过被动，<code>innodb</code> 还提供了 <code>wait-for graph算法</code> 来主动进行死锁检测，每当加锁请求无法立即满足需要并进入等待时，<code>wait-for graph算法</code> 都会被触发。</p>
+<p>这是一种较为 <strong>主动的死锁检测机制</strong>，要求数据库保存 <strong>锁的信息链表</strong> 和 <strong>事务等待链表</strong> 两部分信息。</p>
+<p><img src="/Resources/image-20230625153335931.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230625153335931"></p>
+<p>基于这两个信息，可以绘制 <code>wait-for graph</code>（row2中，T3前面分别有T1，T4，T2，因此需要等待这三个事务，而T1和T4是共享锁，因此不需要等待，即T4和T1中没有箭头）</p>
+<p><img src="/Resources/image-20230625153338438.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230625153338438"></p>
+<blockquote>
+<p>死锁检测的原理是构建一个以事务为顶点，锁为边的有向图，判断有向图是否存在环，存在既有死锁。</p>
+</blockquote>
+<p>一旦检测到回路、有死锁，这时候 <code>InnoDB</code> 存储引擎会选择 <strong>回滚 <code>undo</code> 量最小的事务</strong>，让其他事务继续执行（<code>innodb_deadlock_detect=on</code>表示开启这个逻辑）。</p>
+<p><strong>缺点:</strong></p>
+<ul>
+<li>每个新的被阻塞的线程，都要判断是不是由于自己的加入导致了死锁，这个操作时间复杂度是O(n)。如果100个并发线程同时更新同一行，意味着要检测100*100&#x3D;1万次，1万个线程就会有1千万次检测。</li>
+</ul>
+<p><strong>解决方式:</strong></p>
+<ul>
+<li><p>方式1：<strong>关闭死锁检测</strong>，但意味着可能会出现大量的超时，会导致业务有损。</p>
+</li>
+<li><p>方式2：<strong>控制并发访问的数量</strong>。比如在中间件中实现对于相同行的更新，在进入引擎之前排队，这样在 <code>InnoDB</code> 内部就不会有大量的死锁检测工作。</p>
+</li>
+</ul>
+<p><strong>进一步的思路：</strong></p>
+<ul>
+<li>可以考虑通过将一行改成逻辑上的多行来<strong>减少锁冲突</strong>。比如，连锁超市账户总额的记录，可以考虑放到多条记录上。账户总额等于这多个记录的值的总和。</li>
+</ul>
+<h4 id="4-如何避免死锁"><a href="#4-如何避免死锁" class="headerlink" title="4. 如何避免死锁"></a>4. 如何避免死锁</h4><ol>
+<li><p>合理设计索引，使业务SQL尽可能通过索引定位更少的行，减少锁竞争。</p>
+</li>
+<li><p>调整业务逻辑SQL执行顺序，避免update&#x2F;delete长时间持有锁的SQL在事务前面。</p>
+</li>
+<li><p>避免大事务，尽量将大事务拆成多个小事务来处理，小事务缩短锁定资源的时间，发生锁冲突的几率也更小。</p>
+</li>
+<li><p>在并发比较高的系统中，不要显式加锁，特别是在事务里显式加锁。如 <code>select ... for update</code> 语句，如果是在事务里运行了 <code>start transaction</code> 或设置了 <code>autocommit = 0</code>，那么就会锁定所查找到的记录。</p>
+</li>
+<li><p>降低隔离级别。如果业务允许，将隔离级别调低也是较好的选择，比如将隔离级别从RR调整为RC，可以避免掉很多因为gap锁造成的死锁。</p>
+</li>
+</ol>
+<h2 id="4、锁的内部结构-了解"><a href="#4、锁的内部结构-了解" class="headerlink" title="4、锁的内部结构(了解)"></a>4、锁的内部结构(了解)</h2><p>我们前边说对一条记录加锁的本质就是在内存中创建一个 <strong>锁结构</strong> 与之关联，那么是不是一个事务对多条记录加锁，就要创建多个 <strong>锁结构</strong> 呢？比如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"># 事务T1  <br><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> <span class="hljs-keyword">user</span> LOCK <span class="hljs-keyword">IN</span> SHARE MODE;<br></code></pre></td></tr></table></figure>
+
+<p>理论上创建多个锁结构没问题，但是如果一个事务要获取10000条记录的锁，生成10000个锁结构也太崩溃了！所以决定在对不同记录加锁时，如果符合下边这些条件的记录会放在一个锁结构中。</p>
+<ul>
+<li><p>在同一个事务中进行加锁操作</p>
+</li>
+<li><p>被加锁的记录在同一个页面中</p>
+</li>
+<li><p>加锁的类型是一样的</p>
+</li>
+<li><p>等待状态是一样的</p>
+</li>
+</ul>
+<p><code>InnoDB</code> 存储引擎中的 <strong>锁结构</strong> 如下：</p>
+<p><img src="/Resources/image-20230625154332546.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230625154332546"></p>
+<p>结构解析：</p>
+<ul>
+<li><p><strong>锁所在的事务信息</strong></p>
+<ul>
+<li><p>不论是表锁还是行锁，都是在事务执行过程中生成的，哪个事务生成了这个锁结构 ，这里就记录这个事务的信息。</p>
+</li>
+<li><p>此锁所在的事务信息在内存结构中只是一个指针，通过指针可以找到内存中关于该事务的更多信息，比方说事务id等。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>索引信息</strong></p>
+<ul>
+<li>对于行锁来说，需要记录一下加锁的记录是属于哪个索引的。这里也是一个指针。</li>
+</ul>
+</li>
+<li><p><strong>表锁／行锁信息</strong></p>
+<ul>
+<li><p>表锁</p>
+<ul>
+<li>记载着是对哪个表加的锁，还有其他的一些信息。</li>
+</ul>
+</li>
+<li><p>行锁</p>
+<ul>
+<li><p><code>Space ID</code> ：记录所在表空间。</p>
+</li>
+<li><p><code>Page Number</code> ：记录所在页号。</p>
+</li>
+<li><p><code>n_bits</code>：对于行锁来说，一条记录就对应着一个比特位，一个页面中包含很多记录，用不同的比特位来区分到底是哪一条记录加了锁。为此在行锁结构的末尾放置了一堆比特位，这个<code>n_bis</code>属性代表使用了多少比特位。(n_bits的值一般都比页面中记录条数多一些。主要是为了之后在页面中插入了新记录后也不至于重新分配锁结构)</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong><code>type_mode</code></strong></p>
+<ul>
+<li><p>这是一个32位的数，被分成了 <code>lock_mode</code> 、 <code>lock_type</code> 和 <code>rec_lock_type</code> 三个部分，如图所示：</p>
+</li>
+<li><p><img src="/Resources/image-20230625155640291.png?lastModify=1687674874" srcset="/img/loading.gif" lazyload alt="image-20230625155640291"></p>
+</li>
+<li><p><code>lock_mode</code></p>
+<ul>
+<li><p><code>LOCK_IS</code> （十进制的 0 ）：表示共享意向锁，也就是 <code>IS锁</code> 。</p>
+</li>
+<li><p><code>LOCK_IX</code> （十进制的 1 ）：表示独占意向锁，也就是 <code>IX锁</code> 。</p>
+</li>
+<li><p><code>LOCK_S</code> （十进制的 2 ）：表示共享锁，也就是 <code>S锁</code> 。</p>
+</li>
+<li><p><code>LOCK_X</code> （十进制的 3 ）：表示独占锁，也就是 <code>X锁</code> 。</p>
+</li>
+<li><p><code>LOCK_AUTO_INC</code> （十进制的 4 ）：表示 <code>AUTO-INC锁</code> 。</p>
+</li>
+<li><p>在 <code>InnoDB</code> 存储引擎中，<code>LOCK_IS</code>，<code>LOCK_IX</code>，<code>LOCK_AUTO_INC</code> 都算是表级锁的模式，<code>LOCK_S</code> 和 <code>LOCK_X</code> 既可以算是表级锁的模式，也可以是行级锁的模式。</p>
+</li>
+</ul>
+</li>
+<li><p><code>lock_type</code></p>
+<ul>
+<li><p><code>LOCK_TABLE</code> （十进制的 16 ），也就是当第5个比特位置为1时，表示表级锁。</p>
+</li>
+<li><p><code>LOCK_REC</code>（十进制的 32 ），也就是当第6个比特位置为1时，表示行级锁。</p>
+</li>
+</ul>
+</li>
+<li><p><code>rec_lock_type</code></p>
+<ul>
+<li><p><code>LOCK_ORDINARY</code> （十进制的 0 ）：表示 <code>next-key锁</code> 。</p>
+</li>
+<li><p><code>LOCK_GAP</code> （十进制的 512 ）：也就是当第10个比特位置为1时，表示 <code>gap锁</code> 。</p>
+</li>
+<li><p><code>LOCK_REC_NOT_GAP</code> （十进制的 1024 ）：也就是当第11个比特位置为1时，表示正经 <code>记录锁</code> 。</p>
+</li>
+<li><p><code>LOCK_INSERT_INTENTION</code> （十进制的 2048 ）：也就是当第12个比特位置为1时，表示插入意向锁。其他的类型：还有一些不常用的类型我们就不多说了。</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code>is_waiting</code> 属性呢？基于内存空间的节省，所以把 <code>is_waiting</code> 属性放到了 <code>type_mode</code> 这个32 位的数字中：</p>
+<ul>
+<li><code>LOCK_WAIT</code> （十进制的 256 ） ：当第9个比特位置为 1 时，表示 <code>is_waiting</code> 为 <code>true</code> ，也 就是当前事务尚未获取到锁，处在等待状态；当这个比特位为 0 时，表示 <code>is_waiting</code> 为 <code>false</code> ，也就是当前事务获取锁成功。</li>
+</ul>
+</li>
+<li><p><strong>其他信息</strong></p>
+<ul>
+<li>为了更好的管理系统运行过程中生成的各种锁结构而设计了各种哈希表和链表。</li>
+</ul>
+</li>
+<li><p><strong>一堆比特位</strong></p>
+<ul>
+<li>如果是 <code>行锁结构</code> 的话，在该结构末尾还放置了一堆比特位，比特位的数量是由上边提到的 <code>n_bits</code> 属性表示的。InnoDB数据页中的每条记录在 <code>记录头信息</code> 中都包含一个 <code>heap_no</code> 属性，伪记录 <code>Infimum</code> 的 <code>heap_no</code> 值为 0 ， <code>Supremum</code> 的 <code>heap_no</code> 值为 1 ，之后每插入一条记录， <code>heap_no</code> 值就增1。 锁结 构 最后的一堆比特位就对应着一个页面中的记录，一个比特位映射一个 <code>heap_no</code> ，即一个比特位映射 到页内的一条记录。</li>
+</ul>
+</li>
+</ul>
+<h2 id="5、锁监控（了解）"><a href="#5、锁监控（了解）" class="headerlink" title="5、锁监控（了解）"></a>5、锁监控（了解）</h2><p>关于 <code>MySQL</code> 锁的监控，我们一般可以通过检查 <code>InnoDB_row_lock</code> 等状态变量来分析系统上的行锁的争夺情况</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sql"> mysql<span class="hljs-operator">&gt;</span> <span class="hljs-keyword">show</span> status <span class="hljs-keyword">like</span> <span class="hljs-string">&#x27;innodb_row_lock%&#x27;</span>;  <br> <span class="hljs-operator">+</span><span class="hljs-comment">-------------------------------+-------+  </span><br> <span class="hljs-operator">|</span> Variable_name                 <span class="hljs-operator">|</span> <span class="hljs-keyword">Value</span> <span class="hljs-operator">|</span>  <br> <span class="hljs-operator">+</span><span class="hljs-comment">-------------------------------+-------+  </span><br> <span class="hljs-operator">|</span> Innodb_row_lock_current_waits <span class="hljs-operator">|</span> <span class="hljs-number">0</span>     <span class="hljs-operator">|</span>  <br> <span class="hljs-operator">|</span> Innodb_row_lock_time          <span class="hljs-operator">|</span> <span class="hljs-number">0</span>     <span class="hljs-operator">|</span>  <br> <span class="hljs-operator">|</span> Innodb_row_lock_time_avg      <span class="hljs-operator">|</span> <span class="hljs-number">0</span>     <span class="hljs-operator">|</span>  <br> <span class="hljs-operator">|</span> Innodb_row_lock_time_max      <span class="hljs-operator">|</span> <span class="hljs-number">0</span>     <span class="hljs-operator">|</span>  <br> <span class="hljs-operator">|</span> Innodb_row_lock_waits         <span class="hljs-operator">|</span> <span class="hljs-number">0</span>     <span class="hljs-operator">|</span>  <br> <span class="hljs-operator">+</span><span class="hljs-comment">-------------------------------+-------+  </span><br> <span class="hljs-number">5</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.01</span> sec)<br></code></pre></td></tr></table></figure>
+
+<p>对各个状态量的说明如下：</p>
+<ul>
+<li><p><code>Innodb_row_lock_current_waits</code>：当前正在等待锁定的数量；</p>
+</li>
+<li><p>⭐<code>Innodb_row_lock_time</code> ：从系统启动到现在锁定总时间长度；（等待总时长）</p>
+</li>
+<li><p>⭐<code>Innodb_row_lock_time_avg</code> ：每次等待所花平均时间；（等待平均时长）</p>
+</li>
+<li><p><code>Innodb_row_lock_time_max</code>：从系统启动到现在等待最常的一次所花的时间；</p>
+</li>
+<li><p>⭐<code>Innodb_row_lock_waits</code> ：系统启动后到现在总共等待的次数；（等待总次数）</p>
+</li>
+</ul>
+<p>对于这5个状态变量，比较重要的3个见⭐。</p>
+<p>尤其是当等待次数很高，而且每次等待时长也不小的时候，我们就需要分析系统中为什么会有如此多的等待，然后根据分析结果着手指定优化计划。</p>
+<p><strong>其他监控方法：</strong></p>
+<p><code>MySQL</code> 把事务和锁的信息记录在了 <code>information_schema</code> 库中，涉及到的三张表分别是 <code>INNODB_TRX</code>（被锁阻塞的sql语句） 、 <code>INNODB_LOCKS</code>（锁的情况） 和 <code>INNODB_LOCK_WAITS</code> （锁等待情况）。</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs diff"># MySQL 5.7及之前 <br>select * from information_schema.INNODB_LOCKS; <br># 该命令只能看到阻塞事务的锁；如果事务并未被阻塞，则在该表中看不到该事务的锁情况。 <br><br># MySQL8.0以后<br><span class="hljs-deletion">- select * from information_schema.INNODB_LOCKS; </span><br><span class="hljs-addition">+ select * fromperformance_schema.data_locks; </span><br># 该命令不仅可以看到阻塞该事务的锁，还可以看到该事务所持有的锁。 <br><br><span class="hljs-deletion">- information_schema.INNODB_LOCK_WAITS </span><br><span class="hljs-addition">+ performance_schema.data_lock_waits </span><br># 查看等待的锁的情况<br></code></pre></td></tr></table></figure>
+
+<p>我们模拟一个锁等待的场景，以下是从这三张表收集的信息</p>
+<p>锁等待场景，我们依然使用记录锁中的案例，当事务2进行等待时，查询情况如下：</p>
+<p>（1）查询正在被锁阻塞的sql语句。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"> <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> information_schema.INNODB_TRX;<br></code></pre></td></tr></table></figure>
+
+<p>重要属性代表含义已在上述中标注。</p>
+<p>（2）查询锁等待情况</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> data_lock_waits\G;  <br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> <span class="hljs-number">1.</span> <span class="hljs-type">row</span> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span>  <br>ENGINE: INNODB  <br>REQUESTING_ENGINE_LOCK_ID: <span class="hljs-number">139750145405624</span>:<span class="hljs-number">7</span>:<span class="hljs-number">4</span>:<span class="hljs-number">7</span>:<span class="hljs-number">139747028690608</span>  <br>REQUESTING_ENGINE_TRANSACTION_ID: <span class="hljs-number">13845</span> #被阻塞的事务ID  <br>REQUESTING_THREAD_ID: <span class="hljs-number">72</span>  <br>REQUESTING_EVENT_ID: <span class="hljs-number">26</span>  <br>REQUESTING_OBJECT_INSTANCE_BEGIN: <span class="hljs-number">139747028690608</span>  <br>BLOCKING_ENGINE_LOCK_ID: <span class="hljs-number">139750145406432</span>:<span class="hljs-number">7</span>:<span class="hljs-number">4</span>:<span class="hljs-number">7</span>:<span class="hljs-number">139747028813248</span>  <br>BLOCKING_ENGINE_TRANSACTION_ID: <span class="hljs-number">13844</span> #正在执行的事务ID，阻塞了<span class="hljs-number">13845</span>  <br>BLOCKING_THREAD_ID: <span class="hljs-number">71</span>  <br>BLOCKING_EVENT_ID: <span class="hljs-number">24</span>  <br>BLOCKING_OBJECT_INSTANCE_BEGIN: <span class="hljs-number">139747028813248</span>  <br><span class="hljs-number">1</span> <span class="hljs-type">row</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.00</span> sec)<br><br></code></pre></td></tr></table></figure>
+
+<p>（3）查询锁的情况</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><code class="hljs sql">mysql <span class="hljs-operator">&gt;</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> performance_schema.data_locks\G;  <br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> <span class="hljs-number">1.</span> <span class="hljs-type">row</span> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span>  <br>ENGINE: INNODB  <br>ENGINE_LOCK_ID: <span class="hljs-number">139750145405624</span>:<span class="hljs-number">1068</span>:<span class="hljs-number">139747028693520</span>  <br>ENGINE_TRANSACTION_ID: <span class="hljs-number">13847</span>  <br>THREAD_ID: <span class="hljs-number">72</span>  <br>EVENT_ID: <span class="hljs-number">31</span>  <br>OBJECT_SCHEMA: atguigu  <br>OBJECT_NAME: <span class="hljs-keyword">user</span>  <br>PARTITION_NAME: <span class="hljs-keyword">NULL</span>  <br>SUBPARTITION_NAME: <span class="hljs-keyword">NULL</span>  <br>INDEX_NAME: <span class="hljs-keyword">NULL</span>  <br>OBJECT_INSTANCE_BEGIN: <span class="hljs-number">139747028693520</span>  <br>LOCK_TYPE: <span class="hljs-keyword">TABLE</span>  <br>LOCK_MODE: IX  <br>LOCK_STATUS: GRANTED  <br>LOCK_DATA: <span class="hljs-keyword">NULL</span>  <br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> <span class="hljs-number">2.</span> <span class="hljs-type">row</span> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span>  <br>ENGINE: INNODB  <br>ENGINE_LOCK_ID: <span class="hljs-number">139750145405624</span>:<span class="hljs-number">7</span>:<span class="hljs-number">4</span>:<span class="hljs-number">7</span>:<span class="hljs-number">139747028690608</span>  <br>ENGINE_TRANSACTION_ID: <span class="hljs-number">13847</span>  <br>THREAD_ID: <span class="hljs-number">72</span>  <br>EVENT_ID: <span class="hljs-number">31</span>  <br>OBJECT_SCHEMA: atguigu  <br>OBJECT_NAME: <span class="hljs-keyword">user</span>  <br>PARTITION_NAME: <span class="hljs-keyword">NULL</span>  <br>SUBPARTITION_NAME: <span class="hljs-keyword">NULL</span>  <br>INDEX_NAME: <span class="hljs-keyword">PRIMARY</span>  <br>OBJECT_INSTANCE_BEGIN: <span class="hljs-number">139747028690608</span>  <br>LOCK_TYPE: RECORD  <br>LOCK_MODE: X,REC_NOT_GAP  <br>LOCK_STATUS: WAITING  <br>LOCK_DATA: <span class="hljs-number">1</span>  <br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> <span class="hljs-number">3.</span> <span class="hljs-type">row</span> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span>  <br>ENGINE: INNODB  <br>ENGINE_LOCK_ID: <span class="hljs-number">139750145406432</span>:<span class="hljs-number">1068</span>:<span class="hljs-number">139747028816304</span>  <br>ENGINE_TRANSACTION_ID: <span class="hljs-number">13846</span>  <br>THREAD_ID: <span class="hljs-number">71</span>  <br>EVENT_ID: <span class="hljs-number">28</span>  <br>OBJECT_SCHEMA: atguigu  <br>OBJECT_NAME: <span class="hljs-keyword">user</span>  <br>PARTITION_NAME: <span class="hljs-keyword">NULL</span>  <br>SUBPARTITION_NAME: <span class="hljs-keyword">NULL</span>  <br>INDEX_NAME: <span class="hljs-keyword">NULL</span>  <br>OBJECT_INSTANCE_BEGIN: <span class="hljs-number">139747028816304</span>  <br>LOCK_TYPE: <span class="hljs-keyword">TABLE</span>  <br>LOCK_MODE: IX  <br>LOCK_STATUS: GRANTED  <br>LOCK_DATA: <span class="hljs-keyword">NULL</span>  <br><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span> <span class="hljs-number">4.</span> <span class="hljs-type">row</span> <span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span><span class="hljs-operator">*</span>  <br>ENGINE: INNODB  <br>ENGINE_LOCK_ID: <span class="hljs-number">139750145406432</span>:<span class="hljs-number">7</span>:<span class="hljs-number">4</span>:<span class="hljs-number">7</span>:<span class="hljs-number">139747028813248</span>  <br>ENGINE_TRANSACTION_ID: <span class="hljs-number">13846</span>  <br>THREAD_ID: <span class="hljs-number">71</span>  <br>EVENT_ID: <span class="hljs-number">28</span>  <br>OBJECT_SCHEMA: atguigu  <br>OBJECT_NAME: <span class="hljs-keyword">user</span>  <br>PARTITION_NAME: <span class="hljs-keyword">NULL</span>  <br>SUBPARTITION_NAME: <span class="hljs-keyword">NULL</span>  <br>INDEX_NAME: <span class="hljs-keyword">PRIMARY</span>  <br>OBJECT_INSTANCE_BEGIN: <span class="hljs-number">139747028813248</span>  <br>LOCK_TYPE: RECORD  <br>LOCK_MODE: X,REC_NOT_GAP  <br>LOCK_STATUS: GRANTED  <br>LOCK_DATA: <span class="hljs-number">1</span>  <br><span class="hljs-number">4</span> <span class="hljs-keyword">rows</span> <span class="hljs-keyword">in</span> <span class="hljs-keyword">set</span> (<span class="hljs-number">0.00</span> sec)  <br><br>ERROR:  <br><span class="hljs-keyword">No</span> query specified<br></code></pre></td></tr></table></figure>
+
+<p>从锁的情况可以看出来，两个事务分别获取了IX锁，我们从意向锁章节可以知道，IX锁互相时兼容的。所 以这里不会等待，但是事务1同样持有X锁，此时事务2也要去同一行记录获取X锁，他们之间不兼容，导致等待的情况发生。</p>
+<h2 id="6、附录"><a href="#6、附录" class="headerlink" title="6、附录"></a>6、附录</h2><p><strong>间隙锁加锁规则（共11个案例）</strong></p>
+<p>间隙锁是在可重复读隔离级别下才会生效的： next-key lock 实际上是由间隙锁加行锁实现的，如果切换 到读提交隔离级别 (read-committed) 的话，就好理解了，过程中去掉间隙锁的部分，也就是只剩下行锁 的部分。而在读提交隔离级别下间隙锁就没有了，为了解决可能出现的数据和日志不一致问题，需要把 binlog 格式设置为 row 。也就是说，许多公司的配置为：读提交隔离级别加 binlog_format&#x3D;row。业务不 需要可重复读的保证，这样考虑到读提交下操作数据的锁范围更小（没有间隙锁），这个选择是合理的。</p>
+<p>next-key lock的加锁规则</p>
+<p>总结的加锁规则里面，包含了两个 “ “ 原则 ” ” 、两个 “ “ 优化 ” ” 和一个 “bug” 。</p>
+<ol>
+<li>原则 1 ：加锁的基本单位是 next-key lock 。 next-key lock 是前开后闭区间。 </li>
+<li>原则 2 ：查找过程中访问到的对象才会加锁。任何辅助索引上的锁，或者非索引列上的锁，最终 都要回溯到主键上，在主键上也要加一把锁。 </li>
+<li>优化 1 ：索引上的等值查询，给唯一索引加锁的时候， next-key lock 退化为行锁。也就是说如果 InnoDB扫描的是一个主键、或是一个唯一索引的话，那InnoDB只会采用行锁方式来加锁 </li>
+<li>优化 2 ：索引上（不一定是唯一索引）的等值查询，向右遍历时且最后一个值不满足等值条件的 时候， next-keylock 退化为间隙锁。 </li>
+<li>一个 bug ：唯一索引上的范围查询会访问到不满足条件的第一个值为止。</li>
+</ol>
+<p>我们以表test作为例子，建表语句和初始化语句如下：其中id为主键索引</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs mysql">CREATE TABLE `test` (<br>`id` int(11) NOT NULL,<br>`col1` int(11) DEFAULT NULL,<br>`col2` int(11) DEFAULT NULL,<br>PRIMARY KEY (`id`),<br>KEY `c` (`c`)<br>) ENGINE=InnoDB;<br>insert into test values(0,0,0),(5,5,5),<br>(10,10,10),(15,15,15),(20,20,20),(25,25,25);<br></code></pre></td></tr></table></figure>
+
+<p><strong>案例一：唯一索引等值查询间隙锁</strong></p>
+<p><img src="/Resources/image-20220714134603698-1687683285030-2.png" srcset="/img/loading.gif" lazyload alt="image-20220714134603698"></p>
+<p>由于表 test 中没有 id&#x3D;7 的记录</p>
+<p>根据原则 1 ，加锁单位是 next-key lock ， session A 加锁范围就是 (5,10] ； 同时根据优化 2 ，这是一个等 值查询 (id&#x3D;7) ，而 id&#x3D;10 不满足查询条件， next-key lock 退化成间隙锁，因此最终加锁的范围是 (5,10)</p>
+<p><strong>案例二：非唯一索引等值查询锁</strong></p>
+<p><img src="/Resources/image-20220714134623052-16577775838551-1687683285030-3.png" srcset="/img/loading.gif" lazyload alt="image-20220714134623052"></p>
+<p>这里 session A 要给索引 col1 上 col1&#x3D;5 的这一行加上读锁。</p>
+<ol>
+<li>根据原则 1 ，加锁单位是 next-key lock ，左开右闭，5是闭上的，因此会给 (0,5] 加上 next-key lock 。 </li>
+<li>要注意 c 是普通索引，因此仅访问 c&#x3D;5 这一条记录是不能马上停下来的（可能有col1&#x3D;5的其他记 录），需要向右遍历，查到c&#x3D;10 才放弃。根据原则 2 ，访问到的都要加锁，因此要给 (5,10] 加 next-key lock 。 </li>
+<li>但是同时这个符合优化 2 ：等值判断，向右遍历，最后一个值不满足 col1&#x3D;5 这个等值条件，因此退化成间隙锁 (5,10) 。</li>
+<li>根据原则 2 ， 只有访问到的对象才会加锁，这个查询使用覆盖索引，并不需要访问主键索引，所以主键索引上没有加任何锁，这就是为什么 session B 的 update 语句可以执行完成。</li>
+</ol>
+<p>但 session C 要插入一个 (7,7,7) 的记录，就会被 session A 的间隙锁 (5,10) 锁住 这个例子说明，锁是加在索引上的。</p>
+<p>执行 for update 时，系统会认为你接下来要更新数据，因此会顺便给主键索引上满足条件的行加上行锁。</p>
+<p>如果你要用 lock in share mode来给行加读锁避免数据被更新的话，就必须得绕过覆盖索引的优化，因为覆盖索引不会访问主键索引，不会给主键索引上加锁</p>
+<p><strong>案例三：主键索引范围查询锁</strong></p>
+<p>上面两个例子是等值查询的，这个例子是关于范围查询的，也就是说下面的语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">select * from test where id=10 for update<br>select * from tets where id&gt;=10 and id&lt;11 for update;<br></code></pre></td></tr></table></figure>
+
+<p>这两条查语句肯定是等价的，但是它们的加锁规则不太一样</p>
+<p><img src="/Resources/image-20220714134742049-1687683285030-4.png" srcset="/img/loading.gif" lazyload alt="image-20220714134742049"></p>
+<ol>
+<li>开始执行的时候，要找到第一个 id&#x3D;10 的行，因此本该是 next-key lock(5,10] 。 根据优化 1 ，主键 id 上的等值条件，退化成行锁，只加了 id&#x3D;10 这一行的行锁。 </li>
+<li>它是范围查询， 范围查找就往后继续找，找到 id&#x3D;15 这一行停下来，不满足条件，因此需要加 next-key lock(10,15] 。</li>
+</ol>
+<p>session A 这时候锁的范围就是主键索引上，行锁 id&#x3D;10 和 next-key lock(10,15] 。<strong>首次 session A 定位查找 id&#x3D;10 的行的时候，是当做等值查询来判断的，而向右扫描到 id&#x3D;15 的时候，用的是范围查询判断。</strong></p>
+<p><strong>案例四：非唯一索引范围查询锁</strong></p>
+<p>与案例三不同的是，案例四中查询语句的 where 部分用的是字段 c ，它是普通索引</p>
+<p>这两条查语句肯定是等价的，但是它们的加锁规则不太一样</p>
+<p><img src="/Resources/image-20220714134822160-1687683285029-1.png" srcset="/img/loading.gif" lazyload alt="image-20220714134822160"></p>
+<p>在第一次用 col1&#x3D;10 定位记录的时候，索引 c 上加了 (5,10] 这个 next-key lock 后，由于索引 col1 是非唯 一索引，没有优化规则，也就是说不会蜕变为行锁，因此最终 sesion A 加的锁是，索引 c 上的 (5,10] 和 (10,15] 这两个 next-keylock 。</p>
+<p>这里需要扫描到 col1&#x3D;15 才停止扫描，是合理的，因为 InnoDB 要扫到 col1&#x3D;15 ，才知道不需要继续往后找了。</p>
+<p><strong>案例五：唯一索引范围查询锁 bug</strong></p>
+<p><img src="/Resources/image-20220714134846740-1687683285030-5.png" srcset="/img/loading.gif" lazyload alt="image-20220714134846740"></p>
+<p>session A 是一个范围查询，按照原则 1 的话，应该是索引 id 上只加 (10,15] 这个 next-key lock ，并且因 为 id 是唯一键，所以循环判断到 id&#x3D;15 这一行就应该停止了。</p>
+<p>但是实现上， InnoDB 会往前扫描到第一个不满足条件的行为止，也就是 id&#x3D;20 。而且由于这是个范围扫描，因此索引 id 上的 (15,20] 这个 next-key lock 也会被锁上。照理说，这里锁住 id&#x3D;20 这一行的行为，其实是没有必要的。因为扫描到 id&#x3D;15 ，就可以确定不用往后再找了。</p>
+<p><strong>案例六：非唯一索引上存在 “ “ 等值 “ “ 的例子</strong></p>
+<p>这里，我给表 t 插入一条新记录：insert into t values(30,10,30);也就是说，现在表里面有两个c&#x3D;10的行</p>
+<p><strong>但是它们的主键值 id 是不同的（分别是 10 和 30 ），因此这两个c&#x3D;10 的记录之间，也是有间隙的。</strong></p>
+<p><img src="/Resources/image-20220714134923414-1687683285030-7.png" srcset="/img/loading.gif" lazyload alt="image-20220714134923414"></p>
+<p>这次我们用 delete 语句来验证。注意， delete 语句加锁的逻辑，其实跟 select … for update 是类似的， 也就是我在文章开始总结的两个 “ 原则 ” 、两个 “ 优化 ” 和一个 “bug” 。</p>
+<p>这时， session A 在遍历的时候，先访问第一个 col1&#x3D;10 的记录。同样地，根据原则 1 ，这里加的是 (col1&#x3D;5,id&#x3D;5) 到 (col1&#x3D;10,id&#x3D;10) 这个 next-key lock 。</p>
+<p>由于c是普通索引，所以继续向右查找，直到碰到 (col1&#x3D;15,id&#x3D;15) 这一行循环才结束。根据优化 2 ，这是 一个等值查询，向右查找到了不满足条件的行，所以会退化成 (col1&#x3D;10,id&#x3D;10) 到 (col1&#x3D;15,id&#x3D;15) 的间隙锁。</p>
+<p><img src="/Resources/image-20220714134945012-1687683285030-6.png" srcset="/img/loading.gif" lazyload alt="image-20220714134945012"></p>
+<p>这个 delete 语句在索引 c 上的加锁范围，就是上面图中蓝色区域覆盖的部分。这个蓝色区域左右两边都 是虚线，表示开区间，即 (col1&#x3D;5,id&#x3D;5) 和 (col1&#x3D;15,id&#x3D;15) 这两行上都没有锁</p>
+<p><strong>案例七： limit 语句加锁</strong></p>
+<p>例子 6 也有一个对照案例，场景如下所示：</p>
+<p><img src="/Resources/image-20220714135007118-1687683285031-8.png" srcset="/img/loading.gif" lazyload alt="image-20220714135007118"></p>
+<p>session A 的 delete 语句加了 limit 2 。你知道表 t 里 c&#x3D;10 的记录其实只有两条，因此加不加 limit 2 ，删除的效果都是一样的。但是加锁效果却不一样</p>
+<p>这是因为，案例七里的 delete 语句明确加了 limit 2 的限制，因此在遍历到 (col1&#x3D;10, id&#x3D;30) 这一行之后， 满足条件的语句已经有两条，循环就结束了。因此，索引 col1 上的加锁范围就变成了从（ col1&#x3D;5,id&#x3D;5) 到（ col1&#x3D;10,id&#x3D;30) 这个前开后闭区间，如下图所示：</p>
+<p><img src="/Resources/image-20220714135025045-16577778257713-1687683285031-11.png" srcset="/img/loading.gif" lazyload alt="image-20220714135025045"></p>
+<p>这个例子对我们实践的指导意义就是， 在删除数据的时候尽量加 limit 。</p>
+<p>这样不仅可以控制删除数据的条数，让操作更安全，还可以减小加锁的范围。</p>
+<p><strong>案例八：一个死锁的例子</strong></p>
+<p><img src="/Resources/image-20220714135047760-1687683285031-9.png" srcset="/img/loading.gif" lazyload alt="image-20220714135047760"></p>
+<ol>
+<li>session A 启动事务后执行查询语句加 lock in share mode ，在索引 col1 上加了 next-keylock(5,10] 和 间隙锁 (10,15) （索引向右遍历退化为间隙锁）； </li>
+<li>session B 的 update 语句也要在索引 c 上加 next-key lock(5,10] ，进入锁等待； 实际上分成了两步， 先是加 (5,10) 的间隙锁，加锁成功；然后加 col1&#x3D;10 的行锁，因为sessionA上已经给这行加上了读 锁，此时申请死锁时会被阻塞 </li>
+<li>然后 session A 要再插入 (8,8,8) 这一行，被 session B 的间隙锁锁住。由于出现了死锁， InnoDB 让 session B 回滚</li>
+</ol>
+<p><strong>案例九：order by索引排序的间隙锁1</strong></p>
+<p>如下面一条语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs mysql">begin;<br>select * from test where id&gt;9 and id&lt;12 order by id desc for update;<br></code></pre></td></tr></table></figure>
+
+<p>下图为这个表的索引id的示意图。</p>
+<p><img src="/Resources/image-20220714135130668-1687683285031-10.png" srcset="/img/loading.gif" lazyload alt="image-20220714135130668"></p>
+<ol>
+<li>首先这个查询语句的语义是 order by id desc ，要拿到满足条件的所有行，优化器必须先找到 “ 第 一个 id&lt;12 的值 ” 。 </li>
+<li>这个过程是通过索引树的搜索过程得到的，在引擎内部，其实是要找到 id&#x3D;12 的这个值，只是最终 没找到，但找到了 (10,15) 这个间隙。（ id&#x3D;15 不满足条件，所以 next-key lock 退化为了间隙锁 (10, 15) 。）</li>
+<li>然后向左遍历，在遍历过程中，就不是等值查询了，会扫描到 id&#x3D;5 这一行，又因为区间是左开右 闭的，所以会加一个next-key lock (0,5] 。 也就是说，在执行过程中，通过树搜索的方式定位记录 的时候，用的是 “ 等值查询 ” 的方法。</li>
+</ol>
+<p><strong>案例十：order by索引排序的间隙锁2</strong></p>
+<p><img src="/Resources/image-20220714135206504-1687683285031-12.png" srcset="/img/loading.gif" lazyload alt="image-20220714135206504"></p>
+<ol>
+<li><p>由于是 order by col1 desc ，第一个要定位的是索引 col1 上 “ 最右边的 ”col1&#x3D;20 的行。这是一个非唯一索引的等值查询：</p>
+<p>左开右闭区间，首先加上 next-key lock (15,20] 。 向右遍历，col1&#x3D;25不满足条件，退化为间隙锁 所以会 加上间隙锁(20,25) 和 next-key lock (15,20] 。</p>
+</li>
+<li><p>在索引 col1 上向左遍历，要扫描到 col1&#x3D;10 才停下来。同时又因为左开右闭区间，所以 next-key lock 会加到 (5,10] ，这正是阻塞session B 的 insert 语句的原因。</p>
+</li>
+<li><p>在扫描过程中， col1&#x3D;20 、 col1&#x3D;15 、 col1&#x3D;10 这三行都存在值，由于是 select * ，所以会在主键 id 上加三个行锁。 因此， session A 的 select 语句锁的范围就是：</p>
+<ol>
+<li>索引 col1 上 (5, 25) ；</li>
+<li>主键索引上 id&#x3D;15 、 20 两个行锁。</li>
+</ol>
+</li>
+</ol>
+<p><strong>案例十一：update修改数据的例子-先插入后删除</strong></p>
+<p><img src="/Resources/image-20220714135300189-1687683285031-13.png" srcset="/img/loading.gif" lazyload alt="image-20220714135300189"></p>
+<p>注意：根据 col1&gt;5 查到的第一个记录是 col1&#x3D;10 ，因此不会加 (0,5] 这个 next-key lock 。</p>
+<p>session A 的加锁范围是索引 col1 上的 (5,10] 、 (10,15] 、 (15,20] 、 (20,25] 和(25,supremum] 。</p>
+<p>之后 session B 的第一个 update 语句，要把 col1&#x3D;5 改成 col1&#x3D;1 ，你可以理解为两步：</p>
+<ol>
+<li>插入 (col1&#x3D;1, id&#x3D;5) 这个记录；</li>
+<li>删除 (col1&#x3D;5, id&#x3D;5) 这个记录。</li>
+</ol>
+<p>通过这个操作， session A 的加锁范围变成了图 7 所示的样子:</p>
+<p><img src="/Resources/image-20220714135333089-1687683285031-14.png" srcset="/img/loading.gif" lazyload alt="image-20220714135333089"></p>
+<p>好，接下来 session B 要执行 update t set col1 &#x3D; 5 where col1 &#x3D; 1 这个语句了，一样地可以拆成两步：</p>
+<ol>
+<li>插入 (col1&#x3D;5, id&#x3D;5) 这个记录；</li>
+<li>删除 (col1&#x3D;1, id&#x3D;5) 这个记录。 第一步试图在已经加了间隙锁的 (1,10) 中插入数据，所以就被堵住了。</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Database/" class="category-chain-item">Database</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Database/MySQL/" class="category-chain-item">MySQL</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/MySQL/">#MySQL</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>第15章 锁</div>
+      <div>http://conquers.github.io/posts/b7d439cb.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>wtt</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年6月16日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
