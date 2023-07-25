@@ -310,13 +310,13 @@
     <category term="Docker" scheme="http://conquers.github.io/categories/Docker/"/>
     
     
-    <category term="Redis" scheme="http://conquers.github.io/tags/Redis/"/>
-    
     <category term="Portainer" scheme="http://conquers.github.io/tags/Portainer/"/>
     
     <category term="Elasitc" scheme="http://conquers.github.io/tags/Elasitc/"/>
     
     <category term="Mysql" scheme="http://conquers.github.io/tags/Mysql/"/>
+    
+    <category term="Redis" scheme="http://conquers.github.io/tags/Redis/"/>
     
     <category term="Nginx" scheme="http://conquers.github.io/tags/Nginx/"/>
     
