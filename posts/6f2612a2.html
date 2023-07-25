@@ -20,12 +20,12 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="SpringBoot">
 <meta property="og:url" content="http://conquers.github.io/posts/6f2612a2.html">
-<meta property="og:site_name" content="Kioo&#39;s Blog">
+<meta property="og:site_name" content="wtt&#39;s Blog">
 <meta property="og:description" content="SpringBoot官方网站：Spring Boot SpringBoot的引言Spring Boot是由Pivotal团队提供的全新框架，其设计目的是用来简化Spring应用的初始搭建以及开发过程。该框架使用了特定的方式来进行配置，从而使开发人员不再需要定义样板化的配置。通过这种方式，Spring Boot致力于在蓬勃发展的快速应用开发领域(rapid application developme">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://conquers.github.io/Resources/banner-spring.jpg">
 <meta property="article:published_time" content="2022-08-17T10:54:29.000Z">
-<meta property="article:modified_time" content="2023-07-18T03:42:01.220Z">
+<meta property="article:modified_time" content="2023-07-25T02:35:31.983Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="SpringBoot">
 <meta name="twitter:card" content="summary_large_image">
@@ -33,7 +33,7 @@
   
   
   
-  <title>SpringBoot - Kioo&#39;s Blog</title>
+  <title>SpringBoot - wtt&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -88,7 +88,8 @@
 
 
   
-<meta name="generator" content="Hexo 6.3.0"></head>
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="wtt's Blog" type="application/atom+xml">
+</head>
 
 
 <body>
@@ -226,7 +227,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          44k 字
+          45k 字
         
       </span>
     
@@ -237,7 +238,7 @@
         
         
         
-          371 分钟
+          372 分钟
         
       </span>
     
@@ -284,15 +285,15 @@
 <h2 id="SpringBoot的引言"><a href="#SpringBoot的引言" class="headerlink" title="SpringBoot的引言"></a>SpringBoot的引言</h2><p>Spring Boot是由Pivotal团队提供的全新框架，其设计目的是用来<strong>简化Spring应用的初始搭建以及开发过程</strong>。该框架使用了<strong>特定的方式来进行配置</strong>，从而使开发人员不再需要定义样板化的配置。通过这种方式，Spring Boot致力于在蓬勃发展的快速应用开发领域(rapid application development)成为领导者。</p>
 <p><strong>springboot</strong>(微框架) &#x3D; <strong>springmvc</strong>(控制器) + <strong>spring core</strong>(项目管理)</p>
 <h2 id="SpringBoot的优势"><a href="#SpringBoot的优势" class="headerlink" title="SpringBoot的优势"></a>SpringBoot的优势</h2><ol>
-<li>创建完整的独立的Spring应用程序<ul>
-<li>springmvc + spring</li>
+<li>创建完整的独立的 <code>Spring</code> 应用程序<ul>
+<li><code>springmvc</code> + <code>spring</code></li>
 </ul>
 </li>
-<li>嵌入的Tomcat，无需部署WAR文件<ul>
-<li>内嵌Tomcat</li>
+<li>嵌入的 <code>Tomcat</code> ，无需部署 <code>WAR</code> 文件<ul>
+<li>内嵌 <code>Tomcat</code></li>
 </ul>
 </li>
-<li>简化Maven配置，自动配置Spring，没有XML配置</li>
+<li>简化 <code>Maven</code> 配置，自动配置 <code>Spring</code> ，没有 <code>XM</code> L配置</li>
 </ol>
 <h2 id="SpringBoot约定"><a href="#SpringBoot约定" class="headerlink" title="SpringBoot约定"></a>SpringBoot约定</h2><p><strong>项目结构图</strong><br><img src="/Resources/Pasted%20image%2020220817195034.png" srcset="/img/loading.gif" lazyload></p>
 <ol>
@@ -333,7 +334,7 @@
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!--继承springboot的父项目 便于维护版本--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.7.2<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>    <span class="hljs-comment">&lt;!--        springboot-boot-starter-web--&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br></code></pre></td></tr></table></figure>
 <blockquote>
 <p><code>&lt;parent&gt;</code>继承父项目不导入任何依赖，只是对下面的依赖进行一个版本控制<br>原因：各个依赖有着严格的版本限制，并且方便维护。</p>
-<p><code>&lt;version&gt;</code> SpringBoot版本号在2.4.x以前结尾有一个RELEASE，从2.4.x以后只以数字命名。</p>
+<p><code>&lt;version&gt;</code> SpringBoot 版本号在 2.4.x 以前结尾有一个RELEASE，从 2.4.x 以后只以数字命名。</p>
 </blockquote>
 <p><strong>在resources目录中创建<code>application.yml</code></strong></p>
 <blockquote>
@@ -344,30 +345,44 @@
 <p><strong>创建springboot入口类</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Application</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">         * 启动springboot应用</span><br><span class="hljs-comment">         * 参数1:指定入口类的类对象.class(类的对象是new xxx)</span><br><span class="hljs-comment">         * 参数2:main函数参数</span><br><span class="hljs-comment">         */</span><br>        SpringApplication.run(Application.class,args);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
-<h3 id="注解说明"><a href="#注解说明" class="headerlink" title="注解说明"></a>注解说明</h3><p>⭐<code>@SpringBootApplication</code><br>修饰范围：用在类上只能用在入口类上只能出现一次<br>作用：标识这个类是一个springboot入口类（启动整个springboot项目的总入口）</p>
-<ul>
-<li><code>@SpringBootApplication</code> 由多个注解构成。<ul>
-<li><p><code>@Target(&#123;ElementType.TYPE&#125;)</code><br>指定注解作用范围</p>
-<hr>
-</li>
-<li><p><code>@Retention(RetentionPolicy.RUNTIME) </code><br>指定注解什么时候生效</p>
-<hr>
-</li>
-<li><p><code>@Documented</code>  </p>
-</li>
-<li><p><code>@Inherited</code>  </p>
-<hr>
-</li>
-<li><p><code>@SpringBootConfiguration</code><br>这个注解就是用来自动配置spring springmvc相关环境</p>
-</li>
-<li><h2 id="EnableAutoConfiguration开启自动配置-自动配置核心注解-💥-自动配置spring相关环境-💥-自动与项目中引入的第三方技术自动配置其环境💥"><a href="#EnableAutoConfiguration开启自动配置-自动配置核心注解-💥-自动配置spring相关环境-💥-自动与项目中引入的第三方技术自动配置其环境💥" class="headerlink" title="@EnableAutoConfiguration开启自动配置    - 自动配置核心注解 💥    - 自动配置spring相关环境 💥    - 自动与项目中引入的第三方技术自动配置其环境💥
-  "></a><code>@EnableAutoConfiguration</code><br>开启自动配置<br>    - <strong>自动配置核心注解</strong> 💥<br>    - <strong>自动配置spring相关环境</strong> 💥<br>    - <strong>自动与项目中引入的第三方技术自动配置其环境</strong>💥
-  </h2></li>
-<li><p><code>@ComponentScan</code><br>组件扫描，扫描<code>@SpringBootApplication</code>注解的类的当前包及其子包</p>
-</li>
-</ul>
-</li>
-</ul>
+<h3 id="注解说明"><a href="#注解说明" class="headerlink" title="注解说明"></a>注解说明</h3><p>⭐<code>@SpringBootApplication</code><br>修饰范围：用在类上只能用在入口类上只能出现一次<br>作用：标识这个类是一个 <code>springboot</code> 入口类（启动整个 <code>springboot</code> 项目的总入口）</p>
+<p><code>@SpringBootApplication</code> 由多个注解构成，4个元注解，由 <code>Java</code> 提供，</p>
+<table>
+<thead>
+<tr>
+<th>注解名</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>@Target(&#123;ElementType.TYPE&#125;)</code></td>
+<td>指定注解作用范围</td>
+</tr>
+<tr>
+<td><code>@Retention(RetentionPolicy.RUNTIME) </code></td>
+<td>指定注解什么时候生效，这里指的是运行时</td>
+</tr>
+<tr>
+<td><code>@Documented</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>@Inherited</code></td>
+<td></td>
+</tr>
+<tr>
+<td>⭐<code>@SpringBootConfiguration</code></td>
+<td>用来自动配置 <code>spring springmvc</code> 相关环境<br>组合了 <code>@Configuration</code> 注解，也就是 <code>@SpringBootConfiguration</code> 修饰的类就是 <code>Java</code> 配置类</td>
+</tr>
+<tr>
+<td>⭐<code>@EnableAutoConfiguration</code></td>
+<td>开启自动配置 <br><code>META-INF/spring.factories</code>文件中加载需要自动注入的 <code>Java</code> 类<br><strong>自动配置核心注解</strong><br><strong>自动配置spring相关环境</strong><br><strong>自动与项目中引入的第三方技术自动配置其环境</strong></td>
+</tr>
+<tr>
+<td>⭐<code>@ComponentScan</code></td>
+<td>组件扫描，默认扫描 <code>@SpringBootApplication</code> 注解的类的当前包及其子包下面所有被 <code>@Compoent</code> 注解修饰的 <code>Java</code> 类</td>
+</tr>
+</tbody></table>
 <p><strong>运行</strong><br><img src="/Resources/Pasted%20image%2020220817201942.png" srcset="/img/loading.gif" lazyload><br><img src="/Resources/Pasted%20image%2020220817202007.png" srcset="/img/loading.gif" lazyload></p>
 <blockquote>
 <p><code>SpringApplication.run(Application.class,args);</code><br>启动springboot应用时候需要传递main函数参数作为启动的第二个参数：<br>怎么传参：通过idea里面的vm options可以覆盖掉某些配置，例如下图，可以覆盖端口<br><img src="/Resources/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%BB%98%E5%9B%BE.drawio.png" srcset="/img/loading.gif" lazyload></p>
@@ -406,8 +421,8 @@
 <h2 id="快速创建项目"><a href="#快速创建项目" class="headerlink" title="快速创建项目"></a>快速创建项目</h2><blockquote>
 <p>区别于之前的2.7.2 这里的spring boot版本变为了2.7.3，突然更新了。</p>
 </blockquote>
-<p>除了以上最开始的创建项目的方式，还可以使用Springboot init快速初始化<br><a href="../../%E8%BD%AF%E4%BB%B6/IDEA.md#%E4%BD%BF%E7%94%A8IDEA%E5%88%9B%E5%BB%BASPRINGBOOT%E9%A1%B9%E7%9B%AE">使用IDEA创建SPRINGBOOT项目</a></p>
-<h2 id="工厂创建对象"><a href="#工厂创建对象" class="headerlink" title="工厂创建对象"></a>工厂创建对象</h2><h3 id="创建单个对象"><a href="#创建单个对象" class="headerlink" title="创建单个对象"></a>创建单个对象</h3><p>在springboot中可以管理单个对象可以直接使用spring框架中注解形式创建。</p>
+<p>除了以上最开始的创建项目的方式，还可以使用 <code>Springboot init</code> 快速初始化<br><a href="../../%E8%BD%AF%E4%BB%B6/IDEA.md#%E4%BD%BF%E7%94%A8IDEA%E5%88%9B%E5%BB%BASPRINGBOOT%E9%A1%B9%E7%9B%AE">使用IDEA创建SPRINGBOOT项目</a></p>
+<h2 id="工厂创建对象"><a href="#工厂创建对象" class="headerlink" title="工厂创建对象"></a>工厂创建对象</h2><h3 id="创建单个对象"><a href="#创建单个对象" class="headerlink" title="创建单个对象"></a>创建单个对象</h3><p>在springboot中可以管理单个对象可以直接使用 <code>spring</code> 框架中注解形式创建。</p>
 <ul>
 <li><code>@Component</code>：创建<strong>通用对象</strong><ul>
 <li><code>@Controller</code>：创建<strong>控制层对象</strong></li>
@@ -425,10 +440,10 @@
 </blockquote>
 <h3 id="创建多个对象"><a href="#创建多个对象" class="headerlink" title="创建多个对象"></a>创建多个对象</h3><p>在SpringBoot中也提供了如<code>@configuration</code> + <code>@Bean</code>注解进行创建</p>
 <ul>
-<li><code>@Configuration</code> 修饰范围：用在类上（相当于<code>spring.xml</code>），作用：代表这个类是一个springboot中配置类。<ul>
+<li><code>@Configuration</code> 修饰范围：用在类上（相当于<code>spring.xml</code>），作用：代表这个类是一个 <code>springboot</code> 中配置类。<ul>
 <li><code>@Bean</code> 创建对象，相当于<code>spring.xml</code>中的bean标签<ul>
-<li>默认使用@Bean创建对象在工厂中唯一标识为方法名称</li>
-<li>修改在工厂中对象标识可以在使用@Bean(“工厂中名字”)指定一个名字</li>
+<li>默认使用 <code>@Bean</code> 创建对象在工厂中唯一标识为方法名称</li>
+<li>修改在工厂中对象标识可以在使用 <code>@Bean(&quot;工厂中名字&quot;)</code> 指定一个名字</li>
 </ul>
 </li>
 </ul>
