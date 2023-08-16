@@ -172,9 +172,9 @@
       
       <tag>Java</tag>
       
-      <tag>支付宝</tag>
-      
       <tag>支付</tag>
+      
+      <tag>支付宝</tag>
       
     </tags>
     
@@ -203,9 +203,9 @@
       
       <tag>Java</tag>
       
-      <tag>支付</tag>
-      
       <tag>支付宝支付</tag>
+      
+      <tag>支付</tag>
       
     </tags>
     
@@ -232,9 +232,9 @@
     
     <tags>
       
-      <tag>Java</tag>
-      
       <tag>ElasticSearch</tag>
+      
+      <tag>Java</tag>
       
       <tag>SpringData</tag>
       
