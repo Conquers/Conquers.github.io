@@ -13,12 +13,18 @@
     
     <categories>
       
-      <category>1</category>
+      <category>Java</category>
       
-      <category>2</category>
+      <category>JVM</category>
       
     </categories>
     
+    
+    <tags>
+      
+      <tag>Java</tag>
+      
+    </tags>
     
   </entry>
   
