@@ -4,6 +4,60 @@
   
   
   <entry>
+    <title>Spring 为何需要三级缓存解决循环依赖，而不是二级缓存</title>
+    <link href="/posts/95a885e4.html"/>
+    <url>/posts/95a885e4.html</url>
+    
+    <content type="html"><![CDATA[<h1 id="Spring-为何需要三级缓存解决循环依赖，而不是二级缓存"><a href="#Spring-为何需要三级缓存解决循环依赖，而不是二级缓存" class="headerlink" title="Spring 为何需要三级缓存解决循环依赖，而不是二级缓存"></a>Spring 为何需要三级缓存解决循环依赖，而不是二级缓存</h1><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>都知道 Spring 通过三级缓存来解决循环依赖的问题。但是是不是必须三级缓存才能解决，二级缓存不能解决吗？<br>要分析是不是可以去掉其中一级缓存，就先过一遍 Spring 是如何通过三级缓存来解决循环依赖的。</p><blockquote><p>对于这部分内容，需要了解 Bean 的生命周期。</p></blockquote><h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>在 Spring 生命周期的 populateBean 部分，如果发现该属性（成员变量）还未在 spring 中生成，则会跑去生成属性对象实例</p><p><img src="/./Resources/image-20231008150928305.png" alt="image-20231008150928305"></p><p>我们可以看到填充属性的时候，spring 会提前将已经实例化的 bean 通过 ObjectFactory 半成品暴露出去，为什么称为半成品是因为这时候的 bean 对象实例化，但是未进行属性填充，是一个不完整的 bean 实例对象</p><p><img src="/./Resources/image-20231008151216188.png" alt="image-20231008151216188"></p><p>spring 利用 singletonObjects, earlySingletonObjects, singletonFactories 三级缓存去解决的，所说的缓存其实也就是三个 Map</p><p><img src="/./Resources/42c63cd9a94d0d2d4000473cabc221b7.png" alt="image"></p><p>可以看到三级缓存各自保存的对象，这里重点关注二级缓存 earlySingletonObjects 和三级缓存 singletonFactory，一级缓存可以进行忽略。前面我们讲过先实例化的 bean 会通过 ObjectFactory 半成品提前暴露在三级缓存中</p><p><img src="/./Resources/image-20231008151721379.png" alt="image-20231008151721379"></p><p>singletonFactory 是传入的一个匿名内部类，调用 ObjectFactory.getObject() 最终会调用 getEarlyBeanReference 方法。再来看看循环依赖中是怎么拿其它半成品的实例对象的。</p><p>我们假设现在有这样的场景 AService 依赖 BService，BService 依赖 AService</p><ul><li>AService 首先实例化，实例化通过 ObjectFactory 半成品暴露在三级缓存中</li><li>填充属性 BService，发现 BService 还未进行过加载，就会先去加载 BService</li><li>再加载 BService 的过程中，实例化，也通过 ObjectFactory 半成品暴露在三级缓存</li><li>BService 填充属性 AService 的时候，这时候能够从三级缓存中拿到半成品的 ObjectFactory （AService）</li></ul><p><img src="/./Resources/image-20231008190716923.png" alt="image-20231008190716923"></p><p>拿到 ObjectFactory 对象后，调用 ObjectFactory.getObject() 方法最终会调用 getEarlyBeanReference() 方法，getEarlyBeanReference 这个方法主要逻辑大概描述下，如果 bean 被 AOP 切面代理则返回的是 beanProxy 对象，如果未被代理则返回的是原 bean 实例，这时我们会发现能够拿到 bean 实例(属性未填充)，然后从三级缓存移除，放到二级缓存earlySingletonObjects 中，🔔（补充内容见下部分），然后 B 创建完毕，放入一级缓存中，再回到 A 的创建过程，去一级缓存拿到了B，然后 A 也创建完成，A 最后也放入到一级缓存，最终两个都创建完成；</p><p>🔔：而此时 B 注入的是一个半成品的实例A对象，不过随着 B 初始化完成后，A 会继续进行后续的初始化操作，最终B会注入的是一个完整的A实例，因为在内存中它们是同一个对象。</p><p>过程如下：</p><p><img src="/./Resources/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96.drawio.png" alt="循环依赖.drawio"></p><h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>可以看到，循环依赖下，有没有代理情况下的区别就在：</p><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf"><span class="hljs-attribute">singletonObject</span> <span class="hljs-operator">=</span> singletonFactory.getObject()<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure><p>在循环依赖发生的情况下 B 中的 A 赋值时：</p><ol><li>无代理：getObject 直接返回原来的 Bean</li><li>有代理：getObject 返回的是代理对象</li></ol><p>然后都放到<strong>二级缓存</strong>。</p><p><strong>为什么要三级缓存?</strong></p><ol><li><p>假设去掉三级缓存</p><p>去掉三级缓存之后，Bean 直接创建 <code>earlySingletonObjects</code>， 看着好像也可以。</p><p>如果有代理的时候，在 <code>earlySingletonObjects</code> 直接放代理对象就行了。</p><p>但是会导致一个问题：意味着 Bean 在构造完后就创建代理对象，这样违背了 Spring 设计原则。Spring 结合 AOP 跟 Bean 的生命周期，是在 Bean 创建完全之后通过 AnnotationAwareAspectJAutoProxyCreator 这个后置处理器来完成的，在这个后置处理的 postProcessAfterInitialization 方法中对初始化后的 Bean 完成 AOP 代理。如果出现了循环依赖，那没有办法，只有给 Bean 先创建代理，但是没有出现循环依赖的情况下，设计之初就是让 Bean 在生命周期的最后一步完成代理而不是在实例化后就立马完成代理。</p><p>这么一想，是不是会对 Bean 的生命周期有影响。</p><p>同样，先创建 <code>singletonFactory</code> 的好处就是：<strong>在真正需要实例化的时候，再使用 singletonFactory.getObject() 获取 Bean 或者 Bean 的代理</strong>。相当于是延迟实例化。</p></li><li><p>假设去掉二级缓存</p><p>如果去掉了二级缓存，则需要直接在 <code>singletonFactory.getObject()</code> 阶段初始化完毕，并放到一级缓存中。</p><p><img src="/Resources/Pasted%20image%2020231008213556.png"><br>B 和 C 都依赖 A</p><p>那有这么一种场景，B 和 C 都依赖了 A。</p><p>要知道在有代理的情况下 <code>singletonFactory.getObject()</code> 获取的是代理对象。</p><p><img src="/Resources/Pasted%20image%2020231008213609.png">多次获取代理对象不同</p><p>而多次调用 <code>singletonFactory.getObject()</code> 返回的代理对象是不同的，就会导致 B 和 C 依赖了不同的 A。</p><p>那如果获取 B 到之后直接放到一级缓存，然后 C 再获取呢？</p><p>…</p><p>一级缓存放的是已经初始化完毕的 Bean，要知道 A 依赖了 B 和 C ，A 这时候还没有初始化完毕。</p></li></ol><blockquote><p>参考文章</p><p><a href="https://www.cnblogs.com/semi-sub/p/13548479.html">Spring 为何需要三级缓存解决循环依赖，而不是二级缓存 - 半分、 - 博客园 (cnblogs.com)</a></p><p><a href="https://zhuanlan.zhihu.com/p/610322151">彻底搞懂Spring之三级缓存解决循环依赖问题 - 知乎 (zhihu.com)</a></p><p><a href="https://cloud.tencent.com/developer/article/2019359">【彻底搞懂】Spring之三级缓存解决循环依赖问题-腾讯云开发者社区-腾讯云 (tencent.com)</a></p><p><a href="https://www.bilibili.com/video/BV1rt4y1u7q5">https://www.bilibili.com/video/BV1rt4y1u7q5</a></p><p><a href="https://blog.csdn.net/weixin_49592546/article/details/108050566">Spring循环依赖三级缓存是否可以减少为二级缓存？-CSDN博客</a></p></blockquote>]]></content>
+    
+    
+    <categories>
+      
+      <category>Java</category>
+      
+      <category>Spring</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Spring</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Spring Bean的生命周期</title>
+    <link href="/posts/89080a8e.html"/>
+    <url>/posts/89080a8e.html</url>
+    
+    <content type="html"><![CDATA[<h1 id="Spring-Bean的生命周期"><a href="#Spring-Bean的生命周期" class="headerlink" title="Spring Bean的生命周期"></a>Spring Bean的生命周期</h1><h2 id="Bean-的生命周期"><a href="#Bean-的生命周期" class="headerlink" title="Bean 的生命周期"></a>Bean 的生命周期</h2><p>整个生命周期如下所示</p><p><img src="/./Resources/image-20231008205654478.png" alt="image-20231008205654478"></p><p>在创建 Bean 之前，Spring 容器会将所有 Bean 的信息（xml 里面的 <code>&lt;bean&gt;</code> 或者注解修饰的对象）封装成一个 BeanDefinition 对象，所有的 BeanDefinition 存储到一个名为 beanDefinitionMap 的 Map 集合中去，Spring 框架在对该 Map 进行遍历，然后创建对象，即如下过程</p><h3 id="doCteateBean"><a href="#doCteateBean" class="headerlink" title="doCteateBean"></a>doCteateBean</h3><p>该部分对应图中的初始化赋值部分</p><p>查看实现类 AbstractAutowireCapableBeanFactory 中的 doCteateBean 方法</p><p><img src="/./Resources/image-20231008205913076.png" alt="image-20231008205913076"></p><blockquote><p>继承类图</p><p><img src="/./Resources/image-20231008102641438.png" alt="image-20231008102641438"></p></blockquote><p>该方法是创建 bean 的开始，我们可以看到首先需要实例化这个 bean，也就是在堆中开辟一块内存空间给这个对象，createBeanInstance 方法里面逻辑大概就是采用反射生成实例对象，进行到这里表示对象还并未进行属性的填充，也就是 @Autowired 注解的属性还未得到注入</p><p><img src="/./Resources/image-20231008205954228.png" alt="image-20231008205954228"><br><img src="/./Resources/image-20231008210004652.png" alt="image-20231008210004652"></p><h3 id="populateBean"><a href="#populateBean" class="headerlink" title="populateBean"></a>populateBean</h3><p>该部分对应图中的依赖注入部分</p><h3 id="initializeBean"><a href="#initializeBean" class="headerlink" title="initializeBean"></a>initializeBean</h3><p>该部分对应图中的 Aware 到 BeanPostProcessor#after 部分</p><p>我们可以看到第二步就是填充 bean 的成员属性，populateBean 方法里面的逻辑大致就是对使用到了注入属性的注解就会进行注入，如果在注入的过程发现注入的对象还没生成，则会跑去生产要注入的对象，第三步就是调用 initializeBean 方法初始化bean，</p><p><img src="/./Resources/image-20231008210028120.png" alt="image-20231008210028120"></p><h4 id="调用实现-Aware-接口的方法"><a href="#调用实现-Aware-接口的方法" class="headerlink" title="调用实现 Aware 接口的方法"></a>调用实现 Aware 接口的方法</h4><p>可以看到 initializeBean 方法中，首先调用的是实现的 Aware 接口的方法，我们具体看一下 invokeAwareMethods 方法中会调用 Aware 接口的那些方法</p><p><img src="/./Resources/image-20231008103715206.png" alt="image-20231008103715206">我们可以知道如果我们实现了BeanNameAware，BeanClassLoaderAware，BeanFactoryAware三个Aware接口的话，会依次调用 setBeanName(), setBeanClassLoader(), setBeanFactory() 方法</p><blockquote><p>对于 Await 接口的作用参考：</p><p>Aware 接口定义如下：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * A marker superinterface indicating that a bean is eligible to be notified by the</span><br><span class="hljs-comment"> * Spring container of a particular framework object through a callback-style method.</span><br><span class="hljs-comment"> * The actual method signature is determined by individual subinterfaces but should</span><br><span class="hljs-comment"> * typically consist of just one void-returning method that accepts a single argument.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * &lt;p&gt;Note that merely implementing &#123;<span class="hljs-doctag">@link</span> Aware&#125; provides no default functionality.</span><br><span class="hljs-comment"> * Rather, processing must be done explicitly, for example in a</span><br><span class="hljs-comment"> * &#123;<span class="hljs-doctag">@link</span> org.springframework.beans.factory.config.BeanPostProcessor&#125;.</span><br><span class="hljs-comment"> * Refer to &#123;<span class="hljs-doctag">@link</span> org.springframework.context.support.ApplicationContextAwareProcessor&#125;</span><br><span class="hljs-comment"> * for an example of processing specific &#123;<span class="hljs-doctag">@code</span> *Aware&#125; interface callbacks.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> Chris Beams</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> Juergen Hoeller</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@since</span> 3.1</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Aware</span> &#123;<br><br>&#125;<br></code></pre></td></tr></table></figure><p>Aware 接口为 Spring 容器的核心接口，是一个具有标识作用的超级接口，实现了该接口的 bean 是具有被 Spring 容器通知的能力，通知的方式是采用回调的方式。</p><p>Aware 接口是一个空接口，实际的方法签名由各个子接口来确定，且该接口通常只会有一个接收单参数的 set 方法，该 set 方法的命名方式为 set + 去掉接口名中的 Aware 后缀，即 XxxAware 接口，则方法定义为 setXxx()，例如 BeanNameAware（setBeanName），ApplicationContextAware（setApplicationContext）。</p><p>Aware 的子接口需要提供一个 <code>setXxx</code> 方法，我们知道 set 是设置属性值的方法，即 Aware 类接口的 <code>setXxx</code> 方法其实就是设置 xxx 属性值的。 Aware 的含义是感知的、感应的，那么在 Spring 容器中是如何实现感知并设置属性值的呢？我们可以从初始化 bean 中的激活 Aware 的方法 <code>invokeAwareMethods()</code> 中看到一点点，如下：</p><p><img src="/./Resources/image-20231008111710296.png" alt="image-20231008111710296"></p><p>从这，我们基本上就可以 Aware 真正的含义是什么了？感知，其实是 Spring 容器在初始化主动检测当前 bean 是否实现了 Aware 接口，如果实现了则回调其 set 方法，此时我们就能拿到对应的 XX 资源，对 XX 资源做一些处理；</p><p>补充：虽然这个名字叫 setXXX，但实际上更多的还是拿到这个资源。</p><p>Spring Aware 接口的实际应用场景是很多的，比如：</p><ol><li>获取 Spring 容器的上下文信息：通过 ApplicationContextAware 接口可以获取 Spring 容器的上下文信息，可以在 Bean 中使用 Spring 容器提供的各种服务，如事件机制、AOP、事务管理等。</li><li>动态加载资源：通过 ResourceLoaderAware 接口可以获取 ResourceLoader，可以在 Bean 中动态加载资源，比如配置文件、模板文件等。</li><li>操作 Servlet 相关的信息：通过 ServletConfigAware 和 ServletContextAware 接口可以获取 Servlet 相关的信息，可以在 Bean 中操作 Servlet 相关的信息，比如获取 ServletContext 初始化参数、ServletContext 监听器等。</li><li>获取 Bean 工厂的信息：通过 BeanFactoryAware 接口可以获取 BeanFactory，可以在 Bean 中使用 BeanFactory 提供的各种服务，如 Bean 生命周期管理、依赖注入、AOP、事务管理等。</li></ol><p>总之，Spring Aware 接口可以让 Bean 更好地与 Spring 容器进行交互，实现更灵活、更强大的功能。但需要注意的是，在实际使用中，应该避免滥用 Spring Aware 接口，因为过多地使用会导致 Bean 与 Spring 容器的紧耦合，降低代码的可维护性和可重用性。</p></blockquote><h4 id="调用-before…-方法"><a href="#调用-before…-方法" class="headerlink" title="调用 before… 方法"></a>调用 before… 方法</h4><p>可以看到 applyBeanPostProcessorsBeforeInitialization 方法中，如果有类实现了 BeanPostProcessor 接口，就会执行postProcessBeforeInitialization 方法，这里需要注意的是：如果多个类实现 BeanPostProcessor 接口，那么多个实现类都会执行 postProcessBeforeInitialization 方法，可以看到是 for 循环依次执行的，还有一个注意的点就是如果加载 A 类到spring容器中，A 类也重写了 BeanPostProcessor 接口的postProcessBeforeInitialization 方法，这时要注意 A 类的 postProcessBeforeInitialization 方法并不会得到执行，因为A类还未加载完成，还未完全放到 Spring 的 singletonObjects 一级缓存中。</p><p><img src="/./Resources/image-20231008104006392.png" alt="image-20231008104006392"></p><h4 id="执行-init-method-方法"><a href="#执行-init-method-方法" class="headerlink" title="执行 init-method 方法"></a>执行 init-method 方法</h4><p>可以看到 invokeInitMethods 方法中，如果实现了 InitializingBean 接口，重写了 afterPropertiesSet 方法，则会调用 afterPropertiesSet 方法，最后还会调用是否指定了 init-method，可以通过 <code>&lt;bean init-method&gt;</code> 标签，或者 @Bean 注解的 <code>initMethod</code> 指定</p><p><img src="/./Resources/image-20231008104502810.png" alt="image-20231008104502810"></p><h4 id="调用-after…-方法"><a href="#调用-after…-方法" class="headerlink" title="调用 after… 方法"></a>调用 after… 方法</h4><p>可以看到 applyBeanPostProcessorsAfterInitialization 方法，该方法与之前的 postProcessBeforeInitialization 方法（第二步）类似，也是循环遍历实现了 BeanPostProcessor 的接口实现类，执行 postProcessAfterInitialization 方法。整个 bean 的生命执行流程就如上面截图所示，哪个接口的方法在哪里被调用，方法的执行流程</p><p><img src="/./Resources/image-20231008104728077.png" alt="image-20231008104728077"></p><blockquote><p>第二步的代码如图所示，可以看到只是名字不同而已</p><p><img src="/./Resources/image-20231008105850710.png" alt="image-20231008105850710"></p></blockquote><p>最后，对bean的生命流程进行一个流程图的总结</p><p><img src="/./Resources/image-20231008105033641.png" alt="image-20231008105033641"></p><blockquote><p>参考文章</p><p><a href="https://www.cnblogs.com/semi-sub/p/13548479.html">Spring 为何需要三级缓存解决循环依赖，而不是二级缓存 - 半分、 - 博客园 (cnblogs.com)</a></p><p><a href="https://blog.csdn.net/Bronze5/article/details/105902892">spring中的Aware接口原来是这么回事_spring ware接口-CSDN博客</a></p><p><a href="https://cloud.tencent.com/developer/article/1380827">【死磕 Spring】—– IOC 之 深入分析 Aware 接口-腾讯云开发者社区-腾讯云 (tencent.com)</a></p></blockquote>]]></content>
+    
+    
+    <categories>
+      
+      <category>Java</category>
+      
+      <category>Spring</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Spring</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>垃圾收集器</title>
     <link href="/posts/6158ee9c.html"/>
     <url>/posts/6158ee9c.html</url>
@@ -267,13 +321,13 @@
     
     <tags>
       
+      <tag>Java</tag>
+      
       <tag>ElasticSearch</tag>
       
       <tag>SpringData</tag>
       
       <tag>SpringBoot</tag>
-      
-      <tag>Java</tag>
       
     </tags>
     

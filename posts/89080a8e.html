@@ -1,0 +1,716 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/avatar.png">
+  <link rel="icon" href="/img/avatar.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="wtt">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Spring Bean的生命周期Bean 的生命周期整个生命周期如下所示  在创建 Bean 之前，Spring 容器会将所有 Bean 的信息（xml 里面的 &lt;bean&gt; 或者注解修饰的对象）封装成一个 BeanDefinition 对象，所有的 BeanDefinition 存储到一个名为 beanDefinitionMap 的 Map 集合中去，Spring 框架在对该 Map">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Bean的生命周期">
+<meta property="og:url" content="http://conquers.github.io/posts/89080a8e.html">
+<meta property="og:site_name" content="wtt&#39;s Blog">
+<meta property="og:description" content="Spring Bean的生命周期Bean 的生命周期整个生命周期如下所示  在创建 Bean 之前，Spring 容器会将所有 Bean 的信息（xml 里面的 &lt;bean&gt; 或者注解修饰的对象）封装成一个 BeanDefinition 对象，所有的 BeanDefinition 存储到一个名为 beanDefinitionMap 的 Map 集合中去，Spring 框架在对该 Map">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://conquers.github.io/Resources/banner-spring.jpg">
+<meta property="article:published_time" content="2023-10-08T06:53:09.000Z">
+<meta property="article:modified_time" content="2023-10-08T13:29:49.230Z">
+<meta property="article:author" content="wtt">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://conquers.github.io/Resources/banner-spring.jpg">
+  
+  
+  
+  <title>Spring Bean的生命周期 - wtt&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/mac.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="wtt's Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>wtt&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Spring Bean的生命周期"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-10-08 14:53" pubdate>
+          2023年10月8日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          33 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Spring Bean的生命周期</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Spring-Bean的生命周期"><a href="#Spring-Bean的生命周期" class="headerlink" title="Spring Bean的生命周期"></a>Spring Bean的生命周期</h1><h2 id="Bean-的生命周期"><a href="#Bean-的生命周期" class="headerlink" title="Bean 的生命周期"></a>Bean 的生命周期</h2><p>整个生命周期如下所示</p>
+<p><img src="/./Resources/image-20231008205654478.png" srcset="/img/loading.gif" lazyload alt="image-20231008205654478"></p>
+<p>在创建 Bean 之前，Spring 容器会将所有 Bean 的信息（xml 里面的 <code>&lt;bean&gt;</code> 或者注解修饰的对象）封装成一个 BeanDefinition 对象，所有的 BeanDefinition 存储到一个名为 beanDefinitionMap 的 Map 集合中去，Spring 框架在对该 Map 进行遍历，然后创建对象，即如下过程</p>
+<h3 id="doCteateBean"><a href="#doCteateBean" class="headerlink" title="doCteateBean"></a>doCteateBean</h3><p>该部分对应图中的初始化赋值部分</p>
+<p>查看实现类 AbstractAutowireCapableBeanFactory 中的 doCteateBean 方法</p>
+<p><img src="/./Resources/image-20231008205913076.png" srcset="/img/loading.gif" lazyload alt="image-20231008205913076"></p>
+<blockquote>
+<p>继承类图</p>
+<p><img src="/./Resources/image-20231008102641438.png" srcset="/img/loading.gif" lazyload alt="image-20231008102641438"></p>
+</blockquote>
+<p>该方法是创建 bean 的开始，我们可以看到首先需要实例化这个 bean，也就是在堆中开辟一块内存空间给这个对象，createBeanInstance 方法里面逻辑大概就是采用反射生成实例对象，进行到这里表示对象还并未进行属性的填充，也就是 @Autowired 注解的属性还未得到注入</p>
+<p><img src="/./Resources/image-20231008205954228.png" srcset="/img/loading.gif" lazyload alt="image-20231008205954228"><br><img src="/./Resources/image-20231008210004652.png" srcset="/img/loading.gif" lazyload alt="image-20231008210004652"></p>
+<h3 id="populateBean"><a href="#populateBean" class="headerlink" title="populateBean"></a>populateBean</h3><p>该部分对应图中的依赖注入部分</p>
+<h3 id="initializeBean"><a href="#initializeBean" class="headerlink" title="initializeBean"></a>initializeBean</h3><p>该部分对应图中的 Aware 到 BeanPostProcessor#after 部分</p>
+<p>我们可以看到第二步就是填充 bean 的成员属性，populateBean 方法里面的逻辑大致就是对使用到了注入属性的注解就会进行注入，如果在注入的过程发现注入的对象还没生成，则会跑去生产要注入的对象，第三步就是调用 initializeBean 方法初始化bean，</p>
+<p><img src="/./Resources/image-20231008210028120.png" srcset="/img/loading.gif" lazyload alt="image-20231008210028120"></p>
+<h4 id="调用实现-Aware-接口的方法"><a href="#调用实现-Aware-接口的方法" class="headerlink" title="调用实现 Aware 接口的方法"></a>调用实现 Aware 接口的方法</h4><p>可以看到 initializeBean 方法中，首先调用的是实现的 Aware 接口的方法，我们具体看一下 invokeAwareMethods 方法中会调用 Aware 接口的那些方法</p>
+<p><img src="/./Resources/image-20231008103715206.png" srcset="/img/loading.gif" lazyload alt="image-20231008103715206">我们可以知道如果我们实现了BeanNameAware，BeanClassLoaderAware，BeanFactoryAware三个Aware接口的话，会依次调用 setBeanName(), setBeanClassLoader(), setBeanFactory() 方法</p>
+<blockquote>
+<p>对于 Await 接口的作用参考：</p>
+<p>Aware 接口定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * A marker superinterface indicating that a bean is eligible to be notified by the</span><br><span class="hljs-comment"> * Spring container of a particular framework object through a callback-style method.</span><br><span class="hljs-comment"> * The actual method signature is determined by individual subinterfaces but should</span><br><span class="hljs-comment"> * typically consist of just one void-returning method that accepts a single argument.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * &lt;p&gt;Note that merely implementing &#123;<span class="hljs-doctag">@link</span> Aware&#125; provides no default functionality.</span><br><span class="hljs-comment"> * Rather, processing must be done explicitly, for example in a</span><br><span class="hljs-comment"> * &#123;<span class="hljs-doctag">@link</span> org.springframework.beans.factory.config.BeanPostProcessor&#125;.</span><br><span class="hljs-comment"> * Refer to &#123;<span class="hljs-doctag">@link</span> org.springframework.context.support.ApplicationContextAwareProcessor&#125;</span><br><span class="hljs-comment"> * for an example of processing specific &#123;<span class="hljs-doctag">@code</span> *Aware&#125; interface callbacks.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> Chris Beams</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@author</span> Juergen Hoeller</span><br><span class="hljs-comment"> * <span class="hljs-doctag">@since</span> 3.1</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Aware</span> &#123;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Aware 接口为 Spring 容器的核心接口，是一个具有标识作用的超级接口，实现了该接口的 bean 是具有被 Spring 容器通知的能力，通知的方式是采用回调的方式。</p>
+<p>Aware 接口是一个空接口，实际的方法签名由各个子接口来确定，且该接口通常只会有一个接收单参数的 set 方法，该 set 方法的命名方式为 set + 去掉接口名中的 Aware 后缀，即 XxxAware 接口，则方法定义为 setXxx()，例如 BeanNameAware（setBeanName），ApplicationContextAware（setApplicationContext）。</p>
+<p>Aware 的子接口需要提供一个 <code>setXxx</code> 方法，我们知道 set 是设置属性值的方法，即 Aware 类接口的 <code>setXxx</code> 方法其实就是设置 xxx 属性值的。 Aware 的含义是感知的、感应的，那么在 Spring 容器中是如何实现感知并设置属性值的呢？我们可以从初始化 bean 中的激活 Aware 的方法 <code>invokeAwareMethods()</code> 中看到一点点，如下：</p>
+<p><img src="/./Resources/image-20231008111710296.png" srcset="/img/loading.gif" lazyload alt="image-20231008111710296"></p>
+<p>从这，我们基本上就可以 Aware 真正的含义是什么了？感知，其实是 Spring 容器在初始化主动检测当前 bean 是否实现了 Aware 接口，如果实现了则回调其 set 方法，此时我们就能拿到对应的 XX 资源，对 XX 资源做一些处理；</p>
+<p>补充：虽然这个名字叫 setXXX，但实际上更多的还是拿到这个资源。</p>
+<p>Spring Aware 接口的实际应用场景是很多的，比如：</p>
+<ol>
+<li>获取 Spring 容器的上下文信息：通过 ApplicationContextAware 接口可以获取 Spring 容器的上下文信息，可以在 Bean 中使用 Spring 容器提供的各种服务，如事件机制、AOP、事务管理等。</li>
+<li>动态加载资源：通过 ResourceLoaderAware 接口可以获取 ResourceLoader，可以在 Bean 中动态加载资源，比如配置文件、模板文件等。</li>
+<li>操作 Servlet 相关的信息：通过 ServletConfigAware 和 ServletContextAware 接口可以获取 Servlet 相关的信息，可以在 Bean 中操作 Servlet 相关的信息，比如获取 ServletContext 初始化参数、ServletContext 监听器等。</li>
+<li>获取 Bean 工厂的信息：通过 BeanFactoryAware 接口可以获取 BeanFactory，可以在 Bean 中使用 BeanFactory 提供的各种服务，如 Bean 生命周期管理、依赖注入、AOP、事务管理等。</li>
+</ol>
+<p>总之，Spring Aware 接口可以让 Bean 更好地与 Spring 容器进行交互，实现更灵活、更强大的功能。但需要注意的是，在实际使用中，应该避免滥用 Spring Aware 接口，因为过多地使用会导致 Bean 与 Spring 容器的紧耦合，降低代码的可维护性和可重用性。</p>
+</blockquote>
+<h4 id="调用-before…-方法"><a href="#调用-before…-方法" class="headerlink" title="调用 before… 方法"></a>调用 before… 方法</h4><p>可以看到 applyBeanPostProcessorsBeforeInitialization 方法中，如果有类实现了 BeanPostProcessor 接口，就会执行postProcessBeforeInitialization 方法，这里需要注意的是：如果多个类实现 BeanPostProcessor 接口，那么多个实现类都会执行 postProcessBeforeInitialization 方法，可以看到是 for 循环依次执行的，还有一个注意的点就是如果加载 A 类到spring容器中，A 类也重写了 BeanPostProcessor 接口的postProcessBeforeInitialization 方法，这时要注意 A 类的 postProcessBeforeInitialization 方法并不会得到执行，因为A类还未加载完成，还未完全放到 Spring 的 singletonObjects 一级缓存中。</p>
+<p><img src="/./Resources/image-20231008104006392.png" srcset="/img/loading.gif" lazyload alt="image-20231008104006392"></p>
+<h4 id="执行-init-method-方法"><a href="#执行-init-method-方法" class="headerlink" title="执行 init-method 方法"></a>执行 init-method 方法</h4><p>可以看到 invokeInitMethods 方法中，如果实现了 InitializingBean 接口，重写了 afterPropertiesSet 方法，则会调用 afterPropertiesSet 方法，最后还会调用是否指定了 init-method，可以通过 <code>&lt;bean init-method&gt;</code> 标签，或者 @Bean 注解的 <code>initMethod</code> 指定</p>
+<p><img src="/./Resources/image-20231008104502810.png" srcset="/img/loading.gif" lazyload alt="image-20231008104502810"></p>
+<h4 id="调用-after…-方法"><a href="#调用-after…-方法" class="headerlink" title="调用 after… 方法"></a>调用 after… 方法</h4><p>可以看到 applyBeanPostProcessorsAfterInitialization 方法，该方法与之前的 postProcessBeforeInitialization 方法（第二步）类似，也是循环遍历实现了 BeanPostProcessor 的接口实现类，执行 postProcessAfterInitialization 方法。整个 bean 的生命执行流程就如上面截图所示，哪个接口的方法在哪里被调用，方法的执行流程</p>
+<p><img src="/./Resources/image-20231008104728077.png" srcset="/img/loading.gif" lazyload alt="image-20231008104728077"></p>
+<blockquote>
+<p>第二步的代码如图所示，可以看到只是名字不同而已</p>
+<p><img src="/./Resources/image-20231008105850710.png" srcset="/img/loading.gif" lazyload alt="image-20231008105850710"></p>
+</blockquote>
+<p>最后，对bean的生命流程进行一个流程图的总结</p>
+<p><img src="/./Resources/image-20231008105033641.png" srcset="/img/loading.gif" lazyload alt="image-20231008105033641"></p>
+<blockquote>
+<p>参考文章</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/semi-sub/p/13548479.html">Spring 为何需要三级缓存解决循环依赖，而不是二级缓存 - 半分、 - 博客园 (cnblogs.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Bronze5/article/details/105902892">spring中的Aware接口原来是这么回事_spring ware接口-CSDN博客</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1380827">【死磕 Spring】—– IOC 之 深入分析 Aware 接口-腾讯云开发者社区-腾讯云 (tencent.com)</a></p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/Spring/" class="category-chain-item">Spring</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Spring/">#Spring</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Spring Bean的生命周期</div>
+      <div>http://conquers.github.io/posts/89080a8e.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>wtt</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年10月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/posts/95a885e4.html" title="Spring 为何需要三级缓存解决循环依赖，而不是二级缓存">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Spring 为何需要三级缓存解决循环依赖，而不是二级缓存</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/6158ee9c.html" title="垃圾收集器">
+                        <span class="hidden-mobile">垃圾收集器</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

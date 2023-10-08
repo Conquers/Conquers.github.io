@@ -1,0 +1,717 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/avatar.png">
+  <link rel="icon" href="/img/avatar.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="wtt">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Spring 为何需要三级缓存解决循环依赖，而不是二级缓存问题都知道 Spring 通过三级缓存来解决循环依赖的问题。但是是不是必须三级缓存才能解决，二级缓存不能解决吗？要分析是不是可以去掉其中一级缓存，就先过一遍 Spring 是如何通过三级缓存来解决循环依赖的。  对于这部分内容，需要了解 Bean 的生命周期。  解决在 Spring 生命周期的 populateBean 部分，如果发现该属">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring 为何需要三级缓存解决循环依赖，而不是二级缓存">
+<meta property="og:url" content="http://conquers.github.io/posts/95a885e4.html">
+<meta property="og:site_name" content="wtt&#39;s Blog">
+<meta property="og:description" content="Spring 为何需要三级缓存解决循环依赖，而不是二级缓存问题都知道 Spring 通过三级缓存来解决循环依赖的问题。但是是不是必须三级缓存才能解决，二级缓存不能解决吗？要分析是不是可以去掉其中一级缓存，就先过一遍 Spring 是如何通过三级缓存来解决循环依赖的。  对于这部分内容，需要了解 Bean 的生命周期。  解决在 Spring 生命周期的 populateBean 部分，如果发现该属">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://conquers.github.io/Resources/banner-spring.jpg">
+<meta property="article:published_time" content="2023-10-08T08:20:11.000Z">
+<meta property="article:modified_time" content="2023-10-08T13:36:09.955Z">
+<meta property="article:author" content="wtt">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://conquers.github.io/Resources/banner-spring.jpg">
+  
+  
+  
+  <title>Spring 为何需要三级缓存解决循环依赖，而不是二级缓存 - wtt&#39;s Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+  
+<link rel="stylesheet" href="/css/mac.css">
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="wtt's Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>wtt&#39;s Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Spring 为何需要三级缓存解决循环依赖，而不是二级缓存"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-10-08 16:20" pubdate>
+          2023年10月8日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Spring 为何需要三级缓存解决循环依赖，而不是二级缓存</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Spring-为何需要三级缓存解决循环依赖，而不是二级缓存"><a href="#Spring-为何需要三级缓存解决循环依赖，而不是二级缓存" class="headerlink" title="Spring 为何需要三级缓存解决循环依赖，而不是二级缓存"></a>Spring 为何需要三级缓存解决循环依赖，而不是二级缓存</h1><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>都知道 Spring 通过三级缓存来解决循环依赖的问题。但是是不是必须三级缓存才能解决，二级缓存不能解决吗？<br>要分析是不是可以去掉其中一级缓存，就先过一遍 Spring 是如何通过三级缓存来解决循环依赖的。</p>
+<blockquote>
+<p>对于这部分内容，需要了解 Bean 的生命周期。</p>
+</blockquote>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>在 Spring 生命周期的 populateBean 部分，如果发现该属性（成员变量）还未在 spring 中生成，则会跑去生成属性对象实例</p>
+<p><img src="/./Resources/image-20231008150928305.png" srcset="/img/loading.gif" lazyload alt="image-20231008150928305"></p>
+<p>我们可以看到填充属性的时候，spring 会提前将已经实例化的 bean 通过 ObjectFactory 半成品暴露出去，为什么称为半成品是因为这时候的 bean 对象实例化，但是未进行属性填充，是一个不完整的 bean 实例对象</p>
+<p><img src="/./Resources/image-20231008151216188.png" srcset="/img/loading.gif" lazyload alt="image-20231008151216188"></p>
+<p>spring 利用 singletonObjects, earlySingletonObjects, singletonFactories 三级缓存去解决的，所说的缓存其实也就是三个 Map</p>
+<p><img src="/./Resources/42c63cd9a94d0d2d4000473cabc221b7.png" srcset="/img/loading.gif" lazyload alt="image"></p>
+<p>可以看到三级缓存各自保存的对象，这里重点关注二级缓存 earlySingletonObjects 和三级缓存 singletonFactory，一级缓存可以进行忽略。前面我们讲过先实例化的 bean 会通过 ObjectFactory 半成品提前暴露在三级缓存中</p>
+<p><img src="/./Resources/image-20231008151721379.png" srcset="/img/loading.gif" lazyload alt="image-20231008151721379"></p>
+<p>singletonFactory 是传入的一个匿名内部类，调用 ObjectFactory.getObject() 最终会调用 getEarlyBeanReference 方法。再来看看循环依赖中是怎么拿其它半成品的实例对象的。</p>
+<p>我们假设现在有这样的场景 AService 依赖 BService，BService 依赖 AService</p>
+<ul>
+<li>AService 首先实例化，实例化通过 ObjectFactory 半成品暴露在三级缓存中</li>
+<li>填充属性 BService，发现 BService 还未进行过加载，就会先去加载 BService</li>
+<li>再加载 BService 的过程中，实例化，也通过 ObjectFactory 半成品暴露在三级缓存</li>
+<li>BService 填充属性 AService 的时候，这时候能够从三级缓存中拿到半成品的 ObjectFactory （AService）</li>
+</ul>
+<p><img src="/./Resources/image-20231008190716923.png" srcset="/img/loading.gif" lazyload alt="image-20231008190716923"></p>
+<p>拿到 ObjectFactory 对象后，调用 ObjectFactory.getObject() 方法最终会调用 getEarlyBeanReference() 方法，getEarlyBeanReference 这个方法主要逻辑大概描述下，如果 bean 被 AOP 切面代理则返回的是 beanProxy 对象，如果未被代理则返回的是原 bean 实例，这时我们会发现能够拿到 bean 实例(属性未填充)，然后从三级缓存移除，放到二级缓存earlySingletonObjects 中，🔔（补充内容见下部分），然后 B 创建完毕，放入一级缓存中，再回到 A 的创建过程，去一级缓存拿到了B，然后 A 也创建完成，A 最后也放入到一级缓存，最终两个都创建完成；</p>
+<p>🔔：而此时 B 注入的是一个半成品的实例A对象，不过随着 B 初始化完成后，A 会继续进行后续的初始化操作，最终B会注入的是一个完整的A实例，因为在内存中它们是同一个对象。</p>
+<p>过程如下：</p>
+<p><img src="/./Resources/%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96.drawio.png" srcset="/img/loading.gif" lazyload alt="循环依赖.drawio"></p>
+<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>可以看到，循环依赖下，有没有代理情况下的区别就在：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf"><span class="hljs-attribute">singletonObject</span> <span class="hljs-operator">=</span> singletonFactory.getObject()<span class="hljs-comment">;</span><br></code></pre></td></tr></table></figure>
+
+<p>在循环依赖发生的情况下 B 中的 A 赋值时：</p>
+<ol>
+<li>无代理：getObject 直接返回原来的 Bean</li>
+<li>有代理：getObject 返回的是代理对象</li>
+</ol>
+<p>然后都放到<strong>二级缓存</strong>。</p>
+<p><strong>为什么要三级缓存?</strong></p>
+<ol>
+<li><p>假设去掉三级缓存</p>
+<p>去掉三级缓存之后，Bean 直接创建 <code>earlySingletonObjects</code>， 看着好像也可以。</p>
+<p>如果有代理的时候，在 <code>earlySingletonObjects</code> 直接放代理对象就行了。</p>
+<p>但是会导致一个问题：意味着 Bean 在构造完后就创建代理对象，这样违背了 Spring 设计原则。Spring 结合 AOP 跟 Bean 的生命周期，是在 Bean 创建完全之后通过 AnnotationAwareAspectJAutoProxyCreator 这个后置处理器来完成的，在这个后置处理的 postProcessAfterInitialization 方法中对初始化后的 Bean 完成 AOP 代理。如果出现了循环依赖，那没有办法，只有给 Bean 先创建代理，但是没有出现循环依赖的情况下，设计之初就是让 Bean 在生命周期的最后一步完成代理而不是在实例化后就立马完成代理。</p>
+<p>这么一想，是不是会对 Bean 的生命周期有影响。</p>
+<p>同样，先创建 <code>singletonFactory</code> 的好处就是：<strong>在真正需要实例化的时候，再使用 singletonFactory.getObject() 获取 Bean 或者 Bean 的代理</strong>。相当于是延迟实例化。</p>
+</li>
+<li><p>假设去掉二级缓存</p>
+<p>如果去掉了二级缓存，则需要直接在 <code>singletonFactory.getObject()</code> 阶段初始化完毕，并放到一级缓存中。</p>
+<p><img src="/Resources/Pasted%20image%2020231008213556.png" srcset="/img/loading.gif" lazyload><br>B 和 C 都依赖 A</p>
+<p>那有这么一种场景，B 和 C 都依赖了 A。</p>
+<p>要知道在有代理的情况下 <code>singletonFactory.getObject()</code> 获取的是代理对象。</p>
+<p><img src="/Resources/Pasted%20image%2020231008213609.png" srcset="/img/loading.gif" lazyload>多次获取代理对象不同</p>
+<p>而多次调用 <code>singletonFactory.getObject()</code> 返回的代理对象是不同的，就会导致 B 和 C 依赖了不同的 A。</p>
+<p>那如果获取 B 到之后直接放到一级缓存，然后 C 再获取呢？</p>
+<p>…</p>
+<p>一级缓存放的是已经初始化完毕的 Bean，要知道 A 依赖了 B 和 C ，A 这时候还没有初始化完毕。</p>
+</li>
+</ol>
+<blockquote>
+<p>参考文章</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/semi-sub/p/13548479.html">Spring 为何需要三级缓存解决循环依赖，而不是二级缓存 - 半分、 - 博客园 (cnblogs.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/610322151">彻底搞懂Spring之三级缓存解决循环依赖问题 - 知乎 (zhihu.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2019359">【彻底搞懂】Spring之三级缓存解决循环依赖问题-腾讯云开发者社区-腾讯云 (tencent.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1rt4y1u7q5">https://www.bilibili.com/video/BV1rt4y1u7q5</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_49592546/article/details/108050566">Spring循环依赖三级缓存是否可以减少为二级缓存？-CSDN博客</a></p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/Java/Spring/" class="category-chain-item">Spring</a>
+  
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Spring/">#Spring</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Spring 为何需要三级缓存解决循环依赖，而不是二级缓存</div>
+      <div>http://conquers.github.io/posts/95a885e4.html</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>wtt</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年10月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/posts/89080a8e.html" title="Spring Bean的生命周期">
+                        <span class="hidden-mobile">Spring Bean的生命周期</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
