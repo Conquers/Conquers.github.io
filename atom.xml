@@ -361,11 +361,11 @@
     
     <category term="ElasticSearch" scheme="http://conquers.github.io/tags/ElasticSearch/"/>
     
+    <category term="Java" scheme="http://conquers.github.io/tags/Java/"/>
+    
     <category term="SpringData" scheme="http://conquers.github.io/tags/SpringData/"/>
     
     <category term="SpringBoot" scheme="http://conquers.github.io/tags/SpringBoot/"/>
-    
-    <category term="Java" scheme="http://conquers.github.io/tags/Java/"/>
     
   </entry>
   
