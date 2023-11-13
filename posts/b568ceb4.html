@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://conquers.github.io/Resources/banner-java.png">
 <meta property="article:published_time" content="2023-11-13T07:58:45.000Z">
-<meta property="article:modified_time" content="2023-11-13T13:04:53.313Z">
+<meta property="article:modified_time" content="2023-11-13T13:10:12.042Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary_large_image">
@@ -229,7 +229,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          714 字
+          722 字
         
       </span>
     
@@ -240,7 +240,7 @@
         
         
         
-          6 分钟
+          7 分钟
         
       </span>
     
@@ -293,8 +293,8 @@
 <blockquote>
 <p>知道了区别，那为什么 Queue 有了 add 方法（继承自 Collection) ，为什么还要定义一个 offer 方法呢？</p>
 </blockquote>
-<p>查阅了许多文档，没有一个比较清晰明了的答案，但是在<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/2703984/what-is-the-difference-between-the-add-and-offer-methods-in-a-queue-in-java">What is the difference between the add and offer methods in a Queue in Java? - Stack Overflow</a>这个问题中可以从中发现一些信息，在下面提到了，Queue 首先是继承 Collection，自然他也拥有 add 方法，在 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Collection.html#add(E)">Collection  的 add 方法</a>中，定义了<mark>如果集合出于除已包含元素以外的任何原因拒绝添加特定元素，则它必须引发异常</mark>。</p>
-<p>但是队列我们知道分为有界队列和无界队列，在无界队列中的 offer 其实底层也就是 add，但在有界队列中，offer 就不太一样了，也就是 offer 设计出来的意义。在<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Queue.html">Queue</a> 中， 定义了<mark>设计用于在失败被视为正常情况而非异常情况时使用，例如，在固定容量（或称为“有界”）的队列中。</mark></p>
+<p>查阅了许多文档，没有一个比较清晰明了的答案，但是在 <a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/2703984/what-is-the-difference-between-the-add-and-offer-methods-in-a-queue-in-java">What is the difference between the add and offer methods in a Queue in Java? - Stack Overflow</a> 这个问题中可以从中发现一些信息，在下面提到了，Queue 首先是继承 Collection，自然他也拥有 add 方法，在 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Collection.html#add(E)">Collection 的 add 方法</a>中，定义了<mark>如果集合出于除已包含元素以外的任何原因拒绝添加特定元素，则它必须引发异常</mark>。</p>
+<p>但是队列我们知道分为有界队列和无界队列，在无界队列中的 offer 其实底层也就是 add，但在有界队列中，offer 就不太一样了，也就是 offer 设计出来的意义。在 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Queue.html">Queue 的 offer 方法</a> 中， 定义了<mark>设计用于在失败被视为正常情况而非异常情况时使用，例如，在固定容量（或称为“有界”）的队列中。</mark></p>
 
                 
               </div>
