@@ -6,7 +6,7 @@
   <link href="http://conquers.github.io/atom.xml" rel="self"/>
   
   <link href="http://conquers.github.io/"/>
-  <updated>2023-10-20T08:19:22.478Z</updated>
+  <updated>2023-11-13T08:14:30.262Z</updated>
   <id>http://conquers.github.io/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Queue 中 offer() 和 add() 的区别</title>
+    <link href="http://conquers.github.io/posts/b568ceb4.html"/>
+    <id>http://conquers.github.io/posts/b568ceb4.html</id>
+    <published>2023-11-13T07:58:45.000Z</published>
+    <updated>2023-11-13T08:14:30.262Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Queue-中-offer-和-add-的区别"><a href="#Queue-中-offer-和-add-的区别" class="headerlink" title="Queue 中 offer() 和 add() 的区别"></a>Queue 中 offer() 和 add() 的区别</h1><p>在编写代码时，发现自己用的 add()，别人用的 offer()，好像两个方法的功能是一致的，然后去看了一下 Queue 的实现类 <code>LinkedList</code> 的源码，发现并无区别。</p><p><img src="/./Resources/image-20231113160414176.png" alt="image-20231113160414176"></p><p>既然没有区别，那为什么要分成两个方法呢？看了一下上面的注释：offer 在使用<strong>容量受限</strong>的队列时，此方法通常比 add 更可取，因为 add 只能通过引发异常来插入元素。</p><p><img src="/./Resources/image-20231113160304045.png" alt="image-20231113160304045"></p><p>也就是说只有在容量受限的队列中，才能具体区分这两个方法，然后去看了一下 <code>ArrayBlockingQueue</code> 的源码</p><p><img src="/./Resources/image-20231113160651312.png" alt="image-20231113160651312"></p><p>即，在顶层接口 Queue 中确实定义了方法的标准，但是具体的实现类可能会根据其特定的数据结构和用途，对这些方法的实现细节进行不同的处理。</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Queue-中-offer-和-add-的区别&quot;&gt;&lt;a href=&quot;#Queue-中-offer-和-add-的区别&quot; class=&quot;headerlink&quot; title=&quot;Queue 中 offer() 和 add() 的区别&quot;&gt;&lt;/a&gt;Queue 中 offer</summary>
+      
+    
+    
+    
+    <category term="1" scheme="http://conquers.github.io/categories/1/"/>
+    
+    <category term="2" scheme="http://conquers.github.io/categories/1/2/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>Springboot 为什么编写了配置文件就可以使用</title>
