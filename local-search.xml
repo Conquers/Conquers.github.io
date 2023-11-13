@@ -8,7 +8,7 @@
     <link href="/posts/b568ceb4.html"/>
     <url>/posts/b568ceb4.html</url>
     
-    <content type="html"><![CDATA[<h1 id="Queue-中-offer-和-add-的区别"><a href="#Queue-中-offer-和-add-的区别" class="headerlink" title="Queue 中 offer() 和 add() 的区别"></a>Queue 中 offer() 和 add() 的区别</h1><p>在编写代码时，发现自己用的 add()，别人用的 offer()，好像两个方法的功能是一致的，然后去看了一下 Queue 的实现类 <code>LinkedList</code> 的源码，发现并无区别。</p><p><img src="/./Resources/image-20231113160414176.png" alt="image-20231113160414176"></p><p>既然没有区别，那为什么要分成两个方法呢？看了一下上面的注释：offer 在使用<strong>容量受限</strong>的队列时，此方法通常比 add 更可取，因为 add 只能通过引发异常来插入元素。</p><p><img src="/./Resources/image-20231113160304045.png" alt="image-20231113160304045"></p><p>也就是说只有在容量受限的队列中，才能具体区分这两个方法，然后去看了一下 <code>ArrayBlockingQueue</code> 的源码</p><p><img src="/./Resources/image-20231113160651312.png" alt="image-20231113160651312"></p><p>即，在顶层接口 Queue 中确实定义了方法的标准，但是具体的实现类可能会根据其特定的数据结构和用途，对这些方法的实现细节进行不同的处理。</p>]]></content>
+    <content type="html"><![CDATA[<h1 id="Queue-中-offer-和-add-的区别"><a href="#Queue-中-offer-和-add-的区别" class="headerlink" title="Queue 中 offer() 和 add() 的区别"></a>Queue 中 offer() 和 add() 的区别</h1><p>在编写代码时，发现自己用的 add()，别人用的 offer()，好像两个方法的功能是一致的，然后去看了一下 Queue 的实现类 <code>LinkedList</code> 的源码，发现并无区别。</p><p><img src="/./Resources/image-20231113160414176.png" alt="image-20231113160414176"></p><p>既然没有区别，那为什么要分成两个方法呢？看了一下上面的注释：<mark>offer 在使用<strong>容量受限</strong>的队列时，此方法通常比 add 更可取，因为 add 只能通过引发异常来插入元素。</mark></p><p><img src="/./Resources/image-20231113160304045.png" alt="image-20231113160304045"></p><p>也就是说只有在容量受限的队列中，才能具体区分这两个方法，然后去看了一下 <code>ArrayBlockingQueue</code> 的源码</p><p><img src="/./Resources/image-20231113160651312.png" alt="image-20231113160651312"></p><p>即，在顶层接口 Queue 中确实定义了方法的标准，但是具体的实现类可能会根据其特定的数据结构和用途，对这些方法的实现细节进行不同的处理。</p><blockquote><p>知道了区别，那为什么 Queue 有了 add 方法（继承自 Collection) ，为什么还要定义一个 offer 方法呢？</p></blockquote><p>查阅了许多文档，没有一个比较清晰明了的答案，但是在<a href="https://stackoverflow.com/questions/2703984/what-is-the-difference-between-the-add-and-offer-methods-in-a-queue-in-java">What is the difference between the add and offer methods in a Queue in Java? - Stack Overflow</a>这个问题中可以从中发现一些信息，在下面提到了，Queue 首先是继承 Collection，自然他也拥有 add 方法，在 <a href="https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Collection.html#add(E)">Collection  的 add 方法</a>中，定义了<mark>如果集合出于除已包含元素以外的任何原因拒绝添加特定元素，则它必须引发异常</mark>。</p><p>但是队列我们知道分为有界队列和无界队列，在无界队列中的 offer 其实底层也就是 add，但在有界队列中，offer 就不太一样了，也就是 offer 设计出来的意义。在<a href="https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Queue.html">Queue</a> 中， 定义了<mark>设计用于在失败被视为正常情况而非异常情况时使用，例如，在固定容量（或称为“有界”）的队列中。</mark></p>]]></content>
     
     
     <categories>
@@ -377,11 +377,11 @@
       
       <tag>ElasticSearch</tag>
       
+      <tag>Java</tag>
+      
       <tag>SpringData</tag>
       
       <tag>SpringBoot</tag>
-      
-      <tag>Java</tag>
       
     </tags>
     
