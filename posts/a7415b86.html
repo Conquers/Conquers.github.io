@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://conquers.github.io/Resources/banner-latex.png">
 <meta property="article:published_time" content="2024-01-08T01:51:59.000Z">
-<meta property="article:modified_time" content="2024-01-11T12:31:48.779Z">
+<meta property="article:modified_time" content="2024-01-11T13:44:26.011Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="LaTex">
 <meta name="twitter:card" content="summary_large_image">
@@ -229,7 +229,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.3k 字
+          2.4k 字
         
       </span>
     
@@ -240,7 +240,7 @@
         
         
         
-          20 分钟
+          21 分钟
         
       </span>
     
@@ -374,6 +374,12 @@
 </blockquote>
 <h3 id="编译报错，在某个-figure-块内报错"><a href="#编译报错，在某个-figure-块内报错" class="headerlink" title="编译报错，在某个 figure 块内报错"></a>编译报错，在某个 figure 块内报错</h3><p>具体报错信息如下：<code>I can&#39;t write on file &#39;xxxx.pdf&#39;. \includegraphics&#123;xxx&#125;</code></p>
 <p>这是因为在其他软件预览了编译后的 pdf，关闭即可</p>
+<h3 id="引用不能跳转"><a href="#引用不能跳转" class="headerlink" title="引用不能跳转"></a>引用不能跳转</h3><h4 id="参考文献引用不能跳转"><a href="#参考文献引用不能跳转" class="headerlink" title="参考文献引用不能跳转"></a>参考文献引用不能跳转</h4><p>导言区添加如下语句</p>
+<figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs latex"><span class="hljs-keyword">\usepackage</span>&#123;hyperref&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="图片、表格和公式添加引用"><a href="#图片、表格和公式添加引用" class="headerlink" title="图片、表格和公式添加引用"></a>图片、表格和公式添加引用</h4><p>在图片、表格和公式处，使用 <code>\label&#123;fig1&#125;</code> 添加标记</p>
+<p>在使用处使用 <code>\ref</code> 引用</p>
+<p>例如图片的引用方式：<code>Fig.\ref&#123;fig1&#125;</code></p>
 
                 
               </div>
