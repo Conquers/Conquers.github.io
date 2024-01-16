@@ -25,7 +25,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://conquers.github.io/Resources/banner-latex.png">
 <meta property="article:published_time" content="2024-01-08T01:51:59.000Z">
-<meta property="article:modified_time" content="2024-01-11T13:44:26.011Z">
+<meta property="article:modified_time" content="2024-01-16T03:17:31.404Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="LaTex">
 <meta name="twitter:card" content="summary_large_image">
@@ -229,7 +229,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.4k 字
+          4.5k 字
         
       </span>
     
@@ -240,7 +240,7 @@
         
         
         
-          21 分钟
+          38 分钟
         
       </span>
     
@@ -360,7 +360,19 @@
 <h2 id="表格调整大小"><a href="#表格调整大小" class="headerlink" title="表格调整大小"></a>表格调整大小</h2><figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs latex"><span class="hljs-keyword">\renewcommand</span>&#123;<span class="hljs-keyword">\arraystretch</span>&#125;&#123;1.5&#125;<br></code></pre></td></tr></table></figure>
 
 <p>调整为 1.5 倍，如果不够用，参考更详细的调整教程：<a target="_blank" rel="noopener" href="https://blog.csdn.net/xovee/article/details/126026878">LaTeX 调整行距、列宽，以及表格的整体大小和字体大小_latex调整表格大小-CSDN博客</a></p>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="导入了-subfigure，但是编译报错"><a href="#导入了-subfigure，但是编译报错" class="headerlink" title="导入了 subfigure，但是编译报错"></a>导入了 subfigure，但是编译报错</h3><p>报错信息如下</p>
+<h2 id="作者信息排版"><a href="#作者信息排版" class="headerlink" title="作者信息排版"></a>作者信息排版</h2><h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>修改 texlive 下 <code>IEEEtran.cls</code> 文件中下列信息，根据实际情况调整数字，这里是把4改成了1</p>
+<p>文件位置为：<code>texlive/2023/texmf-dist/tex/latex/ieeetran/IEEEtran.cls</code></p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs diff"><span class="hljs-deletion">-\def\@IEEEBIOskipN&#123;4\baselineskip&#125;% nominal value of the vskip above the biography</span><br><br><span class="hljs-addition">+\def\@IEEEBIOskipN&#123;1.2\baselineskip&#125;% nominal value of the vskip above the biography</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>在两个作者信息之间加上 <code>\vspace&#123;-100 pt&#125;</code></p>
+<p>注意是 <code>\end&#123;*IEEEbiography*&#125;</code> 前，<code>\end&#123;*IEEEbiography*&#125;</code>后</p>
+<h3 id="方法三"><a href="#方法三" class="headerlink" title="方法三"></a>方法三</h3><p>如果作者是单独的一页，且怎么尝试方法一和方法二都不行，可以把作者改成双列</p>
+<p>例如，以下是四个作者，将四个作者分别放左边两个，右边两个。再使用 <code>\vspace</code> 调整间距</p>
+<figure class="highlight latex"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs latex"><span class="hljs-keyword">\documentclass</span>[lettersize,journal]&#123;IEEEtran&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;amsmath,amsfonts&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;algorithmic&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;algorithm&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;array&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;subfigure&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;textcomp&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;stfloats&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;url&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;verbatim&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;graphicx&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;cite&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;multirow&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;graphicx&#125;<br><span class="hljs-keyword">\usepackage</span>&#123;float&#125;<br><span class="hljs-keyword">\usepackage</span>[justification=centering]&#123;caption&#125;<br><span class="hljs-keyword">\hyphenation</span>&#123;op-tical net-works semi-conduc-tor IEEE-Xplore&#125;<br><span class="hljs-comment">% updated with editorial comments 8/9/2021</span><br><br><span class="hljs-keyword">\begin</span>&#123;document&#125;<br><br><span class="hljs-keyword">\begin</span>&#123;IEEEbiography&#125;[&#123;<span class="hljs-keyword">\includegraphics</span>[width=1in,height=1.25in,clip,keepaspectratio]&#123;author/avator.jpg&#125;&#125;]&#123;a&#125;<br>  <span class="hljs-keyword">\vspace</span>&#123;-450 pt&#125;<br><span class="hljs-keyword">\end</span>&#123;IEEEbiography&#125;<br><br><br><span class="hljs-keyword">\begin</span>&#123;IEEEbiography&#125;[&#123;<span class="hljs-keyword">\includegraphics</span>[width=1in,height=1.25in,clip,keepaspectratio]&#123;author/avator.jpg&#125;&#125;]&#123;b&#125;<br><span class="hljs-keyword">\end</span>&#123;IEEEbiography&#125;<br><span class="hljs-keyword">\newpage</span><br><br><span class="hljs-keyword">\begin</span>&#123;IEEEbiography&#125;[&#123;<span class="hljs-keyword">\includegraphics</span>[width=1in,height=1.25in,clip,keepaspectratio]&#123;author/avator.jpg&#125;&#125;]&#123;c&#125;<br>  <span class="hljs-keyword">\vspace</span>&#123;-450 pt&#125;<br><span class="hljs-keyword">\end</span>&#123;IEEEbiography&#125;<br><br><br><span class="hljs-keyword">\begin</span>&#123;IEEEbiography&#125;[&#123;<span class="hljs-keyword">\includegraphics</span>[width=1in,height=1.25in,clip,keepaspectratio]&#123;author/avator.jpg&#125;&#125;]&#123;d&#125;<br><span class="hljs-keyword">\end</span>&#123;IEEEbiography&#125;<br><br><span class="hljs-keyword">\end</span>&#123;document&#125;<br></code></pre></td></tr></table></figure>
+
+<p>效果如下所示：</p>
+<p><img src="/./Resources/image-20240116111623748.png" srcset="/img/loading.gif" lazyload alt="image-20240116111623748"></p>
+<h3 id="可根据实际需要自由组合方法一、二、三"><a href="#可根据实际需要自由组合方法一、二、三" class="headerlink" title="可根据实际需要自由组合方法一、二、三"></a>可根据实际需要自由组合方法一、二、三</h3><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="导入了-subfigure，但是编译报错"><a href="#导入了-subfigure，但是编译报错" class="headerlink" title="导入了 subfigure，但是编译报错"></a>导入了 subfigure，但是编译报错</h3><p>报错信息如下</p>
 <p><img src="/./Resources/image-20240110203014425.png" srcset="/img/loading.gif" lazyload alt="image-20240110203014425"> </p>
 <p>检查导言区是否有这两个包，如果是，注释调第一个，即可解决</p>
 <p><img src="/./Resources/image-20240110202942653.png" srcset="/img/loading.gif" lazyload alt="image-20240110202942653"></p>
