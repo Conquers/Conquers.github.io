@@ -352,9 +352,9 @@
     
     <category term="Java" scheme="http://conquers.github.io/tags/Java/"/>
     
-    <category term="支付" scheme="http://conquers.github.io/tags/%E6%94%AF%E4%BB%98/"/>
-    
     <category term="支付宝" scheme="http://conquers.github.io/tags/%E6%94%AF%E4%BB%98%E5%AE%9D/"/>
+    
+    <category term="支付" scheme="http://conquers.github.io/tags/%E6%94%AF%E4%BB%98/"/>
     
   </entry>
   
@@ -382,9 +382,9 @@
     
     <category term="Java" scheme="http://conquers.github.io/tags/Java/"/>
     
-    <category term="支付宝支付" scheme="http://conquers.github.io/tags/%E6%94%AF%E4%BB%98%E5%AE%9D%E6%94%AF%E4%BB%98/"/>
-    
     <category term="支付" scheme="http://conquers.github.io/tags/%E6%94%AF%E4%BB%98/"/>
+    
+    <category term="支付宝支付" scheme="http://conquers.github.io/tags/%E6%94%AF%E4%BB%98%E5%AE%9D%E6%94%AF%E4%BB%98/"/>
     
   </entry>
   
@@ -412,11 +412,11 @@
     
     <category term="ElasticSearch" scheme="http://conquers.github.io/tags/ElasticSearch/"/>
     
-    <category term="Java" scheme="http://conquers.github.io/tags/Java/"/>
-    
     <category term="SpringData" scheme="http://conquers.github.io/tags/SpringData/"/>
     
     <category term="SpringBoot" scheme="http://conquers.github.io/tags/SpringBoot/"/>
+    
+    <category term="Java" scheme="http://conquers.github.io/tags/Java/"/>
     
   </entry>
   
