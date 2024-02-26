@@ -4,6 +4,60 @@
   
   
   <entry>
+    <title>OpenAI translator——本地大模型的应用之一</title>
+    <link href="/posts/68807ab0.html"/>
+    <url>/posts/68807ab0.html</url>
+    
+    <content type="html"><![CDATA[<h1 id="OpenAI-translator——本地大模型的应用之一"><a href="#OpenAI-translator——本地大模型的应用之一" class="headerlink" title="OpenAI translator——本地大模型的应用之一"></a>OpenAI translator——本地大模型的应用之一</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>继上次部署完本地大模型 Gemma 后，发现一个很好用的软件&#x2F;插件，可以调用本地大模型进行翻译、解释代码等多种功能。</p><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>地址：<a href="https://github.com/openai-translator/openai-translator">openai-translator&#x2F;openai-translator: 基于 ChatGPT API 的划词翻译浏览器插件和跨平台桌面端应用 - Browser extension and cross-platform desktop application for translation based on ChatGPT API. (github.com)</a></p><p>下载地址：<a href="https://github.com/yetone/openai-translator/releases/latest">https://github.com/yetone/openai-translator/releases/latest</a></p><p>下载以 <code>.msi</code> 结尾的文件，安装完成后可以更改语言</p><p>虽然名字是 OpenAI translator，但实际上已经支持本地大模型</p><h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>在设置中将服务提供商更改为已部署的大模型</p><p><img src="/./Resources/image-20240226094611892.png" alt="image-20240226094611892"></p><p>使用快捷键或者打开窗口，在左上角选择功能，默认为翻译。此外，还可以在动作管理器中加入新的动作。例如，这里的查询就是根据规则创建的。</p><p><img src="/./Resources/image-20240226094914344.png" alt="image-20240226094914344"></p><h2 id="翻译"><a href="#翻译" class="headerlink" title="翻译"></a>翻译</h2><p><img src="/./Resources/image-20240226094732815.png" alt="image-20240226094732815"></p><h2 id="分析代码"><a href="#分析代码" class="headerlink" title="分析代码"></a>分析代码</h2><p><img src="/./Resources/image-20240226094822798.png" alt="image-20240226094822798"></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>AI</category>
+      
+      <category>大模型</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>AI</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>本地部署 Gemma 大模型</title>
+    <link href="/posts/84dba9cd.html"/>
+    <url>/posts/84dba9cd.html</url>
+    
+    <content type="html"><![CDATA[<h1 id="本地部署-Gemma-大模型"><a href="#本地部署-Gemma-大模型" class="headerlink" title="本地部署 Gemma 大模型"></a>本地部署 Gemma 大模型</h1><h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><ul><li>Ollama</li><li>Docker(可选，用于搭建 web 界面)</li></ul><h2 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h2><h3 id="下载安装Ollama"><a href="#下载安装Ollama" class="headerlink" title="下载安装Ollama"></a>下载安装<a href="https://ollama.com/">Ollama</a></h3><p><img src="/./Resources/image-20240224152007523.png" alt="image-20240224152007523"></p><h2 id="拉取-Gemma-模型"><a href="#拉取-Gemma-模型" class="headerlink" title="拉取 Gemma 模型"></a>拉取 Gemma 模型</h2><p>在 Ollama 官网中搜索 <a href="https://ollama.com/library/gemma">gemma</a> 可以看到，如果使用此模型，Ollama 的版本必须 &gt;&#x3D; 0.1.26</p><p>符合要求后，打开 PowelShell，输入如下命令</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ollama pull gemma<br></code></pre></td></tr></table></figure><h2 id="运行-Gemma-模型"><a href="#运行-Gemma-模型" class="headerlink" title="运行 Gemma 模型"></a>运行 Gemma 模型</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ollama run gemma<br></code></pre></td></tr></table></figure><p>运行结果如下</p><p><img src="/./Resources/image-20240224152350877.png" alt="image-20240224152350877"></p><h2 id="搭建-web-界面"><a href="#搭建-web-界面" class="headerlink" title="搭建 web 界面"></a>搭建 web 界面</h2><p>使用 <a href="https://github.com/open-webui/open-webui">open-webui&#x2F;open-webui: User-friendly WebUI for LLMs (Formerly Ollama WebUI) (github.com)</a> 搭建</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main<br></code></pre></td></tr></table></figure><p>在 windows 中 访问 <code>localhost:3000</code> 即可使用</p><p><img src="/./Resources/image-20240224161809040.png" alt="image-20240224161809040"></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>AI</category>
+      
+      <category>大模型</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>AI</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Latex 帮助手册</title>
     <link href="/posts/a7415b86.html"/>
     <url>/posts/a7415b86.html</url>
