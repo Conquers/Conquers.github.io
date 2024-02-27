@@ -17,16 +17,16 @@
   <meta name="author" content="wtt">
   <meta name="keywords" content="">
   
-    <meta name="description" content="本地部署 Gemma 大模型环境 Ollama Docker(可选，用于搭建 web 界面)  部署步骤下载安装Ollama 拉取 Gemma 模型在 Ollama 官网中搜索 gemma 可以看到，如果使用此模型，Ollama 的版本必须 &gt;&#x3D; 0.1.26 符合要求后，打开 PowelShell，输入如下命令 1ollama pull gemma  运行 Gemma 模型1ol">
+    <meta name="description" content="本地部署 Gemma 大模型环境 Ollama Docker(可选，用于搭建 web 界面)  环境准备下载安装Ollama 更改 Ollama 下载模型位置在环境变量中，新建一个系统变量，地址仅供参考。  拉取 Gemma 模型在 Ollama 官网中搜索 gemma 可以看到，如果使用此模型，Ollama 的版本必须 &gt;&#x3D; 0.1.26 符合要求后，打开 PowelShell，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="本地部署 Gemma 大模型">
 <meta property="og:url" content="http://conquers.github.io/posts/84dba9cd.html">
 <meta property="og:site_name" content="wtt&#39;s Blog">
-<meta property="og:description" content="本地部署 Gemma 大模型环境 Ollama Docker(可选，用于搭建 web 界面)  部署步骤下载安装Ollama 拉取 Gemma 模型在 Ollama 官网中搜索 gemma 可以看到，如果使用此模型，Ollama 的版本必须 &gt;&#x3D; 0.1.26 符合要求后，打开 PowelShell，输入如下命令 1ollama pull gemma  运行 Gemma 模型1ol">
+<meta property="og:description" content="本地部署 Gemma 大模型环境 Ollama Docker(可选，用于搭建 web 界面)  环境准备下载安装Ollama 更改 Ollama 下载模型位置在环境变量中，新建一个系统变量，地址仅供参考。  拉取 Gemma 模型在 Ollama 官网中搜索 gemma 可以看到，如果使用此模型，Ollama 的版本必须 &gt;&#x3D; 0.1.26 符合要求后，打开 PowelShell，">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://conquers.github.io/Resources/banner-gemma.png">
 <meta property="article:published_time" content="2024-02-24T07:17:30.000Z">
-<meta property="article:modified_time" content="2024-02-26T01:59:35.166Z">
+<meta property="article:modified_time" content="2024-02-27T02:13:04.814Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="AI">
 <meta name="twitter:card" content="summary_large_image">
@@ -230,7 +230,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          478 字
+          515 字
         
       </span>
     
@@ -241,7 +241,7 @@
         
         
         
-          4 分钟
+          5 分钟
         
       </span>
     
@@ -288,7 +288,9 @@
 <li>Ollama</li>
 <li>Docker(可选，用于搭建 web 界面)</li>
 </ul>
-<h2 id="部署步骤"><a href="#部署步骤" class="headerlink" title="部署步骤"></a>部署步骤</h2><h3 id="下载安装Ollama"><a href="#下载安装Ollama" class="headerlink" title="下载安装Ollama"></a>下载安装<a target="_blank" rel="noopener" href="https://ollama.com/">Ollama</a></h3><p><img src="/./Resources/image-20240224152007523.png" srcset="/img/loading.gif" lazyload alt="image-20240224152007523"></p>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><h3 id="下载安装Ollama"><a href="#下载安装Ollama" class="headerlink" title="下载安装Ollama"></a>下载安装<a target="_blank" rel="noopener" href="https://ollama.com/">Ollama</a></h3><p><img src="/./Resources/image-20240224152007523.png" srcset="/img/loading.gif" lazyload alt="image-20240224152007523"></p>
+<h3 id="更改-Ollama-下载模型位置"><a href="#更改-Ollama-下载模型位置" class="headerlink" title="更改 Ollama 下载模型位置"></a>更改 Ollama 下载模型位置</h3><p>在环境变量中，新建一个系统变量，地址仅供参考。</p>
+<p><img src="/./Resources/image-20240227101242755.png" srcset="/img/loading.gif" lazyload alt="image-20240227101242755"></p>
 <h2 id="拉取-Gemma-模型"><a href="#拉取-Gemma-模型" class="headerlink" title="拉取 Gemma 模型"></a>拉取 Gemma 模型</h2><p>在 Ollama 官网中搜索 <a target="_blank" rel="noopener" href="https://ollama.com/library/gemma">gemma</a> 可以看到，如果使用此模型，Ollama 的版本必须 &gt;&#x3D; 0.1.26</p>
 <p>符合要求后，打开 PowelShell，输入如下命令</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">ollama pull gemma<br></code></pre></td></tr></table></figure>
