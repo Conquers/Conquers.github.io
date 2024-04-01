@@ -16,26 +16,25 @@
   <meta name="author" content="wtt">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Queue 中 offer() 和 add() 的区别在编写代码时，发现自己用的 add()，别人用的 offer()，好像两个方法的功能是一致的，然后去看了一下 Queue 的实现类 LinkedList 的源码，发现并无区别。  既然没有区别，那为什么要分成两个方法呢？看了一下上面的注释：offer 在使用容量受限的队列时，此方法通常比 add 更可取，因为 add 只能通过引发异常来插入元素">
+    <meta name="description" content="通过 GitHub Actions 将 Hexo 博客自动部署到 GitHub Pages问题 每次部署时需要运行 hexo cl &amp; hexo g &amp; hexo d  误操作导致本地博客源码丢失  解决方式 自动化部署 GitHub 仓库  准备 已经搭建好的 Hexo + Github Pages 博客 本地的博客源码  实现思路通过 Github Actions，我们只需要在">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Queue 中 offer() 和 add() 的区别">
-<meta property="og:url" content="http://conquers.github.io/posts/b568ceb4.html">
+<meta property="og:title" content="GitHub Actions将Hexo博客自动部署到GitHub Pages">
+<meta property="og:url" content="http://conquers.github.io/posts/1d241ca1.html">
 <meta property="og:site_name" content="wtt&#39;s Blog">
-<meta property="og:description" content="Queue 中 offer() 和 add() 的区别在编写代码时，发现自己用的 add()，别人用的 offer()，好像两个方法的功能是一致的，然后去看了一下 Queue 的实现类 LinkedList 的源码，发现并无区别。  既然没有区别，那为什么要分成两个方法呢？看了一下上面的注释：offer 在使用容量受限的队列时，此方法通常比 add 更可取，因为 add 只能通过引发异常来插入元素">
+<meta property="og:description" content="通过 GitHub Actions 将 Hexo 博客自动部署到 GitHub Pages问题 每次部署时需要运行 hexo cl &amp; hexo g &amp; hexo d  误操作导致本地博客源码丢失  解决方式 自动化部署 GitHub 仓库  准备 已经搭建好的 Hexo + Github Pages 博客 本地的博客源码  实现思路通过 Github Actions，我们只需要在">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://conquers.github.io/Resources/banner-java.png">
-<meta property="article:published_time" content="2023-11-13T15:58:45.000Z">
-<meta property="article:modified_time" content="2024-04-01T09:02:50.067Z">
+<meta property="og:image" content="http://conquers.github.io/Resources/default.png">
+<meta property="article:published_time" content="2024-04-01T16:28:36.000Z">
+<meta property="article:modified_time" content="2024-04-01T09:02:50.071Z">
 <meta property="article:author" content="wtt">
-<meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://conquers.github.io/Resources/banner-java.png">
+<meta name="twitter:image" content="http://conquers.github.io/Resources/default.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Queue 中 offer() 和 add() 的区别 - wtt&#39;s Blog</title>
+  <title>GitHub Actions将Hexo博客自动部署到GitHub Pages - wtt&#39;s Blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -206,7 +205,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Queue 中 offer() 和 add() 的区别"></span>
+            <span id="subtitle" data-typed-text="GitHub Actions将Hexo博客自动部署到GitHub Pages"></span>
           
         </div>
 
@@ -217,8 +216,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-11-13 15:58" pubdate>
-          2023年11月13日 下午
+        <time datetime="2024-04-01 16:28" pubdate>
+          2024年4月1日 下午
         </time>
       </span>
     
@@ -229,7 +228,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          722 字
+          2.2k 字
         
       </span>
     
@@ -240,7 +239,7 @@
         
         
         
-          7 分钟
+          18 分钟
         
       </span>
     
@@ -278,23 +277,41 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">Queue 中 offer() 和 add() 的区别</h1>
+            <h1 style="display: none">GitHub Actions将Hexo博客自动部署到GitHub Pages</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="Queue-中-offer-和-add-的区别"><a href="#Queue-中-offer-和-add-的区别" class="headerlink" title="Queue 中 offer() 和 add() 的区别"></a>Queue 中 offer() 和 add() 的区别</h1><p>在编写代码时，发现自己用的 add()，别人用的 offer()，好像两个方法的功能是一致的，然后去看了一下 Queue 的实现类 <code>LinkedList</code> 的源码，发现并无区别。</p>
-<p><img src="/./Resources/image-20231113160414176.png" srcset="/img/loading.gif" lazyload alt="image-20231113160414176"></p>
-<p>既然没有区别，那为什么要分成两个方法呢？看了一下上面的注释：<mark>offer 在使用<strong>容量受限</strong>的队列时，此方法通常比 add 更可取，因为 add 只能通过引发异常来插入元素。</mark></p>
-<p><img src="/./Resources/image-20231113160304045.png" srcset="/img/loading.gif" lazyload alt="image-20231113160304045"></p>
-<p>也就是说只有在容量受限的队列中，才能具体区分这两个方法，然后去看了一下 <code>ArrayBlockingQueue</code> 的源码</p>
-<p><img src="/./Resources/image-20231113160651312.png" srcset="/img/loading.gif" lazyload alt="image-20231113160651312"></p>
-<p>即，在顶层接口 Queue 中确实定义了方法的标准，但是具体的实现类可能会根据其特定的数据结构和用途，对这些方法的实现细节进行不同的处理。</p>
-<blockquote>
-<p>知道了区别，那为什么 Queue 有了 add 方法（继承自 Collection) ，为什么还要定义一个 offer 方法呢？</p>
-</blockquote>
-<p>查阅了许多文档，没有一个比较清晰明了的答案，但是在 <a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/2703984/what-is-the-difference-between-the-add-and-offer-methods-in-a-queue-in-java">What is the difference between the add and offer methods in a Queue in Java? - Stack Overflow</a> 这个问题中可以从中发现一些信息，在下面提到了，Queue 首先是继承 Collection，自然他也拥有 add 方法，在 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Collection.html#add(E)">Collection 的 add 方法</a>中，定义了<mark>如果集合出于除已包含元素以外的任何原因拒绝添加特定元素，则它必须引发异常</mark>。</p>
-<p>但是队列我们知道分为有界队列和无界队列，在无界队列中的 offer 其实底层也就是 add，但在有界队列中，offer 就不太一样了，也就是 offer 设计出来的意义。在 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/1.5.0/docs/api/java/util/Queue.html">Queue 的 offer 方法</a> 中， 定义了<mark>设计用于在失败被视为正常情况而非异常情况时使用，例如，在固定容量（或称为“有界”）的队列中。</mark></p>
+                <h1 id="通过-GitHub-Actions-将-Hexo-博客自动部署到-GitHub-Pages"><a href="#通过-GitHub-Actions-将-Hexo-博客自动部署到-GitHub-Pages" class="headerlink" title="通过 GitHub Actions 将 Hexo 博客自动部署到 GitHub Pages"></a>通过 GitHub Actions 将 Hexo 博客自动部署到 GitHub Pages</h1><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><ul>
+<li>每次部署时需要运行 <code>hexo cl &amp; hexo g &amp; hexo d</code> </li>
+<li>误操作导致本地博客源码丢失</li>
+</ul>
+<h2 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h2><ul>
+<li>自动化部署</li>
+<li>GitHub 仓库</li>
+</ul>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><ol>
+<li>已经搭建好的 Hexo + Github Pages 博客</li>
+<li>本地的博客源码</li>
+</ol>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><p>通过 <code>Github Actions</code>，我们只需要在每次完成博客的编写或修改以后，将改动直接 <code>push</code> 到远程仓库，之后的编译部署的工作统统交给 <code>CI</code> 来完成即可。</p>
+<h3 id="Personal-Access-Token"><a href="#Personal-Access-Token" class="headerlink" title="Personal Access Token"></a>Personal Access Token</h3><ol>
+<li>登录 GitHub：<a target="_blank" rel="noopener" href="https://github.com/">https://github.com/</a>，点击右上角头像，点击【Setting】</li>
+<li>点击左侧的【Developer settings】</li>
+<li>点击【Personal access tokens】、【Tokens】、【Generate new token】</li>
+<li>填写 【Note】、【过期时间】，勾选【repo】【workflow】，滑至页面底部点击【Generate Token】<br><img src="/Resources/Pasted%20image%2020240401163653.png" srcset="/img/loading.gif" lazyload></li>
+<li>复制生成的 Token，后面配置文件需要用到该token。注意，该内容仅会出现这一次。<br><img src="/Resources/Pasted%20image%2020240401163841.png" srcset="/img/loading.gif" lazyload></li>
+</ol>
+<h3 id="源码仓库"><a href="#源码仓库" class="headerlink" title="源码仓库"></a>源码仓库</h3><p>在 Github 创建私有源码仓库，名字随意</p>
+<p>之所以是私有仓库，是因为在接下来的配置中会用到 <code>Token</code>，如果 <code>Token</code> 被盗用，别人可以肆意操作你的 github 仓库内容，为了避免这一风险，才选择的博客源码闭源。</p>
+<h3 id="配置-Github-Actions"><a href="#配置-Github-Actions" class="headerlink" title="配置 Github Actions"></a>配置 Github Actions</h3><ol>
+<li>在本地源码博客文件夹新建 <code>.github</code> 文件夹</li>
+<li>然后在 <code>.github</code> 目录下新建 <code>workflows</code> 文件夹</li>
+<li>新建 <code>deploy.yml</code> 文件，在 <code>deploy.yml</code> 中添加以下内容<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><code class="hljs yml">   <span class="hljs-attr">name:</span> <span class="hljs-string">自动部署</span><br>   <br>   <span class="hljs-comment"># 当有改动推送到master分支或有新的release发布时，启动Action</span><br>   <span class="hljs-attr">on:</span><br>     <span class="hljs-attr">push:</span><br>       <span class="hljs-attr">branches:</span><br>         <span class="hljs-bullet">-</span> <span class="hljs-string">main</span><br>   <br>   <span class="hljs-attr">jobs:</span><br>     <span class="hljs-attr">deploy:</span><br>       <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-latest</span><br>       <span class="hljs-attr">steps:</span><br>         <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">检查分支</span><br>           <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v2</span><br>           <span class="hljs-attr">with:</span><br>             <span class="hljs-attr">ref:</span> <span class="hljs-string">main</span><br>   <br>         <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">安装</span> <span class="hljs-string">Node</span><br>           <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-node@v1</span><br>           <span class="hljs-attr">with:</span><br>             <span class="hljs-attr">node-version:</span> <span class="hljs-string">&#x27;18.x&#x27;</span><br>   <br>         <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">安装</span> <span class="hljs-string">Hexo</span><br>           <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">             export TZ=&#x27;Asia/Shanghai&#x27;</span><br><span class="hljs-string">             npm install hexo-cli -g</span><br><span class="hljs-string"></span>   <br>         <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">缓存</span> <span class="hljs-string">Hexo</span><br>           <span class="hljs-attr">id:</span> <span class="hljs-string">cache-npm</span><br>           <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/cache@v3</span><br>           <span class="hljs-attr">env:</span><br>             <span class="hljs-attr">cache-name:</span> <span class="hljs-string">cache-node-modules</span><br>           <span class="hljs-attr">with:</span><br>             <span class="hljs-attr">path:</span> <span class="hljs-string">node_modules</span><br>             <span class="hljs-attr">key:</span> <span class="hljs-string">$&#123;&#123;</span> <span class="hljs-string">runner.os</span> <span class="hljs-string">&#125;&#125;-build-$&#123;&#123;</span> <span class="hljs-string">env.cache-name</span> <span class="hljs-string">&#125;&#125;-$&#123;&#123;</span> <span class="hljs-string">hashFiles(&#x27;**/package-lock.json&#x27;)</span> <span class="hljs-string">&#125;&#125;</span><br>             <span class="hljs-attr">restore-keys:</span> <span class="hljs-string">|</span><br><span class="hljs-string">               $&#123;&#123; runner.os &#125;&#125;-build-$&#123;&#123; env.cache-name &#125;&#125;-</span><br><span class="hljs-string">               $&#123;&#123; runner.os &#125;&#125;-build-</span><br><span class="hljs-string">               $&#123;&#123; runner.os &#125;&#125;-</span><br><span class="hljs-string"></span>   <br>         <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">安装依赖</span><br>           <span class="hljs-attr">if:</span> <span class="hljs-string">steps.cache-npm.outputs.cache-hit</span> <span class="hljs-type">!=</span> <span class="hljs-string">&#x27;true&#x27;</span><br>           <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">             npm install --save</span><br><span class="hljs-string"></span>   <br>         <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">生成静态文件</span><br>           <span class="hljs-attr">run:</span> <span class="hljs-string">|</span><br><span class="hljs-string">             hexo clean</span><br><span class="hljs-string">             hexo generate</span><br><span class="hljs-string"></span>   <br>         <span class="hljs-bullet">-</span> <span class="hljs-attr">name:</span> <span class="hljs-string">部署到GitHub</span><br>           <span class="hljs-attr">uses:</span> <span class="hljs-string">JamesIves/github-pages-deploy-action@v4</span><br>           <span class="hljs-attr">with:</span><br>             <span class="hljs-attr">token:</span> <span class="hljs-string">ghp_填写上面获得的token</span><br>             <span class="hljs-attr">repository-name:</span> <span class="hljs-string">Conquers/Conquers.github.io</span> <span class="hljs-string">仓库地址</span><br>             <span class="hljs-attr">branch:</span> <span class="hljs-string">main</span><br>             <span class="hljs-attr">folder:</span> <span class="hljs-string">public</span><br>             <span class="hljs-attr">commit-message:</span> <span class="hljs-string">&#x27;$<span class="hljs-template-variable">&#123;&#123; github.event.head_commit.message &#125;&#125;</span> Updated By Github Actions&#x27;</span><br>   <br><br><span class="hljs-comment">### 将本地博客同步至源码仓库</span><br><br><span class="hljs-string">```bash</span><br><span class="hljs-string">git</span> <span class="hljs-string">init</span><br><span class="hljs-string">git</span> <span class="hljs-string">branch</span> <span class="hljs-string">-M</span> <span class="hljs-string">main</span> <br><span class="hljs-string">git</span> <span class="hljs-string">add</span> <span class="hljs-string">.</span><br><span class="hljs-string">git</span> <span class="hljs-string">commit</span> <span class="hljs-string">-m</span> <span class="hljs-string">&quot;github action update&quot;</span><br><span class="hljs-string">git</span> <span class="hljs-string">remote</span> <span class="hljs-string">add</span> <span class="hljs-string">origin</span> [<span class="hljs-string">github</span> <span class="hljs-string">源码仓库地址</span>] <span class="hljs-comment"># github 源码仓库地址</span><br><span class="hljs-string">git</span> <span class="hljs-string">push</span> <span class="hljs-string">-u</span> <span class="hljs-string">origin</span> <span class="hljs-string">main</span><br></code></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="查看效果"><a href="#查看效果" class="headerlink" title="查看效果"></a>查看效果</h3><p>打开源码仓库的 Actions，如下显示</p>
+<p><img src="/./Resources/image-20240401164516513.png" srcset="/img/loading.gif" lazyload alt="image-20240401164516513"></p>
+<p>稍等几分钟打开博客首页，即可查看自动化部署后的博客，并且以后每次提交代码到 Github 仓库，Github Actions 就会自动构建并部署博客，不需要再手动部署了。</p>
 
                 
               </div>
@@ -313,12 +330,12 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  <a href="/categories/1/" class="category-chain-item">1</a>
   
   
     <span>></span>
     
-  <a href="/categories/Java/Java/" class="category-chain-item">Java</a>
+  <a href="/categories/1/2/" class="category-chain-item">2</a>
   
   
 
@@ -332,13 +349,6 @@
     </div>
   
   
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/Java/">#Java</a>
-      
-    </div>
-  
 </div>
 
 
@@ -347,8 +357,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Queue 中 offer() 和 add() 的区别</div>
-      <div>http://conquers.github.io/posts/b568ceb4.html</div>
+      <div>GitHub Actions将Hexo博客自动部署到GitHub Pages</div>
+      <div>http://conquers.github.io/posts/1d241ca1.html</div>
     </div>
     <div class="license-meta">
       
@@ -360,7 +370,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年11月13日</div>
+          <div>2024年4月1日</div>
         </div>
       
       
@@ -392,18 +402,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/posts/a7415b86.html" title="Latex 帮助手册">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Latex 帮助手册</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/posts/e25bd392.html" title="Springboot 为什么编写了配置文件就可以使用">
-                        <span class="hidden-mobile">Springboot 为什么编写了配置文件就可以使用</span>
+                      <a href="/posts/68807ab0.html" title="OpenAI translator——本地大模型的应用之一">
+                        <span class="hidden-mobile">OpenAI translator——本地大模型的应用之一</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
