@@ -20,25 +20,7 @@
   </url>
   
   <url>
-    <loc>http://wangtao.site/posts/dcb3f659.html</loc>
-    
-    <lastmod>2024-04-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://wangtao.site/posts/d5bb74c6.html</loc>
-    
-    <lastmod>2024-04-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://wangtao.site/posts/7b1830e5.html</loc>
     
     <lastmod>2024-04-04</lastmod>
     
@@ -56,7 +38,7 @@
   </url>
   
   <url>
-    <loc>http://wangtao.site/posts/55890944.html</loc>
+    <loc>http://wangtao.site/posts/7b1830e5.html</loc>
     
     <lastmod>2024-04-04</lastmod>
     
@@ -74,7 +56,7 @@
   </url>
   
   <url>
-    <loc>http://wangtao.site/posts/7273cdc.html</loc>
+    <loc>http://wangtao.site/posts/55890944.html</loc>
     
     <lastmod>2024-04-04</lastmod>
     
@@ -84,6 +66,15 @@
   
   <url>
     <loc>http://wangtao.site/posts/359ea42e.html</loc>
+    
+    <lastmod>2024-04-04</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://wangtao.site/posts/7273cdc.html</loc>
     
     <lastmod>2024-04-04</lastmod>
     
@@ -209,6 +200,15 @@
   </url>
   
   <url>
+    <loc>http://wangtao.site/posts/dcb3f659.html</loc>
+    
+    <lastmod>2024-04-04</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://wangtao.site/posts/bae4ff13.html</loc>
     
     <lastmod>2023-06-06</lastmod>
@@ -304,14 +304,14 @@
   </url>
   
   <url>
-    <loc>http://wangtao.site/tags/Maven/</loc>
+    <loc>http://wangtao.site/tags/MySQL/</loc>
     <lastmod>2024-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://wangtao.site/tags/MySQL/</loc>
+    <loc>http://wangtao.site/tags/Maven/</loc>
     <lastmod>2024-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -390,14 +390,14 @@
   </url>
   
   <url>
-    <loc>http://wangtao.site/categories/Java/</loc>
+    <loc>http://wangtao.site/categories/LaTex/</loc>
     <lastmod>2024-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>http://wangtao.site/categories/LaTex/</loc>
+    <loc>http://wangtao.site/categories/Java/</loc>
     <lastmod>2024-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -425,7 +425,7 @@
   </url>
   
   <url>
-    <loc>http://wangtao.site/categories/Database/Redis/</loc>
+    <loc>http://wangtao.site/categories/Java/Spring/</loc>
     <lastmod>2024-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -433,13 +433,6 @@
   
   <url>
     <loc>http://wangtao.site/categories/Java/Java/</loc>
-    <lastmod>2024-04-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>http://wangtao.site/categories/Java/Spring/</loc>
     <lastmod>2024-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -461,6 +454,13 @@
   
   <url>
     <loc>http://wangtao.site/categories/Java/JVM/</loc>
+    <lastmod>2024-04-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>http://wangtao.site/categories/Database/Redis/</loc>
     <lastmod>2024-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
