@@ -19,17 +19,17 @@
     <meta name="description" content="本文使用的环境为 阿里云云服务器、MySQL 5.7 和 MySQL 8，均使用 Docker 安装，除非特别说明，默认使用MySQL 5.7。 如果出现结果不一致，使用命令行即可，因为可视化软件会自动请求一些其他内容。   基础篇 Mysql 基础篇   高级篇 架构篇 第04章 逻辑架构 第05章 存储引擎   索引及调优篇 6-12 第06章 索引的数据结构 第08章 索引的创建与设计原则">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL OverView">
-<meta property="og:url" content="http://conquers.github.io/posts/359ea42e.html">
+<meta property="og:url" content="http://wangtao.site/posts/359ea42e.html">
 <meta property="og:site_name" content="wtt&#39;s Blog">
 <meta property="og:description" content="本文使用的环境为 阿里云云服务器、MySQL 5.7 和 MySQL 8，均使用 Docker 安装，除非特别说明，默认使用MySQL 5.7。 如果出现结果不一致，使用命令行即可，因为可视化软件会自动请求一些其他内容。   基础篇 Mysql 基础篇   高级篇 架构篇 第04章 逻辑架构 第05章 存储引擎   索引及调优篇 6-12 第06章 索引的数据结构 第08章 索引的创建与设计原则">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://conquers.github.io/Resources/banner-MySQL.png">
+<meta property="og:image" content="http://wangtao.site/Resources/banner-MySQL.png">
 <meta property="article:published_time" content="2023-06-26T14:54:45.000Z">
-<meta property="article:modified_time" content="2024-04-04T08:00:29.290Z">
+<meta property="article:modified_time" content="2024-04-04T13:26:16.054Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="MySQL">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://conquers.github.io/Resources/banner-MySQL.png">
+<meta name="twitter:image" content="http://wangtao.site/Resources/banner-MySQL.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
@@ -77,7 +77,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"wangtao.site","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -289,34 +289,34 @@
 </blockquote>
 <ul>
 <li>基础篇<ul>
-<li><a href="http://conquers.github.io/posts/e967e26.html">Mysql 基础篇</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/e967e26.html">Mysql 基础篇</a></li>
 </ul>
 </li>
 <li>高级篇<ul>
 <li>架构篇<ul>
-<li><a href="http://conquers.github.io/posts/2237bb15.html">第04章 逻辑架构</a></li>
-<li><a href="http://conquers.github.io/posts/8d469f79.html">第05章 存储引擎</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/2237bb15.html">第04章 逻辑架构</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/8d469f79.html">第05章 存储引擎</a></li>
 </ul>
 </li>
 <li>索引及调优篇<ul>
 <li>6-12</li>
-<li><a href="http://conquers.github.io/posts/98817d56.html">第06章 索引的数据结构</a></li>
-<li><a href="http://conquers.github.io/posts/69ea2410.html">第08章 索引的创建与设计原则</a></li>
-<li><a href="http://conquers.github.io/posts/43d93e27.html">第09章 性能分析工具的使用</a></li>
-<li><a href="http://conquers.github.io/posts/ada7f77e.html">第10章 索引优化与查询优化</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/98817d56.html">第06章 索引的数据结构</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/69ea2410.html">第08章 索引的创建与设计原则</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/43d93e27.html">第09章 性能分析工具的使用</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/ada7f77e.html">第10章 索引优化与查询优化</a></li>
 </ul>
 </li>
 <li>事务篇<ul>
-<li><a href="http://conquers.github.io/posts/dfe5e713.html">第13章 事务基础知识</a></li>
-<li><a href="http://conquers.github.io/posts/fa7ec77e.html">第14章 MySQL 日志</a></li>
-<li><a href="http://conquers.github.io/posts/b7d439cb.html">第15章 锁</a></li>
-<li><a href="http://conquers.github.io/posts/99914452.html">第16章 多版本并发控制</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/dfe5e713.html">第13章 事务基础知识</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/fa7ec77e.html">第14章 MySQL 日志</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/b7d439cb.html">第15章 锁</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/99914452.html">第16章 多版本并发控制</a></li>
 </ul>
 </li>
 <li>日志与备份篇<ul>
-<li><a href="http://conquers.github.io/posts/1c2dcbdd.html">第17章 其他数据库日志</a></li>
-<li><a href="http://conquers.github.io/posts/f71f2862.html">第18章 主从复制</a></li>
-<li><a href="http://conquers.github.io/posts/be31b856.html">第19章 数据库备份与恢复</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/1c2dcbdd.html">第17章 其他数据库日志</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/f71f2862.html">第18章 主从复制</a></li>
+<li><a target="_blank" rel="noopener" href="http://conquers.github.io/posts/be31b856.html">第19章 数据库备份与恢复</a></li>
 </ul>
 </li>
 <li>架构篇</li>
@@ -376,7 +376,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>MySQL OverView</div>
-      <div>http://conquers.github.io/posts/359ea42e.html</div>
+      <div>http://wangtao.site/posts/359ea42e.html</div>
     </div>
     <div class="license-meta">
       

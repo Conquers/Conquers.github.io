@@ -19,17 +19,17 @@
     <meta name="description" content="垃圾收集器前言前置知识，不然理解这部分内容比较困难  Java内存区域详解（重点） JVM垃圾回收算法详解  如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。 对于垃圾收集算法，简要说明如下  标记-清除：产生过多地内存碎片  复制：没有碎片，浪费空间 标记-整理：没有碎片，效率较低  接下来讨论的收集器基于 JDK1.7 Update 14 之后的 HotSpot 虚拟机">
 <meta property="og:type" content="article">
 <meta property="og:title" content="垃圾收集器">
-<meta property="og:url" content="http://conquers.github.io/posts/6158ee9c.html">
+<meta property="og:url" content="http://wangtao.site/posts/6158ee9c.html">
 <meta property="og:site_name" content="wtt&#39;s Blog">
 <meta property="og:description" content="垃圾收集器前言前置知识，不然理解这部分内容比较困难  Java内存区域详解（重点） JVM垃圾回收算法详解  如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。 对于垃圾收集算法，简要说明如下  标记-清除：产生过多地内存碎片  复制：没有碎片，浪费空间 标记-整理：没有碎片，效率较低  接下来讨论的收集器基于 JDK1.7 Update 14 之后的 HotSpot 虚拟机">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://conquers.github.io/Resources/banner-java.png">
+<meta property="og:image" content="http://wangtao.site/Resources/banner-java.png">
 <meta property="article:published_time" content="2023-09-24T15:31:03.000Z">
-<meta property="article:modified_time" content="2024-04-04T08:00:29.290Z">
+<meta property="article:modified_time" content="2024-04-04T13:26:16.054Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://conquers.github.io/Resources/banner-java.png">
+<meta name="twitter:image" content="http://wangtao.site/Resources/banner-java.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
@@ -77,7 +77,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"wangtao.site","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -418,7 +418,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>垃圾收集器</div>
-      <div>http://conquers.github.io/posts/6158ee9c.html</div>
+      <div>http://wangtao.site/posts/6158ee9c.html</div>
     </div>
     <div class="license-meta">
       

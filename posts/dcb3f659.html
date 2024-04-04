@@ -19,13 +19,13 @@
     <meta name="description" content="环境   名称 版本号    Portainer Docker version 24.0.2, build cb74dfc   Aliyun CentOs CentOS 7.8 64位   VMware CentOs CentOS 7.8 64位   FinalShell 3.9.8.2   Redis latest &#x3D; 6.2.6   MySQL 5.7 5.7   MySQL 8 8">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Docker 安装容器合集">
-<meta property="og:url" content="http://conquers.github.io/posts/dcb3f659.html">
+<meta property="og:url" content="http://wangtao.site/posts/dcb3f659.html">
 <meta property="og:site_name" content="wtt&#39;s Blog">
 <meta property="og:description" content="环境   名称 版本号    Portainer Docker version 24.0.2, build cb74dfc   Aliyun CentOs CentOS 7.8 64位   VMware CentOs CentOS 7.8 64位   FinalShell 3.9.8.2   Redis latest &#x3D; 6.2.6   MySQL 5.7 5.7   MySQL 8 8">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://conquers.github.io/Resources/banner-docker.png">
+<meta property="og:image" content="http://wangtao.site/Resources/banner-docker.png">
 <meta property="article:published_time" content="2022-07-11T21:45:45.000Z">
-<meta property="article:modified_time" content="2024-04-04T08:00:29.290Z">
+<meta property="article:modified_time" content="2024-04-04T13:26:16.050Z">
 <meta property="article:author" content="wtt">
 <meta property="article:tag" content="Portainer">
 <meta property="article:tag" content="Elasitc">
@@ -34,7 +34,7 @@
 <meta property="article:tag" content="Nginx">
 <meta property="article:tag" content="RabbitMQ">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://conquers.github.io/Resources/banner-docker.png">
+<meta name="twitter:image" content="http://wangtao.site/Resources/banner-docker.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
@@ -82,7 +82,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"conquers.github.io","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+    var CONFIG = {"hostname":"wangtao.site","root":"/","version":"1.9.4","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
@@ -392,7 +392,7 @@
 </blockquote>
 <h4 id="在虚拟机中创建配置文件映射Es容器中的配置文件"><a href="#在虚拟机中创建配置文件映射Es容器中的配置文件" class="headerlink" title="在虚拟机中创建配置文件映射Es容器中的配置文件"></a>在虚拟机中创建配置文件映射Es容器中的配置文件</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/data1<br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/data2<br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/data3<br><br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/plugins1<br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/plugins2<br><span class="hljs-built_in">mkdir</span> -p software/elasticsearch/config/plugins3<br><br><br><span class="hljs-built_in">chmod</span> 777 software/elasticsearch/config/data1<br><span class="hljs-built_in">chmod</span> 777 software/elasticsearch/config/data2<br><span class="hljs-built_in">chmod</span> 777 software/elasticsearch/config/data3<br><br>vim software/elasticsearch/config/es1.yml<br>vim software/elasticsearch/config/es2.yml<br>vim software/elasticsearch/config/es3.yml<br><br><br>cluster.name: es                               <span class="hljs-comment">#集群名称(集群名称必须一致)</span><br>node.name: node1                               <span class="hljs-comment">#节点名称(节点名称不能一致)</span><br>network.host: 0.0.0.0                          <span class="hljs-comment">#监听地址(必须开启远程权限,并关闭防火墙)</span><br>http.port: 9201                                <span class="hljs-comment">#监听端口(在一台机器时服务端口不能一致)</span><br>discovery.zen.ping.unicast.hosts: [<span class="hljs-string">&quot;192.168.153.135:9302&quot;</span>, <span class="hljs-string">&quot;192.168.153.135:9303&quot;</span>]                <span class="hljs-comment">#另外两个节点的ip</span><br>gateway.recover_after_nodes: 3                 <span class="hljs-comment">#集群可做master的最小节点数</span><br>transport.tcp.port: 9301                       <span class="hljs-comment">#集群TCP端口(在一台机器搭建必须修改)</span><br><br>cluster.name: es                               <span class="hljs-comment">#集群名称(集群名称必须一致)</span><br>node.name: node2                               <span class="hljs-comment">#节点名称(节点名称不能一致)</span><br>network.host: 0.0.0.0                          <span class="hljs-comment">#监听地址(必须开启远程权限,并关闭防火墙)</span><br>http.port: 9202                                <span class="hljs-comment">#监听端口(在一台机器时服务端口不能一致)</span><br>discovery.zen.ping.unicast.hosts: [<span class="hljs-string">&quot;192.168.153.135:9301&quot;</span>, <span class="hljs-string">&quot;192.168.153.135:9303&quot;</span>]                <span class="hljs-comment">#另外两个节点的ip</span><br>gateway.recover_after_nodes: 3                 <span class="hljs-comment">#集群可做master的最小节点数</span><br>transport.tcp.port: 9302                       <span class="hljs-comment">#集群TCP端口(在一台机器搭建必须修改)</span><br><br>cluster.name: es                               <span class="hljs-comment">#集群名称(集群名称必须一致)</span><br>node.name: node3                               <span class="hljs-comment">#节点名称(节点名称不能一致)</span><br>network.host: 0.0.0.0                          <span class="hljs-comment">#监听地址(必须开启远程权限,并关闭防火墙)</span><br>http.port: 9203                                <span class="hljs-comment">#监听端口(在一台机器时服务端口不能一致)</span><br>discovery.zen.ping.unicast.hosts: [<span class="hljs-string">&quot;192.168.153.135:9301&quot;</span>, <span class="hljs-string">&quot;192.168.153.135:9302&quot;</span>]                <span class="hljs-comment">#另外两个节点的ip</span><br>gateway.recover_after_nodes: 3                 <span class="hljs-comment">#集群可做master的最小节点数</span><br>transport.tcp.port: 9303                       <span class="hljs-comment">#集群TCP端口(在一台机器搭建必须修改)</span><br></code></pre></td></tr></table></figure>
 
-<h4 id="调高JVM线程数限制数量"><a href="#调高JVM线程数限制数量" class="headerlink" title="调高JVM线程数限制数量"></a>调高JVM线程数限制数量</h4><p><a href="https://conquers.github.io/posts/dcb3f659.html#elasticsearch">Docker安装ElasticSearch</a> 没有报错是因为指明了单机模式运行，因此不会报错，只要是以集群方法启动，就必须调高 <code>JVM</code> 线程数限制数量。</p>
+<h4 id="调高JVM线程数限制数量"><a href="#调高JVM线程数限制数量" class="headerlink" title="调高JVM线程数限制数量"></a>调高JVM线程数限制数量</h4><p><a target="_blank" rel="noopener" href="https://conquers.github.io/posts/dcb3f659.html#elasticsearch">Docker安装ElasticSearch</a> 没有报错是因为指明了单机模式运行，因此不会报错，只要是以集群方法启动，就必须调高 <code>JVM</code> 线程数限制数量。</p>
 <blockquote>
 <p>必须做这个，不然会报错，显示# ERROR: [1] bootstrap checks failed [1]: max virtual memory areas vm.max_map_count [65530] is too low</p>
 </blockquote>
@@ -407,7 +407,7 @@
 <h3 id="连接集群"><a href="#连接集群" class="headerlink" title="连接集群"></a>连接集群</h3><h4 id="Kibana-连接-ES集群"><a href="#Kibana-连接-ES集群" class="headerlink" title="Kibana 连接 ES集群"></a>Kibana 连接 ES集群</h4><p>如果你之前连接过一台ES集群（为什么说一台也是集群呢？因为ES启动方式就是集群启动，只是集群数量为一台），其实需要修改的地方都差不多</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker run --name kibana -e ELASTICSEARCH_HOSTS=http://192.168.153.135:9201 -p 5601:5601 -d kibana:6.8.23<br></code></pre></td></tr></table></figure>
 
-<p>进入kibana配置文件：<br>修改连接ES的地址为集群中的任意一台：<br><a href="https://conquers.github.io/posts/dcb3f659.html#6%E3%80%81%E8%A6%86%E7%9B%96%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">kibana 连接 ES集群-编写配置</a></p>
+<p>进入kibana配置文件：<br>修改连接ES的地址为集群中的任意一台：<br><a target="_blank" rel="noopener" href="https://conquers.github.io/posts/dcb3f659.html#6%E3%80%81%E8%A6%86%E7%9B%96%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">kibana 连接 ES集群-编写配置</a></p>
 <figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">server.host:</span> <span class="hljs-string">&quot;0&quot;</span><br><span class="hljs-attr">elasticsearch.hosts:</span> [<span class="hljs-string">&quot;http://192.168.153.135:9201&quot;</span>]<br></code></pre></td></tr></table></figure>
 
 <h4 id="SpringBoot-连接ES集群"><a href="#SpringBoot-连接ES集群" class="headerlink" title="SpringBoot 连接ES集群"></a>SpringBoot 连接ES集群</h4><p>如果你之前有用 <code>SpringBoot</code> 连接 <code>ES</code> ，这里的配置差不多，只是需要将连接地址改为所有的节点地址（防止其中某一台断掉不可用）<br><a href="SpringData%E6%93%8D%E4%BD%9CElasticSearch.md#%E7%BC%96%E5%86%99yml%E9%85%8D%E7%BD%AE">SpringBoot连接ES-编写配置</a></p>
@@ -493,7 +493,7 @@
 <p><img src="/Resources/image-20230602142724660.png" srcset="/img/loading.gif" lazyload alt="image-20230602142724660"></p>
 <h4 id="Redis持久化"><a href="#Redis持久化" class="headerlink" title="Redis持久化"></a>Redis持久化</h4><p>默认持久化方式是快照持久化，修改配置文件，AOF持久化</p>
 <blockquote>
-<p>参考Redis的持久化：<a href="https://conquers.github.io/posts//posts/bae4ff13.html#9%E3%80%81Redis%E7%9A%84%E6%8C%81%E4%B9%85%E5%8C%96%E6%9C%BA%E5%88%B6">Redis的持久化机制</a></p>
+<p>参考Redis的持久化：<a target="_blank" rel="noopener" href="https://conquers.github.io/posts//posts/bae4ff13.html#9%E3%80%81Redis%E7%9A%84%E6%8C%81%E4%B9%85%E5%8C%96%E6%9C%BA%E5%88%B6">Redis的持久化机制</a></p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">vi /mydata/redis/conf/redis.conf<br><br><span class="hljs-comment"># 修改的下面内容</span><br>appendonly <span class="hljs-built_in">yes</span><br>保存<br> <br>docker restart redis<br></code></pre></td></tr></table></figure>
 
@@ -1034,7 +1034,7 @@
   <div class="license-box my-3">
     <div class="license-title">
       <div>Docker 安装容器合集</div>
-      <div>http://conquers.github.io/posts/dcb3f659.html</div>
+      <div>http://wangtao.site/posts/dcb3f659.html</div>
     </div>
     <div class="license-meta">
       
